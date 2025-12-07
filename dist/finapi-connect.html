@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinAPI Bank-Verbindung</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 500px;
+            width: 100%;
+            padding: 40px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            font-size: 28px;
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+        .header p {
+            color: #6b7280;
+            font-size: 14px;
+        }
+        .bank-list {
+            margin: 20px 0;
+        }
+        .bank-item {
+            padding: 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .bank-item:hover {
+            border-color: #667eea;
+            background: #f3f4f6;
+            transform: translateY(-2px);
+        }
+        .bank-item.selected {
+            border-color: #667eea;
+            background: #eef2ff;
+        }
+        .bank-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        .bank-info h3 {
+            font-size: 16px;
+            color: #1f2937;
+            margin-bottom: 4px;
+        }
+        .bank-info p {
+            font-size: 12px;
+            color: #6b7280;
+        }
+        .form-group {
+            margin: 20px 0;
+        }
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .button:hover {
+            transform: translateY(-2px);
+        }
+        .button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .success {
+            text-align: center;
+            padding: 40px;
+        }
+        .success-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+        .error {
+            background: #fee;
+            border: 1px solid #fcc;
+            padding: 12px;
+            border-radius: 8px;
+            color: #c00;
+            font-size: 14px;
+            margin: 16px 0;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="bank-selection">
+            <div class="header">
+                <h1>🏦 Bank auswählen</h1>
+                <p>Wählen Sie Ihre Bank aus und verbinden Sie Ihr Konto</p>
+            </div>
+
+            <div class="bank-list">
+                <div class="bank-item" data-bank-id="280002" data-bank-name="FinAPI Test Bank">
+                    <div class="bank-icon">🏦</div>
+                    <div class="bank-info">
+                        <h3>FinAPI Test Bank</h3>
+                        <p>Sandbox Test-Bank für Entwicklung</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Online-Banking Benutzername</label>
+                <input type="text" id="username" placeholder="Demodaten" value="Demodaten">
+            </div>
+
+            <div class="form-group">
+                <label>Online-Banking PIN</label>
+                <input type="password" id="pin" placeholder="12345" value="12345">
+            </div>
+
+            <div id="error-message" class="error hidden"></div>
+
+            <button class="button" id="connect-button">Jetzt verbinden</button>
+        </div>
+
+        <div id="loading" class="loading hidden">
+            <div class="spinner"></div>
+            <h2>Verbindung wird hergestellt...</h2>
+            <p style="color: #6b7280; margin-top: 12px;">Bitte warten Sie einen Moment</p>
+        </div>
+
+        <div id="success" class="success hidden">
+            <div class="success-icon">✅</div>
+            <h2>Erfolgreich verbunden!</h2>
+            <p style="color: #6b7280; margin-top: 12px;">Ihre Bank wurde erfolgreich verbunden.</p>
+        </div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+        const accountId = urlParams.get('account_id');
+
+        let selectedBankId = 280002;
+        let selectedBankName = 'FinAPI Test Bank';
+
+        // Bank Selection
+        document.querySelectorAll('.bank-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.bank-item').forEach(i => i.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedBankId = parseInt(this.dataset.bankId);
+                selectedBankName = this.dataset.bankName;
+            });
+        });
+
+        // Pre-select first bank
+        document.querySelector('.bank-item').classList.add('selected');
+
+        // Connect Button
+        document.getElementById('connect-button').addEventListener('click', async function() {
+            const username = document.getElementById('username').value;
+            const pin = document.getElementById('pin').value;
+            const errorDiv = document.getElementById('error-message');
+
+            if (!username || !pin) {
+                errorDiv.textContent = 'Bitte füllen Sie alle Felder aus';
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+
+            errorDiv.classList.add('hidden');
+
+            // Show loading
+            document.getElementById('bank-selection').classList.add('hidden');
+            document.getElementById('loading').classList.remove('hidden');
+
+            try {
+                // Call backend to import bank directly
+                const response = await fetch('http://127.0.0.1:8000/api/finapi-webform/import-bank', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+                    },
+                    body: JSON.stringify({
+                        account_id: accountId,
+                        bank_id: selectedBankId,
+                        username: username,
+                        pin: pin
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.status === 'success') {
+                    // Success!
+                    document.getElementById('loading').classList.add('hidden');
+                    document.getElementById('success').classList.remove('hidden');
+
+                    // Send message to parent
+                    const targetWindow = window.parent !== window ? window.parent : window.opener;
+                    if (targetWindow) {
+                        targetWindow.postMessage({
+                            type: 'FINAPI_SUCCESS',
+                            accountId: accountId,
+                            data: data
+                        }, '*');
+                    }
+
+                    setTimeout(() => {
+                        if (window.parent !== window) {
+                            // In iframe, just notify
+                        } else {
+                            window.close();
+                        }
+                    }, 2000);
+
+                } else {
+                    throw new Error(data.message || data.detail || 'Verbindung fehlgeschlagen');
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('bank-selection').classList.remove('hidden');
+                errorDiv.textContent = error.message || 'Verbindung fehlgeschlagen. Bitte versuchen Sie es erneut.';
+                errorDiv.classList.remove('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
+
