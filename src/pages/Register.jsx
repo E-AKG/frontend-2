@@ -30,6 +30,13 @@ export default function Register() {
       return;
     }
 
+    // Check password length in bytes (bcrypt limit is 72 bytes)
+    const passwordBytes = new TextEncoder().encode(formDaten.password).length;
+    if (passwordBytes > 72) {
+      setFehler("Passwort ist zu lang. Bitte verwenden Sie maximal 72 Zeichen.");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -141,8 +148,9 @@ export default function Register() {
               name="password"
               value={formDaten.password}
               onChange={(e) => setFormDaten({ ...formDaten, password: e.target.value })}
-              placeholder="Mindestens 8 Zeichen"
+              placeholder="Mindestens 8 Zeichen, maximal 72 Zeichen"
               required
+              maxLength={72}
               icon={<Lock className="w-5 h-5" />}
             />
 
