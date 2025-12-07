@@ -40,12 +40,17 @@ export default function Register() {
     setLoading(true);
 
     try {
-      await axiosInstance.post("/auth/register", {
+      console.log("📤 Sende Registrierungs-Request...");
+      const response = await axiosInstance.post("/auth/register", {
         email: formDaten.email,
         password: formDaten.password,
       });
+      console.log("✅ Registrierung erfolgreich:", response.data);
       setErfolg(true);
     } catch (error) {
+      console.error("❌ Registrierungs-Fehler:", error);
+      console.error("❌ Error Response:", error.response);
+      console.error("❌ Error Data:", error.response?.data);
       setFehler(
         error.response?.data?.detail ||
           "Registrierung fehlgeschlagen. Bitte versuchen Sie es erneut."
