@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>IZENIC ImmoAssist - Debug</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #f5f5f5; }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+        pre { background: white; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h1>🔍 IZENIC ImmoAssist Debug-Tool</h1>
+    <div id="output"></div>
+    
+    <script>
+        const output = document.getElementById('output');
+        
+        function log(msg, type = 'info') {
+            const div = document.createElement('div');
+            div.className = type;
+            div.innerHTML = msg;
+            output.appendChild(div);
+        }
+        
+        async function runTests() {
+            log('<h2>1️⃣ Überprüfe LocalStorage</h2>');
+            const token = localStorage.getItem('access_token');
+            if (token) {
+                log(`✅ Token vorhanden: ${token.substring(0, 50)}...`, 'success');
+            } else {
+                log('❌ FEHLER: Kein Token gefunden! Bitte einloggen.', 'error');
+                return;
+            }
+            
+            log('<h2>2️⃣ Teste /api/properties Endpoint</h2>');
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/properties?page_size=100', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                log(`Status: ${response.status} ${response.statusText}`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log('✅ API-Antwort erfolgreich:', 'success');
+                    log(`<pre>${JSON.stringify(data, null, 2)}</pre>`);
+                    
+                    if (data.items && data.items.length > 0) {
+                        log(`<br>✅ ${data.items.length} Objekt(e) gefunden!`, 'success');
+                    } else {
+                        log('<br>⚠️ Keine Objekte vorhanden - bitte erst Objekte anlegen', 'error');
+                    }
+                } else {
+                    const errorText = await response.text();
+                    log(`❌ API-Fehler: ${errorText}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Netzwerkfehler: ${error.message}`, 'error');
+            }
+        }
+        
+        runTests();
+    </script>
+</body>
+</html>
+
