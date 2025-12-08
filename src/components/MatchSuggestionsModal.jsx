@@ -230,7 +230,7 @@ export default function MatchSuggestionsModal({ transaction, isOpen, onClose, on
                   : "bg-green-600 hover:bg-green-700"
               }
             >
-              ✅ Zuordnen
+              Zuordnen
               {selectedSuggestion &&
                 ` (${selectedSuggestion.matched_amount.toFixed(2)} €)`}
             </Button>
