@@ -385,67 +385,67 @@ const Sollstellungen = () => {
         )}
 
         {/* Dashboard-Karten */}
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8 px-4 sm:px-6">
-          <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-6 hover:shadow-md transition-shadow">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center">
-              <div className="flex-shrink-0 mb-3 sm:mb-0">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary-50 rounded-lg sm:rounded-xl flex items-center justify-center">
-                  <svg className="w-5 h-5 sm:w-6 sm:h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8">
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 hover:shadow-md transition-shadow">
+            <div className="flex flex-col items-center text-center">
+              <div className="mb-3">
+                <div className="w-14 h-14 bg-primary-50 rounded-xl flex items-center justify-center">
+                  <svg className="w-7 h-7 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                   </svg>
                 </div>
               </div>
-              <div className="flex-1 min-w-0 sm:ml-4">
-                <p className="text-xs sm:text-sm font-medium text-slate-500 mb-1 truncate">Erwartete Einnahmen</p>
-                <p className="text-lg sm:text-xl md:text-2xl font-semibold text-slate-900 truncate">{formatCurrency(stats.total_expected)}</p>
+              <div className="w-full">
+                <p className="text-xs font-medium text-slate-500 mb-2">Erwartete Einnahmen</p>
+                <p className="text-xl font-bold text-slate-900">{formatCurrency(stats.total_expected)}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-6 hover:shadow-md transition-shadow">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center">
-              <div className="flex-shrink-0 mb-3 sm:mb-0">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-emerald-50 rounded-lg sm:rounded-xl flex items-center justify-center">
-                  <svg className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 hover:shadow-md transition-shadow">
+            <div className="flex flex-col items-center text-center">
+              <div className="mb-3">
+                <div className="w-14 h-14 bg-emerald-50 rounded-xl flex items-center justify-center">
+                  <svg className="w-7 h-7 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
               </div>
-              <div className="flex-1 min-w-0 sm:ml-4">
-                <p className="text-xs sm:text-sm font-medium text-slate-500 mb-1 truncate">Bereits bezahlt</p>
-                <p className="text-lg sm:text-xl md:text-2xl font-semibold text-emerald-600 truncate">{formatCurrency(stats.total_paid)}</p>
+              <div className="w-full">
+                <p className="text-xs font-medium text-slate-500 mb-2">Bereits bezahlt</p>
+                <p className="text-xl font-bold text-emerald-600">{formatCurrency(stats.total_paid)}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-6 hover:shadow-md transition-shadow">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center">
-              <div className="flex-shrink-0 mb-3 sm:mb-0">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-red-50 rounded-lg sm:rounded-xl flex items-center justify-center">
-                  <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 hover:shadow-md transition-shadow">
+            <div className="flex flex-col items-center text-center">
+              <div className="mb-3">
+                <div className="w-14 h-14 bg-red-50 rounded-xl flex items-center justify-center">
+                  <svg className="w-7 h-7 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
                   </svg>
                 </div>
               </div>
-              <div className="ml-4 flex-1">
-                <p className="text-sm font-medium text-slate-500 mb-1">Ausstehend</p>
-                <p className="text-2xl font-semibold text-red-600">{formatCurrency(stats.total_outstanding)}</p>
+              <div className="w-full">
+                <p className="text-xs font-medium text-slate-500 mb-2">Ausstehend</p>
+                <p className="text-xl font-bold text-red-600">{formatCurrency(stats.total_outstanding)}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition-shadow">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="w-12 h-12 bg-violet-50 rounded-xl flex items-center justify-center">
-                  <svg className="w-6 h-6 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 hover:shadow-md transition-shadow">
+            <div className="flex flex-col items-center text-center">
+              <div className="mb-3">
+                <div className="w-14 h-14 bg-purple-50 rounded-xl flex items-center justify-center">
+                  <svg className="w-7 h-7 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                   </svg>
                 </div>
               </div>
-              <div className="ml-4 flex-1">
-                <p className="text-sm font-medium text-slate-500 mb-1">Zahlungsrate</p>
-                <p className="text-2xl font-semibold text-violet-600">{stats.payment_rate.toFixed(1)}%</p>
+              <div className="w-full">
+                <p className="text-xs font-medium text-slate-500 mb-2">Zahlungsrate</p>
+                <p className="text-xl font-bold text-purple-600">{stats.payment_rate.toFixed(1)}%</p>
               </div>
             </div>
           </div>
