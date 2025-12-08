@@ -322,47 +322,48 @@ const Sollstellungen = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white w-full max-w-full overflow-x-hidden">
       {/* Header */}
-      <div className="mb-4 sm:mb-6 lg:mb-8">
-        <div className="flex items-center justify-between">
-          <div>
+      <div className="mb-4 sm:mb-6 lg:mb-8 px-4 sm:px-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex-1 min-w-0">
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-1 sm:mb-2 flex items-center gap-2 sm:gap-3">
-              <svg className="w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 text-primary-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              Sollstellungen
+              <span className="truncate">Sollstellungen</span>
             </h1>
             <p className="text-gray-600 text-sm sm:text-base">
               Verwalten Sie Mieteinnahmen und Zahlungseingänge
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
             <button
               onClick={handleRefresh}
               disabled={loading}
-              className="inline-flex items-center px-4 py-2.5 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
               title="Daten aktualisieren"
             >
-              <svg className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className={`w-4 h-4 sm:mr-2 ${loading ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
-              Aktualisieren
+              <span className="hidden sm:inline">Aktualisieren</span>
             </button>
             <Button
               onClick={() => setShowGenerateModal(true)}
-              className="inline-flex items-center px-6 py-3 text-base font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md"
+              className="inline-flex items-center px-4 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-base font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md whitespace-nowrap"
             >
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              Neue Sollstellung
+              <span className="hidden sm:inline">Neue Sollstellung</span>
+              <span className="sm:hidden">Neu</span>
             </Button>
           </div>
         </div>
       </div>
 
-      <div>
+      <div className="px-4 sm:px-6">
         {/* Auto-Sync Info Banner */}
         {(generateMutation.isPending || deleteMutation.isPending || loading) && (
           <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
@@ -384,43 +385,43 @@ const Sollstellungen = () => {
         )}
 
         {/* Dashboard-Karten */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition-shadow">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center">
-                  <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8 px-4 sm:px-6">
+          <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-6 hover:shadow-md transition-shadow">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center">
+              <div className="flex-shrink-0 mb-3 sm:mb-0">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary-50 rounded-lg sm:rounded-xl flex items-center justify-center">
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                   </svg>
                 </div>
               </div>
-              <div className="ml-4 flex-1">
-                <p className="text-sm font-medium text-slate-500 mb-1">Erwartete Einnahmen</p>
-                <p className="text-2xl font-semibold text-slate-900">{formatCurrency(stats.total_expected)}</p>
+              <div className="flex-1 min-w-0 sm:ml-4">
+                <p className="text-xs sm:text-sm font-medium text-slate-500 mb-1 truncate">Erwartete Einnahmen</p>
+                <p className="text-lg sm:text-xl md:text-2xl font-semibold text-slate-900 truncate">{formatCurrency(stats.total_expected)}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition-shadow">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center">
-                  <svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-6 hover:shadow-md transition-shadow">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center">
+              <div className="flex-shrink-0 mb-3 sm:mb-0">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-emerald-50 rounded-lg sm:rounded-xl flex items-center justify-center">
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
               </div>
-              <div className="ml-4 flex-1">
-                <p className="text-sm font-medium text-slate-500 mb-1">Bereits bezahlt</p>
-                <p className="text-2xl font-semibold text-emerald-600">{formatCurrency(stats.total_paid)}</p>
+              <div className="flex-1 min-w-0 sm:ml-4">
+                <p className="text-xs sm:text-sm font-medium text-slate-500 mb-1 truncate">Bereits bezahlt</p>
+                <p className="text-lg sm:text-xl md:text-2xl font-semibold text-emerald-600 truncate">{formatCurrency(stats.total_paid)}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition-shadow">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center">
+          <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-6 hover:shadow-md transition-shadow">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center">
+              <div className="flex-shrink-0 mb-3 sm:mb-0">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-red-50 rounded-lg sm:rounded-xl flex items-center justify-center">
                   <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
                   </svg>
