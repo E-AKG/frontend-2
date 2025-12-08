@@ -51,14 +51,14 @@ export default function Navbar() {
 
   return (
     <nav className="sticky top-0 z-50 glass border-b border-gray-200/80 shadow-sm">
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-6">
-        <div className="flex items-center justify-between h-16">
+      <div className="max-w-[1600px] mx-auto px-3 sm:px-4 md:px-6">
+        <div className="flex items-center justify-between h-14 sm:h-16">
           {/* Logo */}
-          <NavLink to="/" className="flex items-center group">
+          <NavLink to="/dashboard" className="flex items-center group touch-manipulation">
             <img 
               src="/logo.png" 
               alt="Immpire" 
-              className="h-20 sm:h-24 md:h-28 w-auto transition-all duration-200 group-hover:scale-105 object-contain"
+              className="h-16 sm:h-20 md:h-24 lg:h-28 w-auto transition-all duration-200 group-active:scale-95 sm:group-hover:scale-105 object-contain"
               style={{ imageRendering: 'high-quality' }}
             />
           </NavLink>
@@ -87,13 +87,13 @@ export default function Navbar() {
           </div>
 
           {/* Mobile Menu Button */}
-          <div className="lg:hidden flex items-center gap-3">
+          <div className="lg:hidden flex items-center gap-2 sm:gap-3">
             <button
               onClick={() => setShowMobileMenu(!showMobileMenu)}
-              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-all"
+              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 active:bg-gray-200 rounded-lg transition-all touch-manipulation"
               aria-label="Menü"
             >
-              {showMobileMenu ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              {showMobileMenu ? <X className="w-5 h-5 sm:w-6 sm:h-6" /> : <Menu className="w-5 h-5 sm:w-6 sm:h-6" />}
             </button>
           </div>
 
@@ -101,15 +101,15 @@ export default function Navbar() {
           <div className="hidden lg:relative lg:block" ref={menuRef}>
             <button
               onClick={() => setShowUserMenu(!showUserMenu)}
-              className="flex items-center space-x-3 px-3 py-2 rounded-xl hover:bg-gray-100 transition-all duration-200"
+              className="flex items-center space-x-2 sm:space-x-3 px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl hover:bg-gray-100 active:bg-gray-200 transition-all duration-200 touch-manipulation"
             >
-              <div className="w-9 h-9 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center shadow-md">
-                <span className="text-white text-sm font-bold">
+              <div className="w-8 h-8 sm:w-9 sm:h-9 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center shadow-md">
+                <span className="text-white text-xs sm:text-sm font-bold">
                   {localStorage.getItem("user_email")?.charAt(0).toUpperCase() || "U"}
                 </span>
               </div>
               <ChevronDown
-                className={`w-4 h-4 text-gray-600 transition-transform duration-200 ${
+                className={`w-3 h-3 sm:w-4 sm:h-4 text-gray-600 transition-transform duration-200 ${
                   showUserMenu ? "rotate-180" : ""
                 }`}
               />
@@ -148,7 +148,7 @@ export default function Navbar() {
 
         {/* Mobile Menu */}
         {showMobileMenu && (
-          <div className="lg:hidden border-t border-gray-200 py-4 animate-slide-down">
+          <div className="lg:hidden border-t border-gray-200 py-3 sm:py-4 animate-slide-down">
             <div className="space-y-1">
               {navLinks.map((link) => {
                 const Icon = link.icon;
@@ -158,21 +158,21 @@ export default function Navbar() {
                     to={link.path}
                     onClick={() => setShowMobileMenu(false)}
                     className={({ isActive }) =>
-                      `px-4 py-3 text-sm font-semibold rounded-xl transition-all flex items-center gap-3 ${
+                      `px-3 sm:px-4 py-2.5 sm:py-3 text-sm font-semibold rounded-xl transition-all flex items-center gap-2 sm:gap-3 touch-manipulation active:scale-95 ${
                         isActive
                           ? "bg-gradient-to-r from-primary-600 to-primary-700 text-white shadow-md"
-                          : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                          : "text-gray-600 active:text-gray-900 active:bg-gray-100"
                       }`
                     }
                   >
-                    <Icon className="w-5 h-5" />
+                    <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
                     {link.label}
                   </NavLink>
                 );
               })}
             </div>
-            <div className="mt-4 pt-4 border-t border-gray-200">
-              <div className="px-4 py-2 mb-2">
+            <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-200">
+              <div className="px-3 sm:px-4 py-2 mb-2">
                 <p className="text-xs font-bold text-gray-900">Benutzer</p>
                 <p className="text-xs text-gray-500 truncate">
                   {localStorage.getItem("user_email") || "benutzer@izenic.de"}
@@ -183,16 +183,16 @@ export default function Navbar() {
                   navigate("/einstellungen");
                   setShowMobileMenu(false);
                 }}
-                className="w-full text-left px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-xl transition-colors flex items-center gap-3"
+                className="w-full text-left px-3 sm:px-4 py-2.5 sm:py-3 text-sm font-medium text-gray-700 active:bg-gray-50 rounded-xl transition-colors flex items-center gap-2 sm:gap-3 touch-manipulation active:scale-95"
               >
-                <Settings className="w-5 h-5" />
+                <Settings className="w-4 h-4 sm:w-5 sm:h-5" />
                 Einstellungen
               </button>
               <button
                 onClick={handleLogout}
-                className="w-full text-left px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 rounded-xl transition-colors flex items-center gap-3"
+                className="w-full text-left px-3 sm:px-4 py-2.5 sm:py-3 text-sm font-medium text-red-600 active:bg-red-50 rounded-xl transition-colors flex items-center gap-2 sm:gap-3 touch-manipulation active:scale-95"
               >
-                <LogOut className="w-5 h-5" />
+                <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
                 Abmelden
               </button>
             </div>
