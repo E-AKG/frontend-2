@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axiosInstance from "../api/axiosInstance";
 import Formularfeld from "../components/Formularfeld";
@@ -7,6 +7,14 @@ import { Mail, Lock, LogIn } from "lucide-react";
 
 export default function Login() {
   const navigate = useNavigate();
+  
+  // Redirect if already logged in
+  useEffect(() => {
+    const token = localStorage.getItem("access_token");
+    if (token) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [navigate]);
   const [formDaten, setFormDaten] = useState({ email: "", password: "" });
   const [fehler, setFehler] = useState("");
   const [loading, setLoading] = useState(false);
