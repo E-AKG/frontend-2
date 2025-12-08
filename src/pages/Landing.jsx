@@ -1,41 +1,52 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, Shield, Zap, Users, BarChart3, FileText, CheckCircle2, Sparkles, Building2, TrendingUp, Clock, Globe, ChevronDown, Upload } from "lucide-react";
+import { ArrowRight, Shield, Zap, Users, BarChart3, FileText, CheckCircle2, Sparkles, Building2, TrendingUp, Clock, Globe, ChevronDown, Upload, Star, Award, Rocket } from "lucide-react";
 import Button from "../components/Button";
+import { useState, useEffect } from "react";
 
 export default function Landing() {
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      setMousePosition({ x: e.clientX, y: e.clientY });
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
   const scrollToFeatures = () => {
     document.getElementById('features-section')?.scrollIntoView({ behavior: 'smooth' });
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header - Elegant & Minimal */}
-      <header className="border-b border-gray-100 bg-white/95 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
-        <div className="container mx-auto px-6 py-4">
+    <div className="min-h-screen bg-white overflow-hidden">
+      {/* Header - Modern & Glassmorphic */}
+      <header className="fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-white/80 backdrop-blur-xl shadow-sm">
+        <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4">
           <div className="flex items-center justify-between">
-            <Link to="/" className="flex items-center group">
+            <Link to="/" className="flex items-center group touch-manipulation">
               <img 
                 src="/logo.png" 
                 alt="Immpire" 
-                className="h-20 sm:h-24 md:h-28 w-auto transition-all duration-200 group-hover:scale-105 object-contain"
+                className="h-14 sm:h-18 md:h-22 lg:h-26 w-auto transition-all duration-300 group-active:scale-95 sm:group-hover:scale-110 object-contain"
                 style={{ imageRendering: 'high-quality' }}
               />
             </Link>
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-3 sm:gap-6">
               <Link 
                 to="/pricing" 
-                className="text-slate-600 hover:text-slate-900 font-medium transition-colors hidden sm:block"
+                className="text-slate-700 hover:text-primary-600 font-semibold transition-all duration-200 hidden sm:block text-sm sm:text-base"
               >
                 Preise
               </Link>
               <Link 
                 to="/login" 
-                className="text-slate-600 hover:text-slate-900 font-medium transition-colors"
+                className="text-slate-700 hover:text-primary-600 font-semibold transition-all duration-200 text-sm sm:text-base touch-manipulation"
               >
                 Anmelden
               </Link>
-              <Link to="/register">
-                <Button className="bg-slate-900 hover:bg-slate-800 text-white border-0 shadow-lg hover:shadow-xl transition-all">
+              <Link to="/register" className="touch-manipulation">
+                <Button size="sm" className="bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white border-0 shadow-lg hover:shadow-xl transition-all text-xs sm:text-sm">
                   Kostenlos starten
                 </Button>
               </Link>
@@ -44,175 +55,223 @@ export default function Landing() {
         </div>
       </header>
 
-      {/* Hero Section - MASSIVE & Premium */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-slate-50 via-white to-slate-50 min-h-[90vh] flex items-center">
-        {/* Subtle background pattern */}
-        <div className="absolute inset-0 opacity-[0.02]">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `radial-gradient(circle at 2px 2px, rgb(15 23 42) 1px, transparent 0)`,
-            backgroundSize: '80px 80px'
-          }}></div>
+      {/* Hero Section - Ultra Modern & Animated */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-slate-50 via-white to-primary-50/30 min-h-screen flex items-center pt-20">
+        {/* Animated Background Grid */}
+        <div className="absolute inset-0 opacity-[0.03]" style={{
+          backgroundImage: `linear-gradient(rgba(124, 58, 237, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(124, 58, 237, 0.1) 1px, transparent 1px)`,
+          backgroundSize: '50px 50px',
+          transform: `translate(${mousePosition.x * 0.01}px, ${mousePosition.y * 0.01}px)`
+        }}></div>
+        
+        {/* Floating Gradient Orbs with Animation */}
+        <div className="absolute top-20 right-10 w-96 h-96 bg-gradient-to-br from-primary-400/40 via-primary-500/30 to-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 left-10 w-96 h-96 bg-gradient-to-tr from-blue-400/30 via-primary-400/20 to-slate-300/30 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-br from-primary-200/20 to-purple-200/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+        
+        {/* Floating Particles */}
+        <div className="absolute inset-0 overflow-hidden">
+          {[...Array(20)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-2 h-2 bg-primary-400/30 rounded-full animate-float"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 3}s`,
+                animationDuration: `${3 + Math.random() * 2}s`
+              }}
+            ></div>
+          ))}
         </div>
         
-        {/* Gradient Orbs - Larger */}
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-br from-primary-200/40 to-primary-400/30 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-gradient-to-tr from-slate-200/40 to-slate-400/30 rounded-full blur-3xl"></div>
-        
-        <div className="container mx-auto px-6 relative z-10 py-20">
-          <div className="max-w-6xl mx-auto text-center">
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary-50 to-primary-100 rounded-full mb-10 border border-primary-200/50 shadow-sm">
-              <Sparkles className="w-5 h-5 text-primary-600" />
-              <span className="text-base font-semibold text-primary-700">Die Zukunft der Hausverwaltung</span>
-            </div>
-            
-            <h1 className="text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold text-slate-900 mb-8 leading-[1.1] tracking-tight">
-              Hausverwaltung
-              <br />
-              <span className="bg-gradient-to-r from-primary-600 via-primary-500 to-primary-600 bg-clip-text text-transparent">
-                neu gedacht
-              </span>
-            </h1>
-            
-            <p className="text-2xl md:text-3xl lg:text-4xl text-slate-600 mb-6 max-w-4xl mx-auto leading-relaxed font-light">
-              Alles, was Sie für die professionelle Verwaltung Ihrer Immobilien benötigen.
-            </p>
-            
-            <p className="text-xl md:text-2xl text-slate-500 mb-16 max-w-3xl mx-auto font-medium">
-              Einfach. Sicher. Effizient.
-            </p>
-            
-            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-20">
-              <Link to="/register">
-                <Button 
-                  size="lg" 
-                  className="bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white px-12 py-6 text-xl font-semibold shadow-2xl hover:shadow-3xl transition-all transform hover:scale-105"
-                >
-                  Kostenlos starten
-                  <ArrowRight className="w-6 h-6 ml-3" />
-                </Button>
-              </Link>
-              <Link to="/pricing">
-                <Button 
-                  variant="outline" 
-                  size="lg" 
-                  className="border-2 border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 px-12 py-6 text-xl font-semibold transition-all"
-                >
-                  Preise ansehen
-                </Button>
-              </Link>
-            </div>
+        <div className="container mx-auto px-4 sm:px-6 relative z-10 py-16 sm:py-20 md:py-24">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-12 sm:mb-16">
+              {/* Animated Badge */}
+              <div className="inline-flex items-center gap-2 px-5 sm:px-7 py-2.5 sm:py-3.5 bg-gradient-to-r from-primary-100 via-white to-primary-50 rounded-full mb-8 sm:mb-10 border-2 border-primary-200/50 shadow-lg backdrop-blur-sm animate-fade-in">
+                <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-primary-600 animate-pulse" />
+                <span className="text-xs sm:text-sm md:text-base font-bold text-primary-700">✨ Die Zukunft der Hausverwaltung</span>
+                <Award className="w-4 h-4 sm:w-5 sm:h-5 text-primary-600" />
+              </div>
+              
+              {/* Main Headline with Gradient Animation */}
+              <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-extrabold text-slate-900 mb-6 sm:mb-8 leading-[1.05] tracking-tight px-2 animate-fade-in">
+                Hausverwaltung
+                <br />
+                <span className="relative inline-block">
+                  <span className="absolute inset-0 bg-gradient-to-r from-primary-600 via-purple-600 to-primary-600 bg-clip-text text-transparent animate-gradient-x bg-[length:200%_auto]"></span>
+                  <span className="relative bg-gradient-to-r from-primary-600 via-purple-600 to-primary-600 bg-clip-text text-transparent">
+                    neu gedacht
+                  </span>
+                </span>
+              </h1>
+              
+              {/* Subheadline */}
+              <p className="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-slate-700 mb-4 sm:mb-6 max-w-5xl mx-auto leading-relaxed font-medium px-4 animate-fade-in" style={{ animationDelay: '0.1s' }}>
+                Alles, was Sie für die professionelle Verwaltung Ihrer Immobilien benötigen.
+              </p>
+              
+              <p className="text-lg sm:text-xl md:text-2xl text-slate-600 mb-10 sm:mb-12 max-w-3xl mx-auto font-semibold px-4 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+                Einfach. Sicher. Effizient. ⚡
+              </p>
+              
+              {/* CTA Buttons - Enhanced */}
+              <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center mb-12 sm:mb-16 px-4 animate-fade-in" style={{ animationDelay: '0.3s' }}>
+                <Link to="/register" className="w-full sm:w-auto touch-manipulation group">
+                  <Button 
+                    size="lg" 
+                    className="bg-gradient-to-r from-primary-600 via-primary-600 to-purple-600 hover:from-primary-700 hover:via-primary-700 hover:to-purple-700 text-white w-full sm:w-auto px-10 sm:px-14 py-5 sm:py-6 text-lg sm:text-xl md:text-2xl font-bold shadow-2xl hover:shadow-primary-500/50 transition-all transform active:scale-95 sm:hover:scale-105 relative overflow-hidden"
+                  >
+                    <span className="relative z-10 flex items-center gap-3">
+                      <Rocket className="w-5 h-5 sm:w-6 sm:h-6" />
+                      Kostenlos starten
+                      <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6 group-hover:translate-x-1 transition-transform" />
+                    </span>
+                    <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+                  </Button>
+                </Link>
+                <Link to="/pricing" className="w-full sm:w-auto touch-manipulation">
+                  <Button 
+                    variant="outline" 
+                    size="lg" 
+                    className="border-3 border-primary-300 text-primary-700 hover:bg-primary-50 hover:border-primary-400 w-full sm:w-auto px-10 sm:px-14 py-5 sm:py-6 text-lg sm:text-xl md:text-2xl font-bold transition-all active:scale-95 bg-white/80 backdrop-blur-sm"
+                  >
+                    Preise ansehen
+                  </Button>
+                </Link>
+              </div>
 
-            {/* Trust Indicators - Larger */}
-            <div className="flex flex-wrap items-center justify-center gap-10 text-base md:text-lg text-slate-500 mb-16">
-              <div className="flex items-center gap-3">
-                <CheckCircle2 className="w-6 h-6 text-primary-600" />
-                <span className="font-medium">Keine Kreditkarte erforderlich</span>
+              {/* Trust Indicators - Enhanced */}
+              <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-8 md:gap-10 text-sm sm:text-base md:text-lg text-slate-600 mb-12 animate-fade-in" style={{ animationDelay: '0.4s' }}>
+                <div className="flex items-center gap-2 px-4 py-2 bg-white/60 backdrop-blur-sm rounded-full border border-slate-200 shadow-sm">
+                  <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-500" />
+                  <span className="font-semibold">Keine Kreditkarte</span>
+                </div>
+                <div className="flex items-center gap-2 px-4 py-2 bg-white/60 backdrop-blur-sm rounded-full border border-slate-200 shadow-sm">
+                  <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-500" />
+                  <span className="font-semibold">14 Tage kostenlos</span>
+                </div>
+                <div className="flex items-center gap-2 px-4 py-2 bg-white/60 backdrop-blur-sm rounded-full border border-slate-200 shadow-sm">
+                  <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-500" />
+                  <span className="font-semibold">Jederzeit kündbar</span>
+                </div>
               </div>
-              <div className="flex items-center gap-3">
-                <CheckCircle2 className="w-6 h-6 text-primary-600" />
-                <span className="font-medium">14 Tage kostenlos testen</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <CheckCircle2 className="w-6 h-6 text-primary-600" />
-                <span className="font-medium">Jederzeit kündbar</span>
-              </div>
-            </div>
 
-            {/* Scroll Indicator - Shows next section preview */}
-            <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-              <button
-                onClick={scrollToFeatures}
-                className="flex flex-col items-center gap-2 text-slate-400 hover:text-slate-600 transition-colors group"
-                aria-label="Scroll to features"
-              >
-                <span className="text-sm font-medium">Mehr erfahren</span>
-                <ChevronDown className="w-6 h-6 group-hover:translate-y-1 transition-transform" />
-              </button>
+              {/* Stats Bar */}
+              <div className="grid grid-cols-3 gap-4 sm:gap-6 max-w-3xl mx-auto px-4 animate-fade-in" style={{ animationDelay: '0.5s' }}>
+                {[
+                  { number: "10+", label: "Stunden gespart", icon: Clock },
+                  { number: "100%", label: "DSGVO-konform", icon: Shield },
+                  { number: "24/7", label: "Verfügbar", icon: Globe }
+                ].map((stat, idx) => {
+                  const Icon = stat.icon;
+                  return (
+                    <div key={idx} className="bg-white/70 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border-2 border-slate-200/50 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
+                      <Icon className="w-6 h-6 sm:w-8 sm:h-8 text-primary-600 mx-auto mb-2" />
+                      <div className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 mb-1">{stat.number}</div>
+                      <div className="text-xs sm:text-sm text-slate-600 font-medium">{stat.label}</div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Preview of next section - visible at bottom */}
-        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-white to-transparent pointer-events-none">
-          <div className="container mx-auto px-6">
-            <div className="max-w-6xl mx-auto">
-              <div className="grid grid-cols-3 gap-4 opacity-30">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="h-24 bg-slate-100 rounded-xl"></div>
-                ))}
-              </div>
-            </div>
-          </div>
+        {/* Scroll Indicator */}
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce z-20">
+          <button
+            onClick={scrollToFeatures}
+            className="flex flex-col items-center gap-2 text-primary-600 hover:text-primary-700 transition-colors group touch-manipulation"
+            aria-label="Scroll to features"
+          >
+            <span className="text-sm font-semibold">Mehr erfahren</span>
+            <ChevronDown className="w-6 h-6 group-hover:translate-y-1 transition-transform" />
+          </button>
         </div>
       </section>
 
-      {/* Features Section - Clean & Professional */}
-      <section id="features-section" className="py-32 bg-white">
-        <div className="container mx-auto px-6">
-          <div className="max-w-4xl mx-auto text-center mb-24">
-            <h2 className="text-5xl md:text-6xl lg:text-7xl font-bold text-slate-900 mb-6">
+      {/* Features Section - Ultra Modern */}
+      <section id="features-section" className="py-20 sm:py-28 md:py-36 bg-gradient-to-b from-white via-slate-50/50 to-white relative">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(124,58,237,0.05),transparent_50%)]"></div>
+        
+        <div className="container mx-auto px-4 sm:px-6 relative z-10">
+          <div className="max-w-5xl mx-auto text-center mb-16 sm:mb-20 md:mb-28">
+            <div className="inline-block px-4 py-1.5 bg-primary-100 rounded-full mb-4">
+              <span className="text-sm font-bold text-primary-700">Features</span>
+            </div>
+            <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-slate-900 mb-4 sm:mb-6">
               Alles, was Sie brauchen
             </h2>
-            <p className="text-2xl md:text-3xl text-slate-600">
+            <p className="text-xl sm:text-2xl md:text-3xl text-slate-600 font-medium">
               Eine vollständige Lösung für moderne Hausverwaltung
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10 max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-7xl mx-auto">
             {[
               {
                 icon: Building2,
                 title: "Objektverwaltung",
                 description: "Verwalten Sie alle Ihre Immobilien, Einheiten und Details zentral und übersichtlich.",
-                color: "primary"
+                gradient: "from-blue-500 to-cyan-500"
               },
               {
                 icon: Users,
                 title: "Mieterverwaltung",
                 description: "Alle Mieterdaten, Verträge und Kommunikation an einem zentralen Ort.",
-                color: "primary"
+                gradient: "from-emerald-500 to-teal-500"
               },
               {
                 icon: Zap,
                 title: "Automatisierung",
                 description: "Automatische Sollstellungen, Zahlungsabgleich und Mahnungen sparen wertvolle Zeit.",
-                color: "primary"
+                gradient: "from-amber-500 to-orange-500"
               },
               {
                 icon: BarChart3,
                 title: "Analysen & Berichte",
                 description: "Detaillierte Einblicke in Ihre Finanzen und Performance-Metriken.",
-                color: "primary"
+                gradient: "from-purple-500 to-pink-500"
               },
               {
                 icon: Shield,
                 title: "Sicherheit & DSGVO",
                 description: "Ihre Daten sind sicher, verschlüsselt und vollständig DSGVO-konform.",
-                color: "primary"
+                gradient: "from-indigo-500 to-blue-500"
               },
               {
                 icon: Upload,
                 title: "CSV-Import & Abgleich",
                 description: "Laden Sie Ihre Bankdaten per CSV hoch und lassen Sie Zahlungen automatisch zuordnen.",
-                color: "primary"
+                gradient: "from-rose-500 to-pink-500"
               }
             ].map((feature, index) => {
               const Icon = feature.icon;
               return (
                 <div 
                   key={index}
-                  className="group p-10 rounded-3xl border-2 border-slate-200 bg-white hover:border-primary-300 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2"
+                  className="group relative p-8 sm:p-10 rounded-3xl bg-white border-2 border-slate-200 hover:border-transparent hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 overflow-hidden"
                 >
-                  <div className="w-16 h-16 bg-gradient-to-br from-primary-100 to-primary-200 rounded-2xl flex items-center justify-center mb-8 group-hover:from-primary-200 group-hover:to-primary-300 transition-all scale-100 group-hover:scale-110">
-                    <Icon className="w-8 h-8 text-primary-700" />
+                  {/* Gradient Background on Hover */}
+                  <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`}></div>
+                  
+                  {/* Content */}
+                  <div className="relative z-10">
+                    <div className={`w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br ${feature.gradient} rounded-2xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-500`}>
+                      <Icon className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+                    </div>
+                    <h3 className="text-2xl sm:text-2xl md:text-3xl font-extrabold text-slate-900 group-hover:text-white mb-3 sm:mb-4 transition-colors duration-500">
+                      {feature.title}
+                    </h3>
+                    <p className="text-base sm:text-lg text-slate-600 group-hover:text-white/90 leading-relaxed transition-colors duration-500">
+                      {feature.description}
+                    </p>
                   </div>
-                  <h3 className="text-2xl font-bold text-slate-900 mb-4">
-                    {feature.title}
-                  </h3>
-                  <p className="text-lg text-slate-600 leading-relaxed">
-                    {feature.description}
-                  </p>
+                  
+                  {/* Shine Effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
                 </div>
               );
             })}
@@ -220,69 +279,95 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Benefits Section - Larger */}
-      <section className="py-32 bg-gradient-to-br from-slate-50 to-white">
-        <div className="container mx-auto px-6">
+      {/* Benefits Section - Modern Split */}
+      <section className="py-20 sm:py-28 md:py-36 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white relative overflow-hidden">
+        {/* Animated Background */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0" style={{
+            backgroundImage: `radial-gradient(circle at 2px 2px, white 1px, transparent 0)`,
+            backgroundSize: '50px 50px'
+          }}></div>
+        </div>
+        
+        {/* Gradient Orbs */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-primary-500/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        
+        <div className="container mx-auto px-4 sm:px-6 relative z-10">
           <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-24">
-              <h2 className="text-5xl md:text-6xl lg:text-7xl font-bold text-slate-900 mb-6">
-                Warum Immpire?
+            <div className="text-center mb-16 sm:mb-20 md:mb-24">
+              <div className="inline-block px-4 py-1.5 bg-primary-500/20 rounded-full mb-4">
+                <span className="text-sm font-bold text-primary-300">Warum Immpire?</span>
+              </div>
+              <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold mb-4 sm:mb-6">
+                Die moderne Alternative
               </h2>
-              <p className="text-2xl md:text-3xl text-slate-600">
-                Die moderne Alternative für professionelle Hausverwaltung
+              <p className="text-xl sm:text-2xl md:text-3xl text-slate-300 font-medium">
+                Für professionelle Hausverwaltung
               </p>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-16 items-center">
-              <div className="space-y-12">
+            <div className="grid md:grid-cols-2 gap-12 sm:gap-16 md:gap-20 items-center">
+              <div className="space-y-8 sm:space-y-10 md:space-y-12">
                 {[
                   {
                     icon: TrendingUp,
                     title: "Zeitersparnis",
-                    description: "Automatisieren Sie repetitive Aufgaben und sparen Sie bis zu 10 Stunden pro Woche."
+                    description: "Automatisieren Sie repetitive Aufgaben und sparen Sie bis zu 10 Stunden pro Woche.",
+                    gradient: "from-emerald-400 to-teal-400"
                   },
                   {
                     icon: FileText,
                     title: "Einfacher CSV-Import",
-                    description: "Laden Sie Ihre Bankdaten einfach per CSV hoch. Unser System erkennt automatisch Zahlungen und ordnet sie zu."
+                    description: "Laden Sie Ihre Bankdaten einfach per CSV hoch. Unser System erkennt automatisch Zahlungen und ordnet sie zu.",
+                    gradient: "from-blue-400 to-cyan-400"
                   },
                   {
                     icon: Globe,
                     title: "Überall verfügbar",
-                    description: "Arbeiten Sie von überall - im Büro, zu Hause oder unterwegs. Alles in der Cloud."
+                    description: "Arbeiten Sie von überall - im Büro, zu Hause oder unterwegs. Alles in der Cloud.",
+                    gradient: "from-purple-400 to-pink-400"
                   }
                 ].map((benefit, index) => {
                   const Icon = benefit.icon;
                   return (
-                    <div key={index} className="flex gap-6">
-                      <div className="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center shadow-lg">
-                        <Icon className="w-8 h-8 text-white" />
+                    <div key={index} className="flex gap-4 sm:gap-6 group">
+                      <div className={`flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br ${benefit.gradient} rounded-2xl flex items-center justify-center shadow-xl group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}>
+                        <Icon className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
                       </div>
                       <div>
-                        <h3 className="text-2xl font-bold text-slate-900 mb-3">{benefit.title}</h3>
-                        <p className="text-lg text-slate-600 leading-relaxed">{benefit.description}</p>
+                        <h3 className="text-xl sm:text-2xl md:text-3xl font-extrabold mb-2 sm:mb-3">{benefit.title}</h3>
+                        <p className="text-base sm:text-lg text-slate-300 leading-relaxed">{benefit.description}</p>
                       </div>
                     </div>
                   );
                 })}
               </div>
+              
+              {/* Stats Card */}
               <div className="relative">
-                <div className="bg-gradient-to-br from-primary-500 to-primary-700 rounded-3xl p-16 text-white shadow-2xl">
-                  <div className="space-y-10">
-                    <div>
-                      <div className="text-7xl font-bold mb-3">100%</div>
-                      <div className="text-xl text-primary-100">DSGVO-konform</div>
-                    </div>
-                    <div className="h-px bg-white/20"></div>
-                    <div>
-                      <div className="text-7xl font-bold mb-3">24/7</div>
-                      <div className="text-xl text-primary-100">Verfügbar</div>
-                    </div>
-                    <div className="h-px bg-white/20"></div>
-                    <div>
-                      <div className="text-7xl font-bold mb-3">∞</div>
-                      <div className="text-xl text-primary-100">Skalierbar</div>
-                    </div>
+                <div className="bg-gradient-to-br from-primary-500 via-purple-600 to-primary-700 rounded-3xl p-10 sm:p-14 md:p-16 text-white shadow-2xl relative overflow-hidden">
+                  {/* Animated Background */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 animate-shimmer"></div>
+                  
+                  <div className="relative z-10 space-y-8 sm:space-y-10 md:space-y-12">
+                    {[
+                      { number: "100%", label: "DSGVO-konform", icon: Shield },
+                      { number: "24/7", label: "Verfügbar", icon: Clock },
+                      { number: "∞", label: "Skalierbar", icon: Rocket }
+                    ].map((stat, idx) => {
+                      const Icon = stat.icon;
+                      return (
+                        <div key={idx}>
+                          <div className="flex items-center gap-4 mb-2">
+                            <Icon className="w-8 h-8 text-primary-200" />
+                            <div className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold">{stat.number}</div>
+                          </div>
+                          <div className="text-lg sm:text-xl md:text-2xl text-primary-100 font-semibold">{stat.label}</div>
+                          {idx < 2 && <div className="h-px bg-white/20 mt-6"></div>}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
@@ -291,70 +376,95 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* CTA Section - Elegant & Larger */}
-      <section className="py-32 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white relative overflow-hidden">
-        {/* Subtle pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `radial-gradient(circle at 2px 2px, white 1px, transparent 0)`,
-            backgroundSize: '40px 40px'
-          }}></div>
+      {/* CTA Section - Ultra Modern */}
+      <section className="py-20 sm:py-28 md:py-36 bg-gradient-to-br from-white via-primary-50/30 to-white relative overflow-hidden">
+        {/* Animated Background */}
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(124,58,237,0.1),transparent_50%)] animate-pulse"></div>
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_50%,rgba(168,85,247,0.1),transparent_50%)] animate-pulse" style={{ animationDelay: '1s' }}></div>
         </div>
         
-        {/* Gradient Orbs */}
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary-500/20 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-primary-600/20 rounded-full blur-3xl"></div>
-        
-        <div className="container mx-auto px-6 relative z-10">
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-8">
-              Bereit, Ihre Hausverwaltung zu transformieren?
+        <div className="container mx-auto px-4 sm:px-6 relative z-10">
+          <div className="max-w-5xl mx-auto text-center">
+            <div className="inline-block px-4 py-1.5 bg-primary-100 rounded-full mb-6">
+              <span className="text-sm font-bold text-primary-700">Bereit loszulegen?</span>
+            </div>
+            <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-slate-900 mb-6 sm:mb-8">
+              Transformieren Sie Ihre
+              <br />
+              <span className="bg-gradient-to-r from-primary-600 via-purple-600 to-primary-600 bg-clip-text text-transparent">
+                Hausverwaltung heute
+              </span>
             </h2>
-            <p className="text-2xl md:text-3xl text-slate-300 mb-12">
+            <p className="text-xl sm:text-2xl md:text-3xl text-slate-600 mb-10 sm:mb-12 font-medium">
               Starten Sie noch heute und erleben Sie, wie einfach professionelle Hausverwaltung sein kann.
             </p>
-            <div className="flex flex-col sm:flex-row gap-6 justify-center">
-              <Link to="/register">
+            <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center px-4">
+              <Link to="/register" className="w-full sm:w-auto touch-manipulation group">
                 <Button 
                   size="lg" 
                   variant="secondary"
-                  className="bg-white text-slate-900 hover:bg-slate-100 px-12 py-6 text-xl font-semibold shadow-2xl hover:shadow-3xl transition-all transform hover:scale-105"
+                  className="bg-gradient-to-r from-primary-600 via-purple-600 to-primary-600 hover:from-primary-700 hover:via-purple-700 hover:to-primary-700 text-white w-full sm:w-auto px-12 sm:px-16 py-6 sm:py-7 text-xl sm:text-2xl md:text-3xl font-extrabold shadow-2xl hover:shadow-primary-500/50 transition-all transform active:scale-95 sm:hover:scale-105 relative overflow-hidden"
                 >
-                  Jetzt kostenlos starten
-                  <ArrowRight className="w-6 h-6 ml-3" />
+                  <span className="relative z-10 flex items-center gap-3">
+                    <Rocket className="w-6 h-6 sm:w-7 sm:h-7" />
+                    Jetzt kostenlos starten
+                    <ArrowRight className="w-6 h-6 sm:w-7 sm:h-7 group-hover:translate-x-2 transition-transform" />
+                  </span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/30 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
                 </Button>
               </Link>
-              <Link to="/pricing">
+              <Link to="/pricing" className="w-full sm:w-auto touch-manipulation">
                 <Button 
                   size="lg"
-                  className="bg-transparent border-2 border-white text-white hover:bg-white/10 px-12 py-6 text-xl font-semibold transition-all"
+                  className="bg-white/80 backdrop-blur-sm border-3 border-primary-300 text-primary-700 hover:bg-white hover:border-primary-400 w-full sm:w-auto px-12 sm:px-16 py-6 sm:py-7 text-xl sm:text-2xl md:text-3xl font-extrabold transition-all active:scale-95 shadow-xl"
                 >
                   Preise ansehen
                 </Button>
               </Link>
             </div>
+            
+            {/* Social Proof */}
+            <div className="mt-12 sm:mt-16 flex flex-wrap items-center justify-center gap-6 sm:gap-8">
+              <div className="flex items-center gap-2">
+                <div className="flex -space-x-2">
+                  {[...Array(5)].map((_, i) => (
+                    <div key={i} className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-400 to-purple-500 border-2 border-white"></div>
+                  ))}
+                </div>
+                <div className="ml-2">
+                  <div className="flex items-center gap-1">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
+                    ))}
+                  </div>
+                  <div className="text-xs text-slate-600 font-semibold">500+ zufriedene Kunden</div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Footer - Minimal */}
-      <footer className="border-t border-slate-200 bg-white py-12">
-        <div className="container mx-auto px-6">
+      {/* Footer - Modern */}
+      <footer className="border-t border-slate-200 bg-white py-10 sm:py-12 md:py-14">
+        <div className="container mx-auto px-4 sm:px-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <Link to="/" className="flex items-center group">
+            <Link to="/" className="flex items-center group touch-manipulation">
               <img 
                 src="/logo.png" 
                 alt="Immpire" 
-                className="h-16 sm:h-20 w-auto transition-all duration-200 group-hover:scale-105 object-contain"
+                className="h-12 sm:h-16 md:h-20 w-auto transition-all duration-200 group-active:scale-95 sm:group-hover:scale-110 object-contain"
                 style={{ imageRendering: 'high-quality' }}
               />
             </Link>
-            <div className="text-slate-600 text-sm">
+            <div className="text-slate-600 text-xs sm:text-sm text-center md:text-left font-medium">
               &copy; 2025 Immpire. Alle Rechte vorbehalten.
             </div>
           </div>
         </div>
       </footer>
+
     </div>
   );
 }
