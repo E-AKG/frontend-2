@@ -8,17 +8,17 @@ export default function Landing() {
     <div className="min-h-screen bg-white overflow-hidden">
       {/* Header - Modern & Glassmorphic */}
       <header className="fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-white/80 backdrop-blur-xl shadow-sm">
-        <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-5 md:py-6">
-          <div className="flex items-center justify-between">
+        <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4">
+          <div className="flex items-center justify-between h-14 sm:h-16">
             <Link to="/" className="flex items-center group touch-manipulation">
               <img 
                 src="/logo.png" 
                 alt="Immpire" 
-                className="h-20 sm:h-24 md:h-28 lg:h-32 xl:h-36 w-auto transition-all duration-300 group-active:scale-95 sm:group-hover:scale-110 object-contain"
+                className="h-14 sm:h-16 md:h-18 lg:h-20 w-auto transition-all duration-300 group-active:scale-95 sm:group-hover:scale-110 object-contain"
                 style={{ imageRendering: 'high-quality' }}
               />
             </Link>
-            <div className="flex items-center gap-2 sm:gap-3 md:gap-6">
+            <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
               <Link 
                 to="/pricing" 
                 className="text-slate-700 hover:text-primary-600 font-semibold transition-all duration-200 hidden sm:block text-sm sm:text-base"
@@ -27,12 +27,12 @@ export default function Landing() {
               </Link>
               <Link 
                 to="/login" 
-                className="text-slate-700 hover:text-primary-600 font-semibold transition-all duration-200 text-xs sm:text-sm md:text-base touch-manipulation px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg hover:bg-slate-50"
+                className="text-slate-700 hover:text-primary-600 font-semibold transition-all duration-200 text-xs sm:text-sm md:text-base touch-manipulation px-3 sm:px-4 rounded-lg hover:bg-slate-50 flex items-center justify-center h-[36px] sm:h-[40px]"
               >
                 Anmelden
               </Link>
               <Link to="/register" className="touch-manipulation">
-                <Button size="sm" className="bg-primary-600 hover:bg-primary-700 text-white border-0 shadow-lg hover:shadow-xl transition-all text-xs sm:text-sm px-3 sm:px-4 py-1.5 sm:py-2">
+                <Button size="sm" className="bg-primary-600 hover:bg-primary-700 text-white border-0 shadow-lg hover:shadow-xl transition-all text-xs sm:text-sm px-3 sm:px-4 h-[36px] sm:h-[40px]">
                   Kostenlos starten
                 </Button>
               </Link>
