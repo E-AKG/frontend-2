@@ -22,9 +22,9 @@ export default function Button({
   };
 
   const sizes = {
-    sm: "px-3 sm:px-4 py-2 text-xs sm:text-sm min-h-[36px] sm:min-h-[40px]",
-    md: "px-4 sm:px-5 py-2.5 text-sm sm:text-[15px] min-h-[40px] sm:min-h-[44px]",
-    lg: "px-5 sm:px-6 py-3 text-base min-h-[44px] sm:min-h-[48px]",
+    sm: "px-3 sm:px-4 py-2 text-xs sm:text-sm h-[36px] sm:h-[40px]",
+    md: "px-4 sm:px-5 py-2.5 text-sm sm:text-[15px] h-[40px] sm:h-[44px]",
+    lg: "px-5 sm:px-6 py-3 text-base h-[44px] sm:h-[48px]",
   };
 
   const iconSize = {
