@@ -5,10 +5,10 @@ import Button from "../components/Button";
 export default function Landing() {
 
   return (
-    <div className="min-h-screen bg-white overflow-hidden">
+    <div className="min-h-screen bg-white overflow-x-hidden w-full max-w-full">
       {/* Header - Modern & Glassmorphic */}
-      <header className="fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-white/80 backdrop-blur-xl shadow-sm">
-        <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4">
+      <header className="fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-white/80 backdrop-blur-xl shadow-sm w-full max-w-full overflow-x-hidden">
+        <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4 max-w-full">
           <div className="flex items-center justify-between h-14 sm:h-16">
             <Link to="/" className="flex items-center group touch-manipulation">
               <img 
@@ -42,9 +42,9 @@ export default function Landing() {
       </header>
 
       {/* Hero Section - Clean & Modern */}
-      <section className="relative overflow-hidden bg-white min-h-screen flex items-center pt-20">
-        <div className="container mx-auto px-4 sm:px-6 relative z-10 py-12 sm:py-16 md:py-20 lg:py-24">
-          <div className="max-w-7xl mx-auto">
+      <section className="relative overflow-x-hidden bg-white min-h-screen flex items-center pt-20 w-full max-w-full">
+        <div className="container mx-auto px-4 sm:px-6 relative z-10 py-12 sm:py-16 md:py-20 lg:py-24 max-w-full">
+          <div className="max-w-7xl mx-auto w-full">
             <div className="text-center mb-8 sm:mb-12 md:mb-16">
               {/* Badge */}
               <div className="inline-flex items-center justify-center px-4 sm:px-6 md:px-8 py-2 sm:py-2.5 md:py-3 bg-primary-50 rounded-full mb-6 sm:mb-8 md:mb-10 border-2 border-primary-200 shadow-md animate-fade-in">
@@ -148,9 +148,9 @@ export default function Landing() {
       </section>
 
       {/* USPs Section - Why Immpire? */}
-      <section id="features-section" className="py-20 sm:py-28 md:py-36 bg-gradient-to-b from-white to-slate-50 relative">
-        <div className="container mx-auto px-4 sm:px-6 relative z-10">
-          <div className="max-w-5xl mx-auto text-center mb-16 sm:mb-20 md:mb-28">
+      <section id="features-section" className="py-20 sm:py-28 md:py-36 bg-gradient-to-b from-white to-slate-50 relative w-full max-w-full overflow-x-hidden">
+        <div className="container mx-auto px-4 sm:px-6 relative z-10 max-w-full">
+          <div className="max-w-5xl mx-auto text-center mb-16 sm:mb-20 md:mb-28 w-full">
             <div className="inline-block px-4 py-1.5 bg-primary-100 rounded-full mb-4">
               <span className="text-sm font-bold text-primary-700">Warum Immpire?</span>
             </div>
@@ -162,7 +162,7 @@ export default function Landing() {
             </p>
           </div>
 
-          <div className="max-w-6xl mx-auto space-y-8 sm:space-y-12 md:space-y-16">
+          <div className="max-w-6xl mx-auto space-y-8 sm:space-y-12 md:space-y-16 w-full px-0">
             {/* USP 1: Radikal einfach */}
             <div className="bg-white rounded-3xl p-8 sm:p-10 md:p-12 border-2 border-slate-200 shadow-xl hover:shadow-2xl transition-all">
               <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
@@ -171,7 +171,7 @@ export default function Landing() {
                 </div>
                 <div className="flex-1">
                   <div className="inline-block px-3 py-1 bg-primary-100 rounded-full mb-4">
-                    <span className="text-xs font-bold text-primary-700">1. Radikal einfach</span>
+                    <span className="text-xs font-bold text-primary-700">1. Intuitiv einfach</span>
                   </div>
                   <h3 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 mb-4">
                     Sofort verständlich
@@ -187,7 +187,7 @@ export default function Landing() {
             </div>
 
             {/* USP 2: KI Risikoanalyse */}
-            <div className="bg-white rounded-3xl p-8 sm:p-10 md:p-12 border-2 border-slate-200 shadow-xl hover:shadow-2xl transition-all">
+            <div className="bg-white rounded-3xl p-6 sm:p-8 md:p-10 lg:p-12 border-2 border-slate-200 shadow-xl hover:shadow-2xl transition-all w-full max-w-full">
               <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
                 <div className="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center shadow-lg">
                   <Brain className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
@@ -197,15 +197,19 @@ export default function Landing() {
                     <span className="text-xs font-bold text-primary-700">2. KI, die mehr kann</span>
                   </div>
                   <h3 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 mb-4">
-                    Intelligente Risikoanalyse deiner Mieter
+                    Intelligente Risikoerkennung deiner Mieter
                   </h3>
                   <p className="text-lg sm:text-xl text-slate-700 mb-4 leading-relaxed">
-                    Unsere KI bewertet automatisch relevante Risikofaktoren:
+                    Unsere KI analysiert automatisch das Zahlungsverhalten deiner Mieter:
                   </p>
                   <ul className="space-y-2 text-base sm:text-lg text-slate-600">
                     <li className="flex items-start gap-2">
                       <AlertTriangle className="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
-                      <span>Wiederkehrende verspätete Zahlungen</span>
+                      <span>Erkennt rechtzeitige vs. verspätete Zahlungen</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <AlertTriangle className="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                      <span>Warnt frühzeitig bei wiederkehrenden Zahlungsproblemen</span>
                     </li>
                   </ul>
                   <p className="text-base sm:text-lg text-slate-600 mt-4 leading-relaxed">
@@ -216,7 +220,7 @@ export default function Landing() {
             </div>
 
             {/* USP 3: Vollautomatisierung */}
-            <div className="bg-white rounded-3xl p-8 sm:p-10 md:p-12 border-2 border-slate-200 shadow-xl hover:shadow-2xl transition-all">
+            <div className="bg-white rounded-3xl p-6 sm:p-8 md:p-10 lg:p-12 border-2 border-slate-200 shadow-xl hover:shadow-2xl transition-all w-full max-w-full">
               <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
                 <div className="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center shadow-lg">
                   <SparklesIcon className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
@@ -234,15 +238,15 @@ export default function Landing() {
                   <ul className="space-y-2 text-base sm:text-lg text-slate-600">
                     <li className="flex items-start gap-2">
                       <CheckCircle className="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
-                      <span>Mieten tracken</span>
+                      <span>CSV hochladen – automatischer Zahlungsabgleich ohne manuelles Suchen</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <CheckCircle className="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
-                      <span>Zahlungseingänge prüfen per CSV</span>
+                      <span>Erkennt automatisch welcher Mieter gezahlt hat und welcher nicht</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <CheckCircle className="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
-                      <span>Verträge verwalten</span>
+                      <span>Verträge verwalten und Dokumente organisieren</span>
                     </li>
                   </ul>
                   <p className="text-base sm:text-lg text-primary-600 font-bold mt-4">
@@ -253,7 +257,7 @@ export default function Landing() {
             </div>
 
             {/* USP 4: Alles im Blick */}
-            <div className="bg-white rounded-3xl p-8 sm:p-10 md:p-12 border-2 border-slate-200 shadow-xl hover:shadow-2xl transition-all">
+            <div className="bg-white rounded-3xl p-6 sm:p-8 md:p-10 lg:p-12 border-2 border-slate-200 shadow-xl hover:shadow-2xl transition-all w-full max-w-full">
               <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
                 <div className="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center shadow-lg">
                   <BarChart3 className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
@@ -273,7 +277,7 @@ export default function Landing() {
             </div>
 
             {/* USP 5: Perfekt skaliert */}
-            <div className="bg-white rounded-3xl p-8 sm:p-10 md:p-12 border-2 border-slate-200 shadow-xl hover:shadow-2xl transition-all">
+            <div className="bg-white rounded-3xl p-6 sm:p-8 md:p-10 lg:p-12 border-2 border-slate-200 shadow-xl hover:shadow-2xl transition-all w-full max-w-full">
               <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
                 <div className="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center shadow-lg">
                   <Infinity className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
@@ -293,7 +297,7 @@ export default function Landing() {
             </div>
 
             {/* USP 6: Moderne Technologie */}
-            <div className="bg-white rounded-3xl p-8 sm:p-10 md:p-12 border-2 border-slate-200 shadow-xl hover:shadow-2xl transition-all">
+            <div className="bg-white rounded-3xl p-6 sm:p-8 md:p-10 lg:p-12 border-2 border-slate-200 shadow-xl hover:shadow-2xl transition-all w-full max-w-full">
               <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
                 <div className="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center shadow-lg">
                   <Globe className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
@@ -306,8 +310,8 @@ export default function Landing() {
                     Statt veralteter Software
                   </h3>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
-                    {['schnell', 'DSGVO-konform', 'cloudbasiert', 'mobil optimiert', 'smart vernetzt'].map((tech, idx) => (
-                      <div key={idx} className="flex items-center gap-2 px-3 py-2 bg-primary-50 rounded-lg">
+                    {['schnell', 'DSGVO-konform', 'web-basiert also überall nutzbar', 'mobil optimiert', 'smart vernetzt'].map((tech, idx) => (
+                      <div key={idx} className={`flex items-center gap-2 px-3 py-2 bg-primary-50 rounded-lg ${tech.includes('web-basiert') ? 'col-span-2 sm:col-span-1' : ''}`}>
                         <CheckCircle className="w-4 h-4 text-primary-600 flex-shrink-0" />
                         <span className="text-sm sm:text-base font-semibold text-slate-700">{tech}</span>
                       </div>
@@ -317,37 +321,15 @@ export default function Landing() {
               </div>
             </div>
 
-            {/* USP 7: Entwickelt für Vermieter */}
-            <div className="bg-gradient-to-br from-primary-600 to-primary-700 rounded-3xl p-8 sm:p-10 md:p-12 text-white shadow-2xl">
-              <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
-                <div className="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 bg-white/20 rounded-2xl flex items-center justify-center shadow-lg backdrop-blur-sm">
-                  <Users className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
-                </div>
-                <div className="flex-1">
-                  <div className="inline-block px-3 py-1 bg-white/20 rounded-full mb-4 backdrop-blur-sm">
-                    <span className="text-xs font-bold text-white">7. Entwickelt für Vermieter</span>
-                  </div>
-                  <h3 className="text-2xl sm:text-3xl md:text-4xl font-extrabold mb-4">
-                    Nicht für Großkonzerne
-                  </h3>
-                  <p className="text-lg sm:text-xl mb-4 leading-relaxed opacity-95">
-                    Ein Tool, das echte Probleme löst. Ein Tool, das mitdenkt.
-                  </p>
-                  <p className="text-base sm:text-lg font-bold leading-relaxed">
-                    Ein Tool, das dein Immobilien-Reich schützt und wachsen lässt.
-                  </p>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </section>
 
 
       {/* CTA Section - Clean & Modern */}
-      <section className="py-20 sm:py-28 md:py-36 bg-white relative">
-        <div className="container mx-auto px-4 sm:px-6 relative z-10">
-          <div className="max-w-5xl mx-auto text-center">
+      <section className="py-20 sm:py-28 md:py-36 bg-white relative w-full max-w-full overflow-x-hidden">
+        <div className="container mx-auto px-4 sm:px-6 relative z-10 max-w-full">
+          <div className="max-w-5xl mx-auto text-center w-full">
             <div className="inline-block px-4 py-1.5 bg-primary-100 rounded-full mb-6">
               <span className="text-sm font-bold text-primary-700">Bereit loszulegen?</span>
             </div>
@@ -365,8 +347,7 @@ export default function Landing() {
               <Link to="/register" className="w-full sm:w-auto touch-manipulation">
                 <Button 
                   size="lg" 
-                  variant="secondary"
-                  className="bg-primary-600 hover:bg-primary-700 text-white w-full sm:w-auto px-8 sm:px-12 md:px-16 py-5 sm:py-6 md:py-7 text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold shadow-lg hover:shadow-xl transition-all transform active:scale-95 sm:hover:scale-105"
+                  className="bg-primary-600 hover:bg-primary-700 text-white border-0 w-full sm:w-auto px-8 sm:px-12 md:px-16 py-5 sm:py-6 md:py-7 text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold shadow-lg hover:shadow-xl transition-all transform active:scale-95 sm:hover:scale-105"
                 >
                   <span className="flex items-center justify-center gap-2 sm:gap-3">
                     <Rocket className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7" />
@@ -408,9 +389,9 @@ export default function Landing() {
       </section>
 
       {/* Support Section */}
-      <section className="py-12 sm:py-16 bg-gradient-to-br from-slate-50 to-white border-t border-slate-200">
-        <div className="container mx-auto px-4 sm:px-6">
-          <div className="max-w-4xl mx-auto">
+      <section className="py-12 sm:py-16 bg-gradient-to-br from-slate-50 to-white border-t border-slate-200 w-full max-w-full overflow-x-hidden">
+        <div className="container mx-auto px-4 sm:px-6 max-w-full">
+          <div className="max-w-4xl mx-auto w-full">
             <div className="bg-white rounded-2xl border-2 border-slate-200 p-4 sm:p-6 md:p-8 lg:p-10 shadow-lg">
               <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
                 <div className="flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center">
@@ -450,8 +431,8 @@ export default function Landing() {
       </section>
 
       {/* Footer - Modern with IZENIC Branding */}
-      <footer className="border-t border-slate-200 bg-white py-10 sm:py-12 md:py-14">
-        <div className="container mx-auto px-4 sm:px-6">
+      <footer className="border-t border-slate-200 bg-white py-10 sm:py-12 md:py-14 w-full max-w-full overflow-x-hidden">
+        <div className="container mx-auto px-4 sm:px-6 max-w-full">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
             {/* Immpire Branding */}
             <div>
