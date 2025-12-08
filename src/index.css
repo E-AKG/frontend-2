@@ -13,6 +13,10 @@
     scroll-behavior: smooth;
     /* Prevent text size adjustment on iOS */
     -webkit-text-size-adjust: 100%;
+    /* Prevent horizontal scrolling */
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
   }
   
   body {
@@ -22,6 +26,18 @@
     -moz-osx-font-smoothing: grayscale;
     /* Prevent pull-to-refresh on mobile */
     overscroll-behavior-y: contain;
+    /* Prevent horizontal scrolling */
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
+    position: relative;
+  }
+  
+  /* Ensure root container doesn't overflow */
+  #root {
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
   }
   
   /* Better focus styles */
@@ -132,6 +148,27 @@
     /* Better scrolling on mobile */
     * {
       -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Prevent horizontal overflow on mobile */
+    html, body {
+      overflow-x: hidden !important;
+      width: 100% !important;
+      max-width: 100vw !important;
+      position: relative;
+    }
+    
+    /* Ensure all containers respect viewport width */
+    .container {
+      max-width: 100% !important;
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+    
+    /* Prevent any element from exceeding viewport */
+    * {
+      max-width: 100%;
+      box-sizing: border-box;
     }
   }
 }
