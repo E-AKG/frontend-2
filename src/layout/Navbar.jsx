@@ -52,13 +52,13 @@ export default function Navbar() {
   return (
     <nav className="sticky top-0 z-50 glass border-b border-gray-200/80 shadow-sm">
       <div className="max-w-[1600px] mx-auto px-3 sm:px-4 md:px-6">
-        <div className="flex items-center justify-between h-14 sm:h-16">
+        <div className="flex items-center justify-between h-16 sm:h-20 md:h-24">
           {/* Logo */}
           <NavLink to="/dashboard" className="flex items-center group touch-manipulation">
             <img 
               src="/logo.png" 
               alt="Immpire" 
-              className="h-16 sm:h-20 md:h-24 lg:h-28 w-auto transition-all duration-200 group-active:scale-95 sm:group-hover:scale-105 object-contain"
+              className="h-20 sm:h-24 md:h-28 lg:h-32 xl:h-36 w-auto transition-all duration-200 group-active:scale-95 sm:group-hover:scale-105 object-contain"
               style={{ imageRendering: 'high-quality' }}
             />
           </NavLink>
