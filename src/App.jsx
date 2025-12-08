@@ -19,6 +19,19 @@ import Einstellungen from "./pages/Einstellungen";
 import AppLayout from "./layout/AppLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
 
+// Component to redirect authenticated users away from landing page
+function LandingRoute() {
+  const token = localStorage.getItem("access_token");
+  
+  // If user is authenticated, redirect to dashboard
+  if (token) {
+    return <Navigate to="/dashboard" replace />;
+  }
+  
+  // Otherwise show landing page
+  return <Landing />;
+}
+
 // Create a client with optimized settings
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -37,7 +50,7 @@ export default function App() {
       <Router>
         <Routes>
           {/* Public Routes */}
-          <Route path="/" element={<Landing />} />
+          <Route path="/" element={<LandingRoute />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/verify" element={<Verify />} />
