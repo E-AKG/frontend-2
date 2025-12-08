@@ -176,9 +176,22 @@ export default function Login() {
           </div>
         </div>
 
-        <p className="text-center text-xs text-slate-500 mt-8">
-          © 2025 Immpire. Alle Rechte vorbehalten.
-        </p>
+        <div className="text-center mt-8 space-y-2">
+          <p className="text-xs text-slate-500">
+            © 2025 <strong className="text-slate-700">IZENIC</strong>. Alle Rechte vorbehalten.
+          </p>
+          <p className="text-xs text-slate-400">
+            Immpire ist ein Produkt von{" "}
+            <a 
+              href="https://www.izenic.com" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-primary-600 hover:text-primary-700 font-semibold underline"
+            >
+              IZENIC
+            </a>
+          </p>
+        </div>
       </div>
     </div>
   );

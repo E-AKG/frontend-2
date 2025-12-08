@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Formularfeld from "../components/Formularfeld";
 import Button from "../components/Button";
-import { Settings, User, Link2, FileText, Bell, Mail, Lock, CreditCard, CheckCircle, XCircle, AlertCircle } from "lucide-react";
+import { Settings, User, Link2, FileText, Bell, Mail, Lock, CreditCard, CheckCircle, XCircle, AlertCircle, HelpCircle, ExternalLink } from "lucide-react";
 import { subscriptionApi } from "../api/subscriptionApi";
 
 export default function Einstellungen() {
@@ -16,6 +16,7 @@ export default function Einstellungen() {
     { id: "finapi", label: "FinAPI-Verknüpfung", icon: Link2 },
     { id: "templates", label: "Vorlagen", icon: FileText },
     { id: "reminders", label: "Mahnregeln", icon: Bell },
+    { id: "support", label: "Support & Hilfe", icon: HelpCircle },
   ];
 
   const queryClient = useQueryClient();
@@ -296,6 +297,96 @@ export default function Einstellungen() {
               <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl border-2 border-gray-200 p-12 text-center">
                 <Bell className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                 <p className="text-gray-500 font-medium">Bald verfügbar</p>
+              </div>
+            </div>
+          )}
+
+          {activeTab === "support" && (
+            <div className="max-w-2xl">
+              <h2 className="text-xl font-bold text-gray-900 mb-2 flex items-center gap-2">
+                <HelpCircle className="w-5 h-5 text-primary-600" />
+                Support & Hilfe
+              </h2>
+              <p className="text-gray-600 mb-6">
+                Immpire wird von <strong className="text-gray-900">IZENIC</strong> entwickelt und betreut. 
+                Für Support, Fragen oder weitere Informationen kontaktieren Sie uns bitte.
+              </p>
+              
+              <div className="space-y-4">
+                {/* IZENIC Info Card */}
+                <div className="bg-gradient-to-br from-primary-50 to-white rounded-2xl border-2 border-primary-200 p-6 sm:p-8">
+                  <div className="flex items-start gap-4 mb-4">
+                    <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center">
+                      <HelpCircle className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900 mb-1">Über Immpire</h3>
+                      <p className="text-sm text-gray-600">
+                        Immpire ist ein Produkt von <strong className="text-gray-900">IZENIC</strong>, 
+                        einem Unternehmen für innovative Softwarelösungen.
+                      </p>
+                    </div>
+                  </div>
+                  <a 
+                    href="https://www.izenic.com" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 font-semibold text-sm transition-colors"
+                  >
+                    IZENIC Website besuchen
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
+                </div>
+
+                {/* Support Options */}
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <a 
+                    href="mailto:support@izenic.com" 
+                    className="bg-white rounded-xl border-2 border-gray-200 p-6 hover:border-primary-300 hover:shadow-lg transition-all group"
+                  >
+                    <Mail className="w-8 h-8 text-primary-600 mb-3 group-hover:scale-110 transition-transform" />
+                    <h3 className="font-bold text-gray-900 mb-2">Support kontaktieren</h3>
+                    <p className="text-sm text-gray-600 mb-3">
+                      Schreiben Sie uns eine E-Mail für technischen Support
+                    </p>
+                    <span className="text-sm font-semibold text-primary-600 group-hover:text-primary-700">
+                      support@izenic.com →
+                    </span>
+                  </a>
+
+                  <a 
+                    href="mailto:info@izenic.com" 
+                    className="bg-white rounded-xl border-2 border-gray-200 p-6 hover:border-primary-300 hover:shadow-lg transition-all group"
+                  >
+                    <Mail className="w-8 h-8 text-primary-600 mb-3 group-hover:scale-110 transition-transform" />
+                    <h3 className="font-bold text-gray-900 mb-2">Allgemeine Anfragen</h3>
+                    <p className="text-sm text-gray-600 mb-3">
+                      Für allgemeine Fragen und Informationen
+                    </p>
+                    <span className="text-sm font-semibold text-primary-600 group-hover:text-primary-700">
+                      info@izenic.com →
+                    </span>
+                  </a>
+                </div>
+
+                {/* Additional Info */}
+                <div className="bg-gray-50 rounded-xl border border-gray-200 p-6">
+                  <h4 className="font-bold text-gray-900 mb-3">Weitere Informationen</h4>
+                  <ul className="space-y-2 text-sm text-gray-600">
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" />
+                      <span>Immpire wird kontinuierlich von IZENIC weiterentwickelt</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" />
+                      <span>Alle Daten werden sicher und DSGVO-konform gespeichert</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" />
+                      <span>Support wird von IZENIC bereitgestellt</span>
+                    </li>
+                  </ul>
+                </div>
               </div>
             </div>
           )}
