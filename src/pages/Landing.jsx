@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, Shield, Zap, Users, BarChart3, FileText, CheckCircle2, Sparkles, Building2, TrendingUp, Clock, Globe, ChevronDown, Upload, Star, Award, Rocket } from "lucide-react";
+import { ArrowRight, Shield, Zap, Users, BarChart3, FileText, CheckCircle2, Sparkles, Building2, TrendingUp, Clock, Globe, ChevronDown, Upload, Star, Award, Rocket, ExternalLink, Mail, HelpCircle } from "lucide-react";
 import Button from "../components/Button";
 import { useState, useEffect } from "react";
 
@@ -93,6 +93,20 @@ export default function Landing() {
                 <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-primary-600 animate-pulse" />
                 <span className="text-xs sm:text-sm md:text-base font-bold text-primary-700">✨ Die Zukunft der Hausverwaltung</span>
                 <Award className="w-4 h-4 sm:w-5 sm:h-5 text-primary-600" />
+              </div>
+              
+              {/* IZENIC Branding Badge */}
+              <div className="mb-4 sm:mb-6 animate-fade-in" style={{ animationDelay: '0.05s' }}>
+                <a 
+                  href="https://www.izenic.com" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-full transition-all group touch-manipulation"
+                >
+                  <span className="text-xs sm:text-sm font-semibold text-slate-700">Entwickelt von</span>
+                  <span className="text-xs sm:text-sm font-bold text-slate-900">IZENIC</span>
+                  <ExternalLink className="w-3 h-3 sm:w-4 sm:h-4 text-slate-600 group-hover:text-primary-600 transition-colors" />
+                </a>
               </div>
               
               {/* Main Headline with Gradient Animation */}
@@ -446,20 +460,152 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Footer - Modern */}
+      {/* Support Section */}
+      <section className="py-12 sm:py-16 bg-gradient-to-br from-slate-50 to-white border-t border-slate-200">
+        <div className="container mx-auto px-4 sm:px-6">
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-white rounded-2xl border-2 border-slate-200 p-6 sm:p-8 md:p-10 shadow-lg">
+              <div className="flex items-start gap-4 sm:gap-6">
+                <div className="flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center">
+                  <HelpCircle className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mb-2 sm:mb-3">
+                    Benötigen Sie Hilfe oder Support?
+                  </h3>
+                  <p className="text-sm sm:text-base text-slate-600 mb-4 sm:mb-6 leading-relaxed">
+                    Immpire wird von <strong className="text-slate-900">IZENIC</strong> entwickelt und betreut. 
+                    Für Support, Fragen oder weitere Informationen besuchen Sie bitte die IZENIC Website.
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                    <a 
+                      href="https://www.izenic.com" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all transform hover:scale-105 touch-manipulation"
+                    >
+                      <span>IZENIC Website besuchen</span>
+                      <ExternalLink className="w-4 h-4 sm:w-5 sm:h-5" />
+                    </a>
+                    <a 
+                      href="mailto:support@izenic.com" 
+                      className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white border-2 border-slate-300 hover:border-primary-400 text-slate-700 hover:text-primary-700 rounded-xl font-semibold transition-all touch-manipulation"
+                    >
+                      <Mail className="w-4 h-4 sm:w-5 sm:h-5" />
+                      <span>Support kontaktieren</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer - Modern with IZENIC Branding */}
       <footer className="border-t border-slate-200 bg-white py-10 sm:py-12 md:py-14">
         <div className="container mx-auto px-4 sm:px-6">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <Link to="/" className="flex items-center group touch-manipulation">
-              <img 
-                src="/logo.png" 
-                alt="Immpire" 
-                className="h-12 sm:h-16 md:h-20 w-auto transition-all duration-200 group-active:scale-95 sm:group-hover:scale-110 object-contain"
-                style={{ imageRendering: 'high-quality' }}
-              />
-            </Link>
-            <div className="text-slate-600 text-xs sm:text-sm text-center md:text-left font-medium">
-              &copy; 2025 Immpire. Alle Rechte vorbehalten.
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+            {/* Immpire Branding */}
+            <div>
+              <Link to="/" className="flex items-center group touch-manipulation mb-4">
+                <img 
+                  src="/logo.png" 
+                  alt="Immpire" 
+                  className="h-10 sm:h-14 md:h-16 w-auto transition-all duration-200 group-active:scale-95 sm:group-hover:scale-110 object-contain"
+                  style={{ imageRendering: 'high-quality' }}
+                />
+              </Link>
+              <p className="text-sm text-slate-600 mb-2">
+                Professionelle Hausverwaltung
+              </p>
+              <p className="text-xs text-slate-500">
+                Ein Produkt von <strong className="text-slate-700">IZENIC</strong>
+              </p>
+            </div>
+
+            {/* Quick Links */}
+            <div>
+              <h4 className="text-sm font-bold text-slate-900 mb-4">Schnellzugriff</h4>
+              <ul className="space-y-2">
+                <li>
+                  <Link to="/pricing" className="text-sm text-slate-600 hover:text-primary-600 transition-colors">
+                    Preise
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/register" className="text-sm text-slate-600 hover:text-primary-600 transition-colors">
+                    Registrieren
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/login" className="text-sm text-slate-600 hover:text-primary-600 transition-colors">
+                    Anmelden
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* IZENIC Info */}
+            <div>
+              <h4 className="text-sm font-bold text-slate-900 mb-4">Unternehmen & Support</h4>
+              <ul className="space-y-2">
+                <li>
+                  <a 
+                    href="https://www.izenic.com" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-sm text-slate-600 hover:text-primary-600 transition-colors inline-flex items-center gap-1"
+                  >
+                    IZENIC Website
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                </li>
+                <li>
+                  <a 
+                    href="mailto:support@izenic.com" 
+                    className="text-sm text-slate-600 hover:text-primary-600 transition-colors inline-flex items-center gap-1"
+                  >
+                    <Mail className="w-3 h-3" />
+                    Support kontaktieren
+                  </a>
+                </li>
+                <li>
+                  <a 
+                    href="mailto:info@izenic.com" 
+                    className="text-sm text-slate-600 hover:text-primary-600 transition-colors inline-flex items-center gap-1"
+                  >
+                    <Mail className="w-3 h-3" />
+                    Allgemeine Anfragen
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Copyright */}
+          <div className="border-t border-slate-200 pt-6 sm:pt-8">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="text-slate-600 text-xs sm:text-sm text-center sm:text-left">
+                <p className="mb-1">
+                  &copy; 2025 <strong className="text-slate-900">IZENIC</strong>. Alle Rechte vorbehalten.
+                </p>
+                <p className="text-slate-500">
+                  Immpire ist ein Produkt von IZENIC
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-slate-500">Entwickelt von</span>
+                <a 
+                  href="https://www.izenic.com" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-xs font-bold text-slate-900 hover:text-primary-600 transition-colors inline-flex items-center gap-1"
+                >
+                  IZENIC
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              </div>
             </div>
           </div>
         </div>
