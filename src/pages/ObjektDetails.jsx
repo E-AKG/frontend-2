@@ -185,62 +185,64 @@ export default function ObjektDetails() {
       {/* Breadcrumb */}
       <button
         onClick={() => navigate("/objekte")}
-        className="flex items-center text-slate-600 hover:text-slate-900 mb-6 text-[15px]"
+        className="flex items-center text-slate-600 hover:text-slate-900 mb-4 sm:mb-6 text-sm sm:text-[15px] touch-manipulation"
       >
-        <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
         </svg>
         Zurück zu Objekte
       </button>
 
       {/* Objekt-Info */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-6">
-        <h1 className="text-2xl font-bold text-slate-900 mb-1">{objekt.name}</h1>
-        <p className="text-slate-600 text-[15px] mb-6">{objekt.address}</p>
+      <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 p-4 sm:p-6 mb-4 sm:mb-6">
+        <h1 className="text-xl sm:text-2xl font-bold text-slate-900 mb-1">{objekt.name}</h1>
+        <p className="text-slate-600 text-sm sm:text-[15px] mb-4 sm:mb-6">{objekt.address}</p>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
           <div>
-            <p className="text-sm text-slate-500 mb-1">Baujahr</p>
-            <p className="text-lg font-semibold text-slate-900">
+            <p className="text-xs sm:text-sm text-slate-500 mb-1">Baujahr</p>
+            <p className="text-base sm:text-lg font-semibold text-slate-900">
               {objekt.year_built || "—"}
             </p>
           </div>
           <div>
-            <p className="text-sm text-slate-500 mb-1">Fläche</p>
-            <p className="text-lg font-semibold text-slate-900">
+            <p className="text-xs sm:text-sm text-slate-500 mb-1">Fläche</p>
+            <p className="text-base sm:text-lg font-semibold text-slate-900">
               {objekt.size_sqm ? `${objekt.size_sqm} m²` : "—"}
             </p>
           </div>
           <div>
-            <p className="text-sm text-slate-500 mb-1">Einheiten</p>
-            <p className="text-lg font-semibold text-slate-900">{einheiten.length}</p>
+            <p className="text-xs sm:text-sm text-slate-500 mb-1">Einheiten</p>
+            <p className="text-base sm:text-lg font-semibold text-slate-900">{einheiten.length}</p>
           </div>
           <div>
-            <p className="text-sm text-slate-500 mb-1">Vermietet</p>
-            <p className="text-lg font-semibold text-slate-900">
+            <p className="text-xs sm:text-sm text-slate-500 mb-1">Vermietet</p>
+            <p className="text-base sm:text-lg font-semibold text-slate-900">
               {einheiten.filter((e) => e.status === "occupied").length}
             </p>
           </div>
         </div>
 
         {objekt.notes && (
-          <div className="mt-6 pt-6 border-t border-gray-200">
-            <p className="text-sm text-slate-500 mb-1">Notizen</p>
-            <p className="text-[15px] text-slate-700">{objekt.notes}</p>
+          <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-200">
+            <p className="text-xs sm:text-sm text-slate-500 mb-1">Notizen</p>
+            <p className="text-sm sm:text-[15px] text-slate-700">{objekt.notes}</p>
           </div>
         )}
       </div>
 
       {/* Einheiten */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-semibold text-slate-900">Wohneinheiten</h2>
+      <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
+          <h2 className="text-base sm:text-lg font-semibold text-slate-900">Wohneinheiten</h2>
           <Button
             onClick={() => {
               setBearbeitung(null);
               formZuruecksetzen();
               setShowModal(true);
             }}
+            size="sm"
+            className="w-full sm:w-auto"
           >
             + Neue Einheit
           </Button>
@@ -268,7 +270,7 @@ export default function ObjektDetails() {
             placeholder="z.B. Wohnung 1A"
             required
           />
-          <div className="grid grid-cols-2 gap-4 mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
             <Formularfeld
               label="Etage"
               name="floor"
@@ -298,7 +300,7 @@ export default function ObjektDetails() {
             required
             className="mt-4"
           />
-          <div className="flex justify-end space-x-3 mt-6">
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 mt-6">
             <Button
               type="button"
               variant="secondary"
@@ -307,10 +309,11 @@ export default function ObjektDetails() {
                 setBearbeitung(null);
                 formZuruecksetzen();
               }}
+              className="w-full sm:w-auto"
             >
               Abbrechen
             </Button>
-            <Button type="submit">
+            <Button type="submit" className="w-full sm:w-auto">
               {bearbeitung ? "Aktualisieren" : "Erstellen"}
             </Button>
           </div>

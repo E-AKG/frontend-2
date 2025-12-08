@@ -122,34 +122,34 @@ export default function Dashboard() {
   return (
     <div className="animate-fade-in">
       {/* Header - Simpler */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Übersicht</h1>
-        <p className="text-gray-600">Ihre wichtigsten Informationen auf einen Blick</p>
+      <div className="mb-4 sm:mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">Übersicht</h1>
+        <p className="text-sm sm:text-base text-gray-600">Ihre wichtigsten Informationen auf einen Blick</p>
       </div>
 
       {/* Upgrade Banner - Only if needed */}
       {!hasActiveSubscription && showUpgradeBanner && (
-        <div className="mb-6 bg-gradient-to-r from-primary-600 to-primary-700 rounded-xl p-4 text-white relative overflow-hidden">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <Sparkles className="w-5 h-5" />
+        <div className="mb-4 sm:mb-6 bg-gradient-to-r from-primary-600 to-primary-700 rounded-xl p-3 sm:p-4 text-white relative overflow-hidden">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
               <div>
-                <p className="font-semibold">Vollständigen Zugriff freischalten</p>
-                <p className="text-sm text-primary-100">10€/Monat - Alle Features</p>
+                <p className="text-sm sm:text-base font-semibold">Vollständigen Zugriff freischalten</p>
+                <p className="text-xs sm:text-sm text-primary-100">10€/Monat - Alle Features</p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 w-full sm:w-auto">
               <Button
                 onClick={() => navigate("/pricing")}
                 variant="secondary"
                 size="sm"
-                className="bg-white text-primary-700 hover:bg-primary-50"
+                className="bg-white text-primary-700 hover:bg-primary-50 flex-1 sm:flex-none"
               >
                 Upgrade
               </Button>
               <button
                 onClick={() => setShowUpgradeBanner(false)}
-                className="p-1.5 hover:bg-white/20 rounded-lg"
+                className="p-1.5 sm:p-2 hover:bg-white/20 rounded-lg flex-shrink-0"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -159,7 +159,7 @@ export default function Dashboard() {
       )}
 
       {/* Quick Stats - Simpler Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
         {[
           { titel: "Objekte", wert: stats.objekte, icon: Building2, link: "/objekte", farbe: "blue" },
           { titel: "Mieter", wert: stats.mieter, icon: Users, link: "/mieter", farbe: "emerald" },
@@ -177,47 +177,47 @@ export default function Dashboard() {
             <div
               key={idx}
               onClick={() => navigate(item.link)}
-              className="bg-white rounded-xl border border-gray-200 p-5 cursor-pointer hover:shadow-md transition-all"
+              className="bg-white rounded-lg sm:rounded-xl border border-gray-200 p-3 sm:p-5 cursor-pointer active:scale-95 hover:shadow-md transition-all touch-manipulation"
             >
-              <div className="flex items-center justify-between mb-3">
-                <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${colorClasses[item.farbe].split(' ')[0]} ${colorClasses[item.farbe].split(' ')[1]} flex items-center justify-center`}>
-                  <Icon className="w-5 h-5 text-white" />
+              <div className="flex items-center justify-between mb-2 sm:mb-3">
+                <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-gradient-to-br ${colorClasses[item.farbe].split(' ')[0]} ${colorClasses[item.farbe].split(' ')[1]} flex items-center justify-center`}>
+                  <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 </div>
-                <ArrowRight className="w-4 h-4 text-gray-400" />
+                <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
               </div>
-              <div className="text-2xl font-bold text-gray-900 mb-1">
+              <div className="text-xl sm:text-2xl font-bold text-gray-900 mb-0.5 sm:mb-1">
                 {loading ? "—" : item.wert}
               </div>
-              <div className="text-sm text-gray-600">{item.titel}</div>
+              <div className="text-xs sm:text-sm text-gray-600">{item.titel}</div>
             </div>
           );
         })}
       </div>
 
       {/* Mieteinnahmen - Größer und übersichtlicher */}
-      <div className="bg-white rounded-xl border-2 border-gray-200 shadow-sm p-8 mb-6">
-        <div className="flex items-center justify-between mb-8">
+      <div className="bg-white rounded-xl border-2 border-gray-200 shadow-sm p-4 sm:p-6 lg:p-8 mb-4 sm:mb-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 sm:mb-8">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2 flex items-center gap-3">
-              <Euro className="w-6 h-6 text-primary-600" />
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1 sm:mb-2 flex items-center gap-2 sm:gap-3">
+              <Euro className="w-5 h-5 sm:w-6 sm:h-6 text-primary-600" />
               Mieteinnahmen
             </h2>
-            <p className="text-base text-gray-600">{formatMonthYear(selectedMonth)}</p>
+            <p className="text-sm sm:text-base text-gray-600">{formatMonthYear(selectedMonth)}</p>
           </div>
-          <div className="flex items-center gap-2 bg-gray-50 rounded-lg p-1 border border-gray-200">
+          <div className="flex items-center gap-2 bg-gray-50 rounded-lg p-1 border border-gray-200 w-full sm:w-auto">
             <button
               onClick={() => changeMonth(-1)}
-              className="p-2 hover:bg-white rounded-lg transition-colors"
+              className="p-2 hover:bg-white rounded-lg transition-colors touch-manipulation"
               title="Vorheriger Monat"
             >
               ←
             </button>
-            <span className="px-3 text-sm font-medium text-gray-700 min-w-[120px] text-center">
+            <span className="px-2 sm:px-3 text-xs sm:text-sm font-medium text-gray-700 flex-1 sm:min-w-[120px] text-center">
               {formatMonthYear(selectedMonth)}
             </span>
             <button
               onClick={() => changeMonth(1)}
-              className="p-2 hover:bg-white rounded-lg transition-colors"
+              className="p-2 hover:bg-white rounded-lg transition-colors touch-manipulation"
               title="Nächster Monat"
             >
               →
@@ -226,60 +226,60 @@ export default function Dashboard() {
         </div>
 
         {/* Hauptzahlen - Größer */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-gradient-to-br from-gray-50 to-white rounded-xl p-6 border-2 border-gray-200">
-            <div className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+          <div className="bg-gradient-to-br from-gray-50 to-white rounded-xl p-4 sm:p-6 border-2 border-gray-200">
+            <div className="text-xs sm:text-sm font-semibold text-gray-600 uppercase tracking-wide mb-2 sm:mb-3">
               Erwartete Einnahmen
             </div>
-            <div className="text-4xl font-bold text-gray-900">
+            <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">
               {mietdaten.erwartet.toLocaleString('de-DE')} €
             </div>
           </div>
           
-          <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl p-6 border-2 border-emerald-200">
-            <div className="text-sm font-semibold text-emerald-700 uppercase tracking-wide mb-3 flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4" />
+          <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl p-4 sm:p-6 border-2 border-emerald-200">
+            <div className="text-xs sm:text-sm font-semibold text-emerald-700 uppercase tracking-wide mb-2 sm:mb-3 flex items-center gap-2">
+              <CheckCircle2 className="w-3 h-3 sm:w-4 sm:h-4" />
               Bezahlt
             </div>
-            <div className="text-4xl font-bold text-emerald-700">
+            <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-emerald-700">
               {mietdaten.bezahlt.toLocaleString('de-DE')} €
             </div>
           </div>
           
-          <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl p-6 border-2 border-amber-200">
-            <div className="text-sm font-semibold text-amber-700 uppercase tracking-wide mb-3 flex items-center gap-2">
-              <AlertCircle className="w-4 h-4" />
+          <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl p-4 sm:p-6 border-2 border-amber-200">
+            <div className="text-xs sm:text-sm font-semibold text-amber-700 uppercase tracking-wide mb-2 sm:mb-3 flex items-center gap-2">
+              <AlertCircle className="w-3 h-3 sm:w-4 sm:h-4" />
               Offen
             </div>
-            <div className="text-4xl font-bold text-amber-700">
+            <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-amber-700">
               {mietdaten.offen.toLocaleString('de-DE')} €
             </div>
           </div>
         </div>
 
         {/* Progress Bar - Größer und prominenter */}
-        <div className="bg-gray-50 rounded-xl p-6 border-2 border-gray-200">
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-base font-semibold text-gray-700">Zahlungsfortschritt</span>
-            <span className="text-3xl font-bold text-gray-900">{mietdaten.prozent}%</span>
+        <div className="bg-gray-50 rounded-xl p-4 sm:p-6 border-2 border-gray-200">
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
+            <span className="text-sm sm:text-base font-semibold text-gray-700">Zahlungsfortschritt</span>
+            <span className="text-2xl sm:text-3xl font-bold text-gray-900">{mietdaten.prozent}%</span>
           </div>
-          <div className="h-6 bg-gray-200 rounded-full overflow-hidden shadow-inner">
+          <div className="h-5 sm:h-6 bg-gray-200 rounded-full overflow-hidden shadow-inner">
             <div
-              className="h-full bg-gradient-to-r from-emerald-500 to-emerald-600 transition-all duration-1000 ease-out rounded-full flex items-center justify-end pr-2 shadow-md"
+              className="h-full bg-gradient-to-r from-emerald-500 to-emerald-600 transition-all duration-1000 ease-out rounded-full flex items-center justify-end pr-1.5 sm:pr-2 shadow-md"
               style={{ width: `${progressAnimation}%` }}
             >
               {progressAnimation > 10 && (
-                <CheckCircle2 className="w-4 h-4 text-white" />
+                <CheckCircle2 className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
               )}
             </div>
           </div>
-          <div className="flex items-center justify-between mt-3 text-sm font-medium text-gray-600">
-            <span className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+          <div className="flex items-center justify-between mt-2 sm:mt-3 text-xs sm:text-sm font-medium text-gray-600">
+            <span className="flex items-center gap-1.5 sm:gap-2">
+              <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-500"></div>
               {mietdaten.prozent}% bezahlt
             </span>
-            <span className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-amber-500"></div>
+            <span className="flex items-center gap-1.5 sm:gap-2">
+              <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-amber-500"></div>
               {100 - mietdaten.prozent}% offen
             </span>
           </div>
@@ -287,9 +287,9 @@ export default function Dashboard() {
       </div>
 
       {/* Quick Actions - Simplified */}
-      <div className="bg-white rounded-xl border border-gray-200 p-6">
-        <h2 className="text-lg font-bold text-gray-900 mb-4">Schnellzugriff</h2>
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+      <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6">
+        <h2 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">Schnellzugriff</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-3">
           {[
             { label: "Objekt anlegen", link: "/objekte?create=true", icon: Building2 },
             { label: "Einheit anlegen", link: "/einheiten?create=true", icon: DoorOpen },
@@ -302,10 +302,10 @@ export default function Dashboard() {
               <button
                 key={idx}
                 onClick={() => navigate(action.link)}
-                className="flex items-center gap-3 p-4 bg-gray-50 hover:bg-gray-100 rounded-lg transition-all text-left"
+                className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 bg-gray-50 active:bg-gray-100 hover:bg-gray-100 rounded-lg transition-all text-left touch-manipulation"
               >
-                <Icon className="w-5 h-5 text-primary-600" />
-                <span className="text-sm font-medium text-gray-900">{action.label}</span>
+                <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-primary-600 flex-shrink-0" />
+                <span className="text-xs sm:text-sm font-medium text-gray-900">{action.label}</span>
               </button>
             );
           })}
