@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, Shield, Zap, Users, BarChart3, FileText, CheckCircle2, Sparkles, Building2, TrendingUp, Clock, Globe, Upload, Star, Award, Rocket, ExternalLink, Mail, HelpCircle } from "lucide-react";
+import { ArrowRight, Shield, Zap, Users, BarChart3, FileText, CheckCircle2, Sparkles, Building2, TrendingUp, Clock, Globe, Upload, Star, Award, Rocket, ExternalLink, Mail, HelpCircle, Brain, Sparkles as SparklesIcon, CheckCircle, AlertTriangle, Infinity } from "lucide-react";
 import Button from "../components/Button";
 
 export default function Landing() {
@@ -65,22 +65,22 @@ export default function Landing() {
                 </a>
               </div>
               
-              {/* Main Headline with Gradient Animation */}
+              {/* Main Headline with Powerful Slogan */}
               <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl 2xl:text-9xl font-extrabold text-slate-900 mb-4 sm:mb-6 md:mb-8 leading-[1.05] tracking-tight px-2 sm:px-4 animate-fade-in">
-                Hausverwaltung
+                Wo aus Objekten
                 <br />
                 <span className="text-primary-600">
-                  neu gedacht
+                  dein Immobilien-Reich entsteht
                 </span>
               </h1>
               
               {/* Subheadline */}
               <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl text-slate-700 mb-3 sm:mb-4 md:mb-6 max-w-5xl mx-auto leading-relaxed font-medium px-4 sm:px-6 animate-fade-in" style={{ animationDelay: '0.1s' }}>
-                Alles, was Sie für die professionelle Verwaltung Ihrer Immobilien benötigen.
+                Die Einfachheit einer modernen App. Die Power einer intelligenten Verwaltungsplattform.
               </p>
               
-              <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-slate-600 mb-8 sm:mb-10 md:mb-12 max-w-3xl mx-auto font-semibold px-4 sm:px-6 animate-fade-in" style={{ animationDelay: '0.2s' }}>
-                Einfach. Sicher. Effizient.
+              <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-primary-600 mb-8 sm:mb-10 md:mb-12 max-w-3xl mx-auto font-bold px-4 sm:px-6 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+                Entwickelt für Vermieter, die maximale Kontrolle bei minimalem Aufwand wollen.
               </p>
               
               {/* CTA Buttons - Clean & Modern */}
@@ -101,7 +101,7 @@ export default function Landing() {
                   <Button 
                     variant="outline" 
                     size="lg" 
-                    className="border-2 border-primary-300 text-primary-700 hover:bg-primary-50 hover:border-primary-400 w-full sm:w-auto px-8 sm:px-12 md:px-14 py-4 sm:py-5 md:py-6 text-base sm:text-lg md:text-xl lg:text-2xl font-bold transition-all active:scale-95 bg-white shadow-sm hover:shadow-md"
+                    className="border-3 border-primary-500 text-primary-700 hover:bg-primary-50 hover:border-primary-600 w-full sm:w-auto px-8 sm:px-12 md:px-14 py-4 sm:py-5 md:py-6 text-base sm:text-lg md:text-xl lg:text-2xl font-bold transition-all active:scale-95 bg-white shadow-md hover:shadow-lg"
                   >
                     Preise ansehen
                   </Button>
@@ -147,172 +147,202 @@ export default function Landing() {
 
       </section>
 
-      {/* Features Section - Clean & Modern */}
-      <section id="features-section" className="py-20 sm:py-28 md:py-36 bg-white relative">
+      {/* USPs Section - Why Immpire? */}
+      <section id="features-section" className="py-20 sm:py-28 md:py-36 bg-gradient-to-b from-white to-slate-50 relative">
         <div className="container mx-auto px-4 sm:px-6 relative z-10">
           <div className="max-w-5xl mx-auto text-center mb-16 sm:mb-20 md:mb-28">
             <div className="inline-block px-4 py-1.5 bg-primary-100 rounded-full mb-4">
-              <span className="text-sm font-bold text-primary-700">Features</span>
+              <span className="text-sm font-bold text-primary-700">Warum Immpire?</span>
             </div>
             <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-slate-900 mb-4 sm:mb-6">
-              Alles, was Sie brauchen
+              Was macht unser Tool so besonders?
             </h2>
             <p className="text-xl sm:text-2xl md:text-3xl text-slate-600 font-medium">
-              Eine vollständige Lösung für moderne Hausverwaltung
+              Ein Tool, das echte Probleme löst. Ein Tool, das mitdenkt.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 max-w-7xl mx-auto">
-            {[
-              {
-                icon: Building2,
-                title: "Objektverwaltung",
-                description: "Verwalten Sie alle Ihre Immobilien, Einheiten und Details zentral und übersichtlich.",
-                gradient: "from-blue-500 to-cyan-500"
-              },
-              {
-                icon: Users,
-                title: "Mieterverwaltung",
-                description: "Alle Mieterdaten, Verträge und Kommunikation an einem zentralen Ort.",
-                gradient: "from-emerald-500 to-teal-500"
-              },
-              {
-                icon: Zap,
-                title: "Automatisierung",
-                description: "Automatische Sollstellungen, Zahlungsabgleich und Mahnungen sparen wertvolle Zeit.",
-                gradient: "from-amber-500 to-orange-500"
-              },
-              {
-                icon: BarChart3,
-                title: "Analysen & Berichte",
-                description: "Detaillierte Einblicke in Ihre Finanzen und Performance-Metriken.",
-                gradient: "from-primary-500 to-blue-400"
-              },
-              {
-                icon: Shield,
-                title: "Sicherheit & DSGVO",
-                description: "Ihre Daten sind sicher, verschlüsselt und vollständig DSGVO-konform.",
-                gradient: "from-indigo-500 to-blue-500"
-              },
-              {
-                icon: Upload,
-                title: "CSV-Import & Abgleich",
-                description: "Laden Sie Ihre Bankdaten per CSV hoch und lassen Sie Zahlungen automatisch zuordnen.",
-                gradient: "from-primary-400 to-blue-500"
-              }
-            ].map((feature, index) => {
-              const Icon = feature.icon;
-              return (
-                <div 
-                  key={index}
-                  className="group relative p-6 sm:p-8 md:p-10 rounded-2xl sm:rounded-3xl bg-white border-2 border-slate-200 hover:border-transparent hover:shadow-2xl transition-all duration-500 transform active:scale-95 sm:hover:-translate-y-2 overflow-hidden"
-                >
-                  {/* Gradient Background on Hover */}
-                  <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`}></div>
-                  
-                  {/* Content */}
-                  <div className="relative z-10">
-                    <div className={`w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-gradient-to-br ${feature.gradient} rounded-xl sm:rounded-2xl flex items-center justify-center mb-4 sm:mb-5 md:mb-6 shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-500`}>
-                      <Icon className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-10 lg:h-10 text-white" />
-                    </div>
-                    <h3 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-slate-900 group-hover:text-white mb-2 sm:mb-3 md:mb-4 transition-colors duration-500">
-                      {feature.title}
-                    </h3>
-                    <p className="text-sm sm:text-base md:text-lg text-slate-600 group-hover:text-white/90 leading-relaxed transition-colors duration-500">
-                      {feature.description}
-                    </p>
-                  </div>
-                  
-                  {/* Shine Effect */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+          <div className="max-w-6xl mx-auto space-y-8 sm:space-y-12 md:space-y-16">
+            {/* USP 1: Radikal einfach */}
+            <div className="bg-white rounded-3xl p-8 sm:p-10 md:p-12 border-2 border-slate-200 shadow-xl hover:shadow-2xl transition-all">
+              <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
+                <div className="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center shadow-lg">
+                  <Zap className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
                 </div>
-              );
-            })}
+                <div className="flex-1">
+                  <div className="inline-block px-3 py-1 bg-primary-100 rounded-full mb-4">
+                    <span className="text-xs font-bold text-primary-700">1. Radikal einfach</span>
+                  </div>
+                  <h3 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 mb-4">
+                    Sofort verständlich
+                  </h3>
+                  <p className="text-lg sm:text-xl text-slate-700 mb-4 leading-relaxed">
+                    Einloggen, starten, loslegen.
+                  </p>
+                  <p className="text-base sm:text-lg text-slate-600 leading-relaxed">
+                    Kein Schulungsaufwand, kein Chaos – nur ein cleanes, modernes Interface.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* USP 2: KI Risikoanalyse */}
+            <div className="bg-white rounded-3xl p-8 sm:p-10 md:p-12 border-2 border-slate-200 shadow-xl hover:shadow-2xl transition-all">
+              <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
+                <div className="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center shadow-lg">
+                  <Brain className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+                </div>
+                <div className="flex-1">
+                  <div className="inline-block px-3 py-1 bg-primary-100 rounded-full mb-4">
+                    <span className="text-xs font-bold text-primary-700">2. KI, die mehr kann</span>
+                  </div>
+                  <h3 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 mb-4">
+                    Intelligente Risikoanalyse deiner Mieter
+                  </h3>
+                  <p className="text-lg sm:text-xl text-slate-700 mb-4 leading-relaxed">
+                    Unsere KI bewertet automatisch relevante Risikofaktoren:
+                  </p>
+                  <ul className="space-y-2 text-base sm:text-lg text-slate-600">
+                    <li className="flex items-start gap-2">
+                      <AlertTriangle className="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                      <span>Wiederkehrende verspätete Zahlungen</span>
+                    </li>
+                  </ul>
+                  <p className="text-base sm:text-lg text-slate-600 mt-4 leading-relaxed">
+                    Sie erkennt Muster frühzeitig und gibt dir Risiko-Warnungen, bevor es teuer wird.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* USP 3: Vollautomatisierung */}
+            <div className="bg-white rounded-3xl p-8 sm:p-10 md:p-12 border-2 border-slate-200 shadow-xl hover:shadow-2xl transition-all">
+              <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
+                <div className="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center shadow-lg">
+                  <SparklesIcon className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+                </div>
+                <div className="flex-1">
+                  <div className="inline-block px-3 py-1 bg-primary-100 rounded-full mb-4">
+                    <span className="text-xs font-bold text-primary-700">3. Vollautomatisiert</span>
+                  </div>
+                  <h3 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 mb-4">
+                    Zeit sparen ohne Aufwand
+                  </h3>
+                  <p className="text-lg sm:text-xl text-slate-700 mb-4 leading-relaxed">
+                    Das System übernimmt wiederkehrende Aufgaben für dich:
+                  </p>
+                  <ul className="space-y-2 text-base sm:text-lg text-slate-600">
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                      <span>Mieten tracken</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                      <span>Zahlungseingänge prüfen per CSV</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                      <span>Verträge verwalten</span>
+                    </li>
+                  </ul>
+                  <p className="text-base sm:text-lg text-primary-600 font-bold mt-4">
+                    Du verwaltest, die Plattform arbeitet.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* USP 4: Alles im Blick */}
+            <div className="bg-white rounded-3xl p-8 sm:p-10 md:p-12 border-2 border-slate-200 shadow-xl hover:shadow-2xl transition-all">
+              <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
+                <div className="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center shadow-lg">
+                  <BarChart3 className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+                </div>
+                <div className="flex-1">
+                  <div className="inline-block px-3 py-1 bg-primary-100 rounded-full mb-4">
+                    <span className="text-xs font-bold text-primary-700">4. Alles im Blick</span>
+                  </div>
+                  <h3 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 mb-4">
+                    Dein gesamtes Immobilien-Reich auf einem Dashboard
+                  </h3>
+                  <p className="text-lg sm:text-xl text-slate-700 leading-relaxed">
+                    Offene Mieten, auslaufende Verträge, potenzielle Risiken, Dokumente – alles in Echtzeit sichtbar.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* USP 5: Perfekt skaliert */}
+            <div className="bg-white rounded-3xl p-8 sm:p-10 md:p-12 border-2 border-slate-200 shadow-xl hover:shadow-2xl transition-all">
+              <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
+                <div className="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center shadow-lg">
+                  <Infinity className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+                </div>
+                <div className="flex-1">
+                  <div className="inline-block px-3 py-1 bg-primary-100 rounded-full mb-4">
+                    <span className="text-xs font-bold text-primary-700">5. Perfekt skaliert</span>
+                  </div>
+                  <h3 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 mb-4">
+                    Für Kleinvermieter – stark für große Bestände
+                  </h3>
+                  <p className="text-lg sm:text-xl text-slate-700 leading-relaxed">
+                    Ob 1 Einheit oder 100: Das Tool skaliert mit dir, ohne komplizierte Einrichtung.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* USP 6: Moderne Technologie */}
+            <div className="bg-white rounded-3xl p-8 sm:p-10 md:p-12 border-2 border-slate-200 shadow-xl hover:shadow-2xl transition-all">
+              <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
+                <div className="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center shadow-lg">
+                  <Globe className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+                </div>
+                <div className="flex-1">
+                  <div className="inline-block px-3 py-1 bg-primary-100 rounded-full mb-4">
+                    <span className="text-xs font-bold text-primary-700">6. Moderne Technologie</span>
+                  </div>
+                  <h3 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 mb-4">
+                    Statt veralteter Software
+                  </h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+                    {['schnell', 'DSGVO-konform', 'cloudbasiert', 'mobil optimiert', 'smart vernetzt'].map((tech, idx) => (
+                      <div key={idx} className="flex items-center gap-2 px-3 py-2 bg-primary-50 rounded-lg">
+                        <CheckCircle className="w-4 h-4 text-primary-600 flex-shrink-0" />
+                        <span className="text-sm sm:text-base font-semibold text-slate-700">{tech}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* USP 7: Entwickelt für Vermieter */}
+            <div className="bg-gradient-to-br from-primary-600 to-primary-700 rounded-3xl p-8 sm:p-10 md:p-12 text-white shadow-2xl">
+              <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
+                <div className="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 bg-white/20 rounded-2xl flex items-center justify-center shadow-lg backdrop-blur-sm">
+                  <Users className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+                </div>
+                <div className="flex-1">
+                  <div className="inline-block px-3 py-1 bg-white/20 rounded-full mb-4 backdrop-blur-sm">
+                    <span className="text-xs font-bold text-white">7. Entwickelt für Vermieter</span>
+                  </div>
+                  <h3 className="text-2xl sm:text-3xl md:text-4xl font-extrabold mb-4">
+                    Nicht für Großkonzerne
+                  </h3>
+                  <p className="text-lg sm:text-xl mb-4 leading-relaxed opacity-95">
+                    Ein Tool, das echte Probleme löst. Ein Tool, das mitdenkt.
+                  </p>
+                  <p className="text-base sm:text-lg font-bold leading-relaxed">
+                    Ein Tool, das dein Immobilien-Reich schützt und wachsen lässt.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Benefits Section - Clean & Modern */}
-      <section className="py-20 sm:py-28 md:py-36 bg-slate-900 text-white relative">
-        <div className="container mx-auto px-4 sm:px-6 relative z-10">
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-16 sm:mb-20 md:mb-24">
-              <div className="inline-block px-4 py-1.5 bg-primary-500/20 rounded-full mb-4">
-                <span className="text-sm font-bold text-primary-300">Warum Immpire?</span>
-              </div>
-              <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold mb-4 sm:mb-6">
-                Die moderne Alternative
-              </h2>
-              <p className="text-xl sm:text-2xl md:text-3xl text-slate-300 font-medium">
-                Für professionelle Hausverwaltung
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-8 sm:gap-12 md:gap-16 lg:gap-20 items-start md:items-center">
-              <div className="space-y-6 sm:space-y-8 md:space-y-10 lg:space-y-12">
-                {[
-                  {
-                    icon: TrendingUp,
-                    title: "Zeitersparnis",
-                    description: "Automatisieren Sie repetitive Aufgaben und sparen Sie bis zu 10 Stunden pro Woche.",
-                    gradient: "from-emerald-400 to-teal-400"
-                  },
-                  {
-                    icon: FileText,
-                    title: "Einfacher CSV-Import",
-                    description: "Laden Sie Ihre Bankdaten einfach per CSV hoch. Unser System erkennt automatisch Zahlungen und ordnet sie zu.",
-                    gradient: "from-blue-400 to-cyan-400"
-                  },
-                  {
-                    icon: Globe,
-                    title: "Überall verfügbar",
-                    description: "Arbeiten Sie von überall - im Büro, zu Hause oder unterwegs. Alles in der Cloud.",
-                    gradient: "from-primary-400 to-blue-400"
-                  }
-                ].map((benefit, index) => {
-                  const Icon = benefit.icon;
-                  return (
-                    <div key={index} className="flex flex-col sm:flex-row gap-3 sm:gap-4 md:gap-6 group">
-                      <div className={`flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-gradient-to-br ${benefit.gradient} rounded-xl sm:rounded-2xl flex items-center justify-center shadow-xl group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}>
-                        <Icon className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-10 lg:h-10 text-white" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-extrabold mb-1 sm:mb-2 md:mb-3">{benefit.title}</h3>
-                        <p className="text-sm sm:text-base md:text-lg text-slate-300 leading-relaxed">{benefit.description}</p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-              
-              {/* Stats Card */}
-              <div className="relative w-full">
-                <div className="bg-primary-600 rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-10 lg:p-14 xl:p-16 text-white shadow-2xl">
-                  <div className="space-y-8 sm:space-y-10 md:space-y-12">
-                    {[
-                      { number: "100%", label: "DSGVO-konform", icon: Shield },
-                      { number: "24/7", label: "Verfügbar", icon: Clock },
-                      { number: "∞", label: "Skalierbar", icon: Rocket }
-                    ].map((stat, idx) => {
-                      const Icon = stat.icon;
-                      return (
-                        <div key={idx}>
-                          <div className="flex items-center gap-4 mb-2">
-                            <Icon className="w-8 h-8 text-primary-200" />
-                            <div className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold">{stat.number}</div>
-                          </div>
-                          <div className="text-lg sm:text-xl md:text-2xl text-primary-100 font-semibold">{stat.label}</div>
-                          {idx < 2 && <div className="h-px bg-white/20 mt-6"></div>}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* CTA Section - Clean & Modern */}
       <section className="py-20 sm:py-28 md:py-36 bg-white relative">
@@ -348,7 +378,7 @@ export default function Landing() {
               <Link to="/pricing" className="w-full sm:w-auto touch-manipulation">
                 <Button 
                   size="lg"
-                  className="bg-white border-2 border-primary-300 text-primary-700 hover:bg-primary-50 hover:border-primary-400 w-full sm:w-auto px-8 sm:px-12 md:px-16 py-5 sm:py-6 md:py-7 text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold transition-all active:scale-95 shadow-md hover:shadow-lg"
+                  className="bg-white border-3 border-primary-500 text-primary-700 hover:bg-primary-50 hover:border-primary-600 w-full sm:w-auto px-8 sm:px-12 md:px-16 py-5 sm:py-6 md:py-7 text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold transition-all active:scale-95 shadow-lg hover:shadow-xl"
                 >
                   Preise ansehen
                 </Button>
