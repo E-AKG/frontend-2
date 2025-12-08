@@ -341,7 +341,7 @@ export default function Einstellungen() {
                 {/* Support Options */}
                 <div className="grid sm:grid-cols-2 gap-4">
                   <a 
-                    href="mailto:support@izenic.com" 
+                    href="mailto:kontakt@izenic.com" 
                     className="bg-white rounded-xl border-2 border-gray-200 p-6 hover:border-primary-300 hover:shadow-lg transition-all group"
                   >
                     <Mail className="w-8 h-8 text-primary-600 mb-3 group-hover:scale-110 transition-transform" />
@@ -350,12 +350,12 @@ export default function Einstellungen() {
                       Schreiben Sie uns eine E-Mail für technischen Support
                     </p>
                     <span className="text-sm font-semibold text-primary-600 group-hover:text-primary-700">
-                      support@izenic.com →
+                      kontakt@izenic.com →
                     </span>
                   </a>
 
                   <a 
-                    href="mailto:info@izenic.com" 
+                    href="mailto:kontakt@izenic.com" 
                     className="bg-white rounded-xl border-2 border-gray-200 p-6 hover:border-primary-300 hover:shadow-lg transition-all group"
                   >
                     <Mail className="w-8 h-8 text-primary-600 mb-3 group-hover:scale-110 transition-transform" />
@@ -364,7 +364,7 @@ export default function Einstellungen() {
                       Für allgemeine Fragen und Informationen
                     </p>
                     <span className="text-sm font-semibold text-primary-600 group-hover:text-primary-700">
-                      info@izenic.com →
+                      kontakt@izenic.com →
                     </span>
                   </a>
                 </div>

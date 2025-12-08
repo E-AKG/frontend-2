@@ -22,13 +22,13 @@ export default function Landing() {
     <div className="min-h-screen bg-white overflow-hidden">
       {/* Header - Modern & Glassmorphic */}
       <header className="fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-white/80 backdrop-blur-xl shadow-sm">
-        <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4">
+        <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-5 md:py-6">
           <div className="flex items-center justify-between">
             <Link to="/" className="flex items-center group touch-manipulation">
               <img 
                 src="/logo.png" 
                 alt="Immpire" 
-                className="h-14 sm:h-18 md:h-22 lg:h-26 w-auto transition-all duration-300 group-active:scale-95 sm:group-hover:scale-110 object-contain"
+                className="h-20 sm:h-24 md:h-28 lg:h-32 xl:h-36 w-auto transition-all duration-300 group-active:scale-95 sm:group-hover:scale-110 object-contain"
                 style={{ imageRendering: 'high-quality' }}
               />
             </Link>
@@ -59,15 +59,15 @@ export default function Landing() {
       <section className="relative overflow-hidden bg-gradient-to-br from-slate-50 via-white to-primary-50/30 min-h-screen flex items-center pt-20">
         {/* Animated Background Grid */}
         <div className="absolute inset-0 opacity-[0.03]" style={{
-          backgroundImage: `linear-gradient(rgba(124, 58, 237, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(124, 58, 237, 0.1) 1px, transparent 1px)`,
+          backgroundImage: `linear-gradient(rgba(37, 99, 235, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(37, 99, 235, 0.1) 1px, transparent 1px)`,
           backgroundSize: '50px 50px',
           transform: `translate(${mousePosition.x * 0.01}px, ${mousePosition.y * 0.01}px)`
         }}></div>
         
         {/* Floating Gradient Orbs with Animation */}
-        <div className="absolute top-20 right-10 w-96 h-96 bg-gradient-to-br from-primary-400/40 via-primary-500/30 to-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute top-20 right-10 w-96 h-96 bg-gradient-to-br from-primary-400/40 via-primary-500/30 to-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute bottom-20 left-10 w-96 h-96 bg-gradient-to-tr from-blue-400/30 via-primary-400/20 to-slate-300/30 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-br from-primary-200/20 to-purple-200/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-br from-primary-200/20 to-blue-200/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
         
         {/* Floating Particles */}
         <div className="absolute inset-0 overflow-hidden">
@@ -91,7 +91,7 @@ export default function Landing() {
               {/* Animated Badge */}
               <div className="inline-flex items-center gap-2 px-5 sm:px-7 py-2.5 sm:py-3.5 bg-gradient-to-r from-primary-100 via-white to-primary-50 rounded-full mb-8 sm:mb-10 border-2 border-primary-200/50 shadow-lg backdrop-blur-sm animate-fade-in">
                 <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-primary-600 animate-pulse" />
-                <span className="text-xs sm:text-sm md:text-base font-bold text-primary-700">✨ Die Zukunft der Hausverwaltung</span>
+                <span className="text-xs sm:text-sm md:text-base font-bold text-primary-700">Die Zukunft der Hausverwaltung</span>
                 <Award className="w-4 h-4 sm:w-5 sm:h-5 text-primary-600" />
               </div>
               
@@ -114,8 +114,8 @@ export default function Landing() {
                 Hausverwaltung
                 <br />
                 <span className="relative inline-block">
-                  <span className="absolute inset-0 bg-gradient-to-r from-primary-600 via-purple-600 to-primary-600 bg-clip-text text-transparent animate-gradient-x bg-[length:200%_auto]"></span>
-                  <span className="relative bg-gradient-to-r from-primary-600 via-purple-600 to-primary-600 bg-clip-text text-transparent">
+                  <span className="absolute inset-0 bg-gradient-to-r from-primary-600 via-blue-500 to-primary-600 bg-clip-text text-transparent animate-gradient-x bg-[length:200%_auto]"></span>
+                  <span className="relative bg-gradient-to-r from-primary-600 via-blue-500 to-primary-600 bg-clip-text text-transparent">
                     neu gedacht
                   </span>
                 </span>
@@ -127,7 +127,7 @@ export default function Landing() {
               </p>
               
               <p className="text-lg sm:text-xl md:text-2xl text-slate-600 mb-10 sm:mb-12 max-w-3xl mx-auto font-semibold px-4 animate-fade-in" style={{ animationDelay: '0.2s' }}>
-                Einfach. Sicher. Effizient. ⚡
+                Einfach. Sicher. Effizient.
               </p>
               
               {/* CTA Buttons - Enhanced */}
@@ -135,7 +135,7 @@ export default function Landing() {
                 <Link to="/register" className="w-full sm:w-auto touch-manipulation group">
                   <Button 
                     size="lg" 
-                    className="bg-gradient-to-r from-primary-600 via-primary-600 to-purple-600 hover:from-primary-700 hover:via-primary-700 hover:to-purple-700 text-white w-full sm:w-auto px-10 sm:px-14 py-5 sm:py-6 text-lg sm:text-xl md:text-2xl font-bold shadow-2xl hover:shadow-primary-500/50 transition-all transform active:scale-95 sm:hover:scale-105 relative overflow-hidden"
+                    className="bg-gradient-to-r from-primary-600 via-primary-500 to-blue-500 hover:from-primary-700 hover:via-primary-600 hover:to-blue-600 text-white w-full sm:w-auto px-10 sm:px-14 py-5 sm:py-6 text-lg sm:text-xl md:text-2xl font-bold shadow-2xl hover:shadow-primary-500/50 transition-all transform active:scale-95 sm:hover:scale-105 relative overflow-hidden"
                   >
                     <span className="relative z-10 flex items-center gap-3">
                       <Rocket className="w-5 h-5 sm:w-6 sm:h-6" />
@@ -208,7 +208,7 @@ export default function Landing() {
 
       {/* Features Section - Ultra Modern */}
       <section id="features-section" className="py-20 sm:py-28 md:py-36 bg-gradient-to-b from-white via-slate-50/50 to-white relative">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(124,58,237,0.05),transparent_50%)]"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(37,99,235,0.05),transparent_50%)]"></div>
         
         <div className="container mx-auto px-4 sm:px-6 relative z-10">
           <div className="max-w-5xl mx-auto text-center mb-16 sm:mb-20 md:mb-28">
@@ -247,7 +247,7 @@ export default function Landing() {
                 icon: BarChart3,
                 title: "Analysen & Berichte",
                 description: "Detaillierte Einblicke in Ihre Finanzen und Performance-Metriken.",
-                gradient: "from-purple-500 to-pink-500"
+                gradient: "from-primary-500 to-blue-400"
               },
               {
                 icon: Shield,
@@ -305,7 +305,7 @@ export default function Landing() {
         
         {/* Gradient Orbs */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-primary-500/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
         
         <div className="container mx-auto px-4 sm:px-6 relative z-10">
           <div className="max-w-7xl mx-auto">
@@ -488,7 +488,7 @@ export default function Landing() {
                       <ExternalLink className="w-4 h-4 sm:w-5 sm:h-5" />
                     </a>
                     <a 
-                      href="mailto:support@izenic.com" 
+                      href="mailto:kontakt@izenic.com" 
                       className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white border-2 border-slate-300 hover:border-primary-400 text-slate-700 hover:text-primary-700 rounded-xl font-semibold transition-all touch-manipulation"
                     >
                       <Mail className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -563,7 +563,7 @@ export default function Landing() {
                 </li>
                 <li>
                   <a 
-                    href="mailto:support@izenic.com" 
+                    href="mailto:kontakt@izenic.com" 
                     className="text-sm text-slate-600 hover:text-primary-600 transition-colors inline-flex items-center gap-1"
                   >
                     <Mail className="w-3 h-3" />
@@ -572,7 +572,7 @@ export default function Landing() {
                 </li>
                 <li>
                   <a 
-                    href="mailto:info@izenic.com" 
+                    href="mailto:kontakt@izenic.com" 
                     className="text-sm text-slate-600 hover:text-primary-600 transition-colors inline-flex items-center gap-1"
                   >
                     <Mail className="w-3 h-3" />
