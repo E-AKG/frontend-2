@@ -85,14 +85,14 @@ export default function Landing() {
           ))}
         </div>
         
-        <div className="container mx-auto px-4 sm:px-6 relative z-10 py-16 sm:py-20 md:py-24">
+        <div className="container mx-auto px-4 sm:px-6 relative z-10 py-12 sm:py-16 md:py-20 lg:py-24">
           <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-12 sm:mb-16">
+            <div className="text-center mb-8 sm:mb-12 md:mb-16">
               {/* Animated Badge */}
-              <div className="inline-flex items-center gap-2 px-5 sm:px-7 py-2.5 sm:py-3.5 bg-gradient-to-r from-primary-100 via-white to-primary-50 rounded-full mb-8 sm:mb-10 border-2 border-primary-200/50 shadow-lg backdrop-blur-sm animate-fade-in">
-                <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-primary-600 animate-pulse" />
-                <span className="text-xs sm:text-sm md:text-base font-bold text-primary-700">Die Zukunft der Hausverwaltung</span>
-                <Award className="w-4 h-4 sm:w-5 sm:h-5 text-primary-600" />
+              <div className="inline-flex items-center gap-1.5 sm:gap-2 px-4 sm:px-5 md:px-7 py-2 sm:py-2.5 md:py-3.5 bg-gradient-to-r from-primary-100 via-white to-primary-50 rounded-full mb-6 sm:mb-8 md:mb-10 border-2 border-primary-200/50 shadow-lg backdrop-blur-sm animate-fade-in">
+                <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-primary-600 animate-pulse flex-shrink-0" />
+                <span className="text-xs sm:text-sm md:text-base font-bold text-primary-700 whitespace-nowrap">Die Zukunft der Hausverwaltung</span>
+                <Award className="w-4 h-4 sm:w-5 sm:h-5 text-primary-600 flex-shrink-0" />
               </div>
               
               {/* IZENIC Branding Badge */}
@@ -101,16 +101,16 @@ export default function Landing() {
                   href="https://www.izenic.com" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-full transition-all group touch-manipulation"
+                  className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-slate-100 hover:bg-slate-200 rounded-full transition-all group touch-manipulation"
                 >
-                  <span className="text-xs sm:text-sm font-semibold text-slate-700">Entwickelt von</span>
-                  <span className="text-xs sm:text-sm font-bold text-slate-900">IZENIC</span>
-                  <ExternalLink className="w-3 h-3 sm:w-4 sm:h-4 text-slate-600 group-hover:text-primary-600 transition-colors" />
+                  <span className="text-xs sm:text-sm font-semibold text-slate-700 whitespace-nowrap">Entwickelt von</span>
+                  <span className="text-xs sm:text-sm font-bold text-slate-900 whitespace-nowrap">IZENIC</span>
+                  <ExternalLink className="w-3 h-3 sm:w-4 sm:h-4 text-slate-600 group-hover:text-primary-600 transition-colors flex-shrink-0" />
                 </a>
               </div>
               
               {/* Main Headline with Gradient Animation */}
-              <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-extrabold text-slate-900 mb-6 sm:mb-8 leading-[1.05] tracking-tight px-2 animate-fade-in">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl 2xl:text-9xl font-extrabold text-slate-900 mb-4 sm:mb-6 md:mb-8 leading-[1.05] tracking-tight px-2 sm:px-4 animate-fade-in">
                 Hausverwaltung
                 <br />
                 <span className="relative inline-block">
@@ -122,16 +122,16 @@ export default function Landing() {
               </h1>
               
               {/* Subheadline */}
-              <p className="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-slate-700 mb-4 sm:mb-6 max-w-5xl mx-auto leading-relaxed font-medium px-4 animate-fade-in" style={{ animationDelay: '0.1s' }}>
+              <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl text-slate-700 mb-3 sm:mb-4 md:mb-6 max-w-5xl mx-auto leading-relaxed font-medium px-4 sm:px-6 animate-fade-in" style={{ animationDelay: '0.1s' }}>
                 Alles, was Sie für die professionelle Verwaltung Ihrer Immobilien benötigen.
               </p>
               
-              <p className="text-lg sm:text-xl md:text-2xl text-slate-600 mb-10 sm:mb-12 max-w-3xl mx-auto font-semibold px-4 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+              <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-slate-600 mb-8 sm:mb-10 md:mb-12 max-w-3xl mx-auto font-semibold px-4 sm:px-6 animate-fade-in" style={{ animationDelay: '0.2s' }}>
                 Einfach. Sicher. Effizient.
               </p>
               
               {/* CTA Buttons - Enhanced */}
-              <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center mb-12 sm:mb-16 px-4 animate-fade-in" style={{ animationDelay: '0.3s' }}>
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 md:gap-6 justify-center items-stretch sm:items-center mb-8 sm:mb-12 md:mb-16 px-4 sm:px-6 animate-fade-in" style={{ animationDelay: '0.3s' }}>
                 <Link to="/register" className="w-full sm:w-auto touch-manipulation group">
                   <Button 
                     size="lg" 
@@ -157,23 +157,23 @@ export default function Landing() {
               </div>
 
               {/* Trust Indicators - Enhanced */}
-              <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-8 md:gap-10 text-sm sm:text-base md:text-lg text-slate-600 mb-12 animate-fade-in" style={{ animationDelay: '0.4s' }}>
-                <div className="flex items-center gap-2 px-4 py-2 bg-white/60 backdrop-blur-sm rounded-full border border-slate-200 shadow-sm">
-                  <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-500" />
-                  <span className="font-semibold">Keine Kreditkarte</span>
+              <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 md:gap-6 lg:gap-8 text-xs sm:text-sm md:text-base lg:text-lg text-slate-600 mb-8 sm:mb-10 md:mb-12 animate-fade-in" style={{ animationDelay: '0.4s' }}>
+                <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-white/60 backdrop-blur-sm rounded-full border border-slate-200 shadow-sm">
+                  <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-emerald-500 flex-shrink-0" />
+                  <span className="font-semibold whitespace-nowrap">Keine Kreditkarte</span>
                 </div>
-                <div className="flex items-center gap-2 px-4 py-2 bg-white/60 backdrop-blur-sm rounded-full border border-slate-200 shadow-sm">
-                  <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-500" />
-                  <span className="font-semibold">14 Tage kostenlos</span>
+                <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-white/60 backdrop-blur-sm rounded-full border border-slate-200 shadow-sm">
+                  <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-emerald-500 flex-shrink-0" />
+                  <span className="font-semibold whitespace-nowrap">14 Tage kostenlos</span>
                 </div>
-                <div className="flex items-center gap-2 px-4 py-2 bg-white/60 backdrop-blur-sm rounded-full border border-slate-200 shadow-sm">
-                  <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-500" />
-                  <span className="font-semibold">Jederzeit kündbar</span>
+                <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-white/60 backdrop-blur-sm rounded-full border border-slate-200 shadow-sm">
+                  <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-emerald-500 flex-shrink-0" />
+                  <span className="font-semibold whitespace-nowrap">Jederzeit kündbar</span>
                 </div>
               </div>
 
               {/* Stats Bar */}
-              <div className="grid grid-cols-3 gap-4 sm:gap-6 max-w-3xl mx-auto px-4 animate-fade-in" style={{ animationDelay: '0.5s' }}>
+              <div className="grid grid-cols-3 gap-2 sm:gap-3 md:gap-4 lg:gap-6 max-w-3xl mx-auto px-2 sm:px-4 animate-fade-in" style={{ animationDelay: '0.5s' }}>
                 {[
                   { number: "10+", label: "Stunden gespart", icon: Clock },
                   { number: "100%", label: "DSGVO-konform", icon: Shield },
@@ -181,10 +181,10 @@ export default function Landing() {
                 ].map((stat, idx) => {
                   const Icon = stat.icon;
                   return (
-                    <div key={idx} className="bg-white/70 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border-2 border-slate-200/50 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
-                      <Icon className="w-6 h-6 sm:w-8 sm:h-8 text-primary-600 mx-auto mb-2" />
-                      <div className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 mb-1">{stat.number}</div>
-                      <div className="text-xs sm:text-sm text-slate-600 font-medium">{stat.label}</div>
+                    <div key={idx} className="bg-white/70 backdrop-blur-sm rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-6 border-2 border-slate-200/50 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
+                      <Icon className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-primary-600 mx-auto mb-1 sm:mb-2 flex-shrink-0" />
+                      <div className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-extrabold text-slate-900 mb-0.5 sm:mb-1">{stat.number}</div>
+                      <div className="text-[10px] sm:text-xs md:text-sm text-slate-600 font-medium leading-tight">{stat.label}</div>
                     </div>
                   );
                 })}
@@ -223,7 +223,7 @@ export default function Landing() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 max-w-7xl mx-auto">
             {[
               {
                 icon: Building2,
@@ -259,27 +259,27 @@ export default function Landing() {
                 icon: Upload,
                 title: "CSV-Import & Abgleich",
                 description: "Laden Sie Ihre Bankdaten per CSV hoch und lassen Sie Zahlungen automatisch zuordnen.",
-                gradient: "from-rose-500 to-pink-500"
+                gradient: "from-primary-400 to-blue-500"
               }
             ].map((feature, index) => {
               const Icon = feature.icon;
               return (
                 <div 
                   key={index}
-                  className="group relative p-8 sm:p-10 rounded-3xl bg-white border-2 border-slate-200 hover:border-transparent hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 overflow-hidden"
+                  className="group relative p-6 sm:p-8 md:p-10 rounded-2xl sm:rounded-3xl bg-white border-2 border-slate-200 hover:border-transparent hover:shadow-2xl transition-all duration-500 transform active:scale-95 sm:hover:-translate-y-2 overflow-hidden"
                 >
                   {/* Gradient Background on Hover */}
                   <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`}></div>
                   
                   {/* Content */}
                   <div className="relative z-10">
-                    <div className={`w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br ${feature.gradient} rounded-2xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-500`}>
-                      <Icon className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+                    <div className={`w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-gradient-to-br ${feature.gradient} rounded-xl sm:rounded-2xl flex items-center justify-center mb-4 sm:mb-5 md:mb-6 shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-500`}>
+                      <Icon className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-10 lg:h-10 text-white" />
                     </div>
-                    <h3 className="text-2xl sm:text-2xl md:text-3xl font-extrabold text-slate-900 group-hover:text-white mb-3 sm:mb-4 transition-colors duration-500">
+                    <h3 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-slate-900 group-hover:text-white mb-2 sm:mb-3 md:mb-4 transition-colors duration-500">
                       {feature.title}
                     </h3>
-                    <p className="text-base sm:text-lg text-slate-600 group-hover:text-white/90 leading-relaxed transition-colors duration-500">
+                    <p className="text-sm sm:text-base md:text-lg text-slate-600 group-hover:text-white/90 leading-relaxed transition-colors duration-500">
                       {feature.description}
                     </p>
                   </div>
@@ -321,8 +321,8 @@ export default function Landing() {
               </p>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-12 sm:gap-16 md:gap-20 items-center">
-              <div className="space-y-8 sm:space-y-10 md:space-y-12">
+            <div className="grid md:grid-cols-2 gap-8 sm:gap-12 md:gap-16 lg:gap-20 items-start md:items-center">
+              <div className="space-y-6 sm:space-y-8 md:space-y-10 lg:space-y-12">
                 {[
                   {
                     icon: TrendingUp,
@@ -340,18 +340,18 @@ export default function Landing() {
                     icon: Globe,
                     title: "Überall verfügbar",
                     description: "Arbeiten Sie von überall - im Büro, zu Hause oder unterwegs. Alles in der Cloud.",
-                    gradient: "from-purple-400 to-pink-400"
+                    gradient: "from-primary-400 to-blue-400"
                   }
                 ].map((benefit, index) => {
                   const Icon = benefit.icon;
                   return (
-                    <div key={index} className="flex gap-4 sm:gap-6 group">
-                      <div className={`flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br ${benefit.gradient} rounded-2xl flex items-center justify-center shadow-xl group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}>
-                        <Icon className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+                    <div key={index} className="flex flex-col sm:flex-row gap-3 sm:gap-4 md:gap-6 group">
+                      <div className={`flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-gradient-to-br ${benefit.gradient} rounded-xl sm:rounded-2xl flex items-center justify-center shadow-xl group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}>
+                        <Icon className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-10 lg:h-10 text-white" />
                       </div>
-                      <div>
-                        <h3 className="text-xl sm:text-2xl md:text-3xl font-extrabold mb-2 sm:mb-3">{benefit.title}</h3>
-                        <p className="text-base sm:text-lg text-slate-300 leading-relaxed">{benefit.description}</p>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-extrabold mb-1 sm:mb-2 md:mb-3">{benefit.title}</h3>
+                        <p className="text-sm sm:text-base md:text-lg text-slate-300 leading-relaxed">{benefit.description}</p>
                       </div>
                     </div>
                   );
@@ -359,8 +359,8 @@ export default function Landing() {
               </div>
               
               {/* Stats Card */}
-              <div className="relative">
-                <div className="bg-gradient-to-br from-primary-500 via-purple-600 to-primary-700 rounded-3xl p-10 sm:p-14 md:p-16 text-white shadow-2xl relative overflow-hidden">
+              <div className="relative w-full">
+                <div className="bg-gradient-to-br from-primary-500 via-primary-600 to-blue-600 rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-10 lg:p-14 xl:p-16 text-white shadow-2xl relative overflow-hidden">
                   {/* Animated Background */}
                   <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 animate-shimmer"></div>
                   
@@ -394,8 +394,8 @@ export default function Landing() {
       <section className="py-20 sm:py-28 md:py-36 bg-gradient-to-br from-white via-primary-50/30 to-white relative overflow-hidden">
         {/* Animated Background */}
         <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(124,58,237,0.1),transparent_50%)] animate-pulse"></div>
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_50%,rgba(168,85,247,0.1),transparent_50%)] animate-pulse" style={{ animationDelay: '1s' }}></div>
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(37,99,235,0.1),transparent_50%)] animate-pulse"></div>
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_50%,rgba(59,130,246,0.1),transparent_50%)] animate-pulse" style={{ animationDelay: '1s' }}></div>
         </div>
         
         <div className="container mx-auto px-4 sm:px-6 relative z-10">
@@ -406,7 +406,7 @@ export default function Landing() {
             <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-slate-900 mb-6 sm:mb-8">
               Transformieren Sie Ihre
               <br />
-              <span className="bg-gradient-to-r from-primary-600 via-purple-600 to-primary-600 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-primary-600 via-blue-500 to-primary-600 bg-clip-text text-transparent">
                 Hausverwaltung heute
               </span>
             </h2>
@@ -418,7 +418,7 @@ export default function Landing() {
                 <Button 
                   size="lg" 
                   variant="secondary"
-                  className="bg-gradient-to-r from-primary-600 via-purple-600 to-primary-600 hover:from-primary-700 hover:via-purple-700 hover:to-primary-700 text-white w-full sm:w-auto px-12 sm:px-16 py-6 sm:py-7 text-xl sm:text-2xl md:text-3xl font-extrabold shadow-2xl hover:shadow-primary-500/50 transition-all transform active:scale-95 sm:hover:scale-105 relative overflow-hidden"
+                  className="bg-gradient-to-r from-primary-600 via-primary-500 to-blue-500 hover:from-primary-700 hover:via-primary-600 hover:to-blue-600 text-white w-full sm:w-auto px-12 sm:px-16 py-6 sm:py-7 text-xl sm:text-2xl md:text-3xl font-extrabold shadow-2xl hover:shadow-primary-500/50 transition-all transform active:scale-95 sm:hover:scale-105 relative overflow-hidden"
                 >
                   <span className="relative z-10 flex items-center gap-3">
                     <Rocket className="w-6 h-6 sm:w-7 sm:h-7" />
@@ -443,7 +443,7 @@ export default function Landing() {
               <div className="flex items-center gap-2">
                 <div className="flex -space-x-2">
                   {[...Array(5)].map((_, i) => (
-                    <div key={i} className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-400 to-purple-500 border-2 border-white"></div>
+                    <div key={i} className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-400 to-blue-500 border-2 border-white"></div>
                   ))}
                 </div>
                 <div className="ml-2">
@@ -464,13 +464,13 @@ export default function Landing() {
       <section className="py-12 sm:py-16 bg-gradient-to-br from-slate-50 to-white border-t border-slate-200">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="max-w-4xl mx-auto">
-            <div className="bg-white rounded-2xl border-2 border-slate-200 p-6 sm:p-8 md:p-10 shadow-lg">
-              <div className="flex items-start gap-4 sm:gap-6">
+            <div className="bg-white rounded-2xl border-2 border-slate-200 p-4 sm:p-6 md:p-8 lg:p-10 shadow-lg">
+              <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
                 <div className="flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center">
                   <HelpCircle className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
                 </div>
-                <div className="flex-1">
-                  <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mb-2 sm:mb-3">
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-slate-900 mb-2 sm:mb-3">
                     Benötigen Sie Hilfe oder Support?
                   </h3>
                   <p className="text-sm sm:text-base text-slate-600 mb-4 sm:mb-6 leading-relaxed">
