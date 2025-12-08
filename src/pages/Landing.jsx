@@ -18,7 +18,7 @@ export default function Landing() {
                 style={{ imageRendering: 'high-quality' }}
               />
             </Link>
-            <div className="flex items-center gap-3 sm:gap-6">
+            <div className="flex items-center gap-2 sm:gap-3 md:gap-6">
               <Link 
                 to="/pricing" 
                 className="text-slate-700 hover:text-primary-600 font-semibold transition-all duration-200 hidden sm:block text-sm sm:text-base"
@@ -27,12 +27,12 @@ export default function Landing() {
               </Link>
               <Link 
                 to="/login" 
-                className="text-slate-700 hover:text-primary-600 font-semibold transition-all duration-200 text-sm sm:text-base touch-manipulation"
+                className="text-slate-700 hover:text-primary-600 font-semibold transition-all duration-200 text-xs sm:text-sm md:text-base touch-manipulation px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg hover:bg-slate-50"
               >
                 Anmelden
               </Link>
               <Link to="/register" className="touch-manipulation">
-                <Button size="sm" className="bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white border-0 shadow-lg hover:shadow-xl transition-all text-xs sm:text-sm">
+                <Button size="sm" className="bg-primary-600 hover:bg-primary-700 text-white border-0 shadow-lg hover:shadow-xl transition-all text-xs sm:text-sm px-3 sm:px-4 py-1.5 sm:py-2">
                   Kostenlos starten
                 </Button>
               </Link>
@@ -46,11 +46,9 @@ export default function Landing() {
         <div className="container mx-auto px-4 sm:px-6 relative z-10 py-12 sm:py-16 md:py-20 lg:py-24">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-8 sm:mb-12 md:mb-16">
-              {/* Animated Badge */}
-              <div className="inline-flex items-center gap-1.5 sm:gap-2 px-4 sm:px-5 md:px-7 py-2 sm:py-2.5 md:py-3.5 bg-gradient-to-r from-primary-100 via-white to-primary-50 rounded-full mb-6 sm:mb-8 md:mb-10 border-2 border-primary-200/50 shadow-lg backdrop-blur-sm animate-fade-in">
-                <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-primary-600 animate-pulse flex-shrink-0" />
-                <span className="text-xs sm:text-sm md:text-base font-bold text-primary-700 whitespace-nowrap">Die Zukunft der Hausverwaltung</span>
-                <Award className="w-4 h-4 sm:w-5 sm:h-5 text-primary-600 flex-shrink-0" />
+              {/* Badge */}
+              <div className="inline-flex items-center justify-center px-4 sm:px-6 md:px-8 py-2 sm:py-2.5 md:py-3 bg-primary-50 rounded-full mb-6 sm:mb-8 md:mb-10 border-2 border-primary-200 shadow-md animate-fade-in">
+                <span className="text-xs sm:text-sm md:text-base font-bold text-primary-700 text-center">Die Zukunft der Hausverwaltung</span>
               </div>
               
               {/* IZENIC Branding Badge */}
@@ -103,7 +101,7 @@ export default function Landing() {
                   <Button 
                     variant="outline" 
                     size="lg" 
-                    className="border-2 border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 w-full sm:w-auto px-8 sm:px-12 md:px-14 py-4 sm:py-5 md:py-6 text-base sm:text-lg md:text-xl lg:text-2xl font-bold transition-all active:scale-95 bg-white"
+                    className="border-2 border-primary-300 text-primary-700 hover:bg-primary-50 hover:border-primary-400 w-full sm:w-auto px-8 sm:px-12 md:px-14 py-4 sm:py-5 md:py-6 text-base sm:text-lg md:text-xl lg:text-2xl font-bold transition-all active:scale-95 bg-white shadow-sm hover:shadow-md"
                   >
                     Preise ansehen
                   </Button>
@@ -350,7 +348,7 @@ export default function Landing() {
               <Link to="/pricing" className="w-full sm:w-auto touch-manipulation">
                 <Button 
                   size="lg"
-                  className="bg-white border-2 border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 w-full sm:w-auto px-8 sm:px-12 md:px-16 py-5 sm:py-6 md:py-7 text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold transition-all active:scale-95 shadow-lg"
+                  className="bg-white border-2 border-primary-300 text-primary-700 hover:bg-primary-50 hover:border-primary-400 w-full sm:w-auto px-8 sm:px-12 md:px-16 py-5 sm:py-6 md:py-7 text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold transition-all active:scale-95 shadow-md hover:shadow-lg"
                 >
                   Preise ansehen
                 </Button>
