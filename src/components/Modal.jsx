@@ -8,13 +8,18 @@ export default function Modal({ isOpen, onClose, titel, children, groesse = "md"
     xl: "max-w-6xl",
   };
 
-  // Höhe: kompakt = kürzer, normal = mittlere Höhe
+  // Höhe: kompakt = viel kürzer für kompakten Kasten, normal = mittlere Höhe
   const hoeheKlasse = kompakt 
-    ? "max-h-[85vh] sm:max-h-[70vh]"
+    ? "max-h-[70vh] sm:max-h-[70vh]"
     : "max-h-[90vh] sm:max-h-[85vh]";
+  
+  // Breite: kompakt = schmaler auf Mobile für kompakteren Kasten
+  const breiteKlasse = kompakt
+    ? "max-w-[95%] sm:max-w-2xl"
+    : groessenKlassen[groesse];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 animate-fade-in">
       {/* Backdrop - Verwischter Hintergrund */}
       <div
         className="fixed inset-0 bg-black/50 backdrop-blur-md transition-opacity animate-fade-in"
@@ -23,10 +28,10 @@ export default function Modal({ isOpen, onClose, titel, children, groesse = "md"
 
       {/* Modal - Kompakt und zentriert */}
       <div
-        className={`relative bg-white rounded-2xl sm:rounded-3xl shadow-2xl ${groessenKlassen[groesse]} w-full ${hoeheKlasse} flex flex-col overflow-hidden border border-gray-200/50 animate-scale-in`}
+        className={`relative bg-white rounded-2xl sm:rounded-3xl shadow-2xl ${breiteKlasse} w-full ${hoeheKlasse} flex flex-col overflow-hidden border border-gray-200/50 animate-scale-in`}
       >
         {/* Header - Fixed mit größerem X-Button */}
-        <div className="flex items-center justify-between px-5 sm:px-6 py-4 sm:py-5 border-b border-gray-200 bg-white flex-shrink-0">
+        <div className={`flex items-center justify-between border-b border-gray-200 bg-white flex-shrink-0 ${kompakt ? 'px-4 sm:px-6 py-3 sm:py-4' : 'px-5 sm:px-6 py-4 sm:py-5'}`}>
           <h2 className="text-lg sm:text-xl font-bold text-gray-900 pr-2">{titel}</h2>
           <button
             onClick={onClose}
@@ -45,7 +50,7 @@ export default function Modal({ isOpen, onClose, titel, children, groesse = "md"
         </div>
 
         {/* Content - Scrollbar */}
-        <div className="flex-1 overflow-y-auto overscroll-contain p-4 sm:p-5 custom-scrollbar" style={{ WebkitOverflowScrolling: 'touch' }}>
+        <div className={`flex-1 overflow-y-auto overscroll-contain custom-scrollbar ${kompakt ? 'p-3 sm:p-5' : 'p-4 sm:p-5'}`} style={{ WebkitOverflowScrolling: 'touch' }}>
           {children}
         </div>
       </div>
