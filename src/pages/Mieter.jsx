@@ -307,15 +307,15 @@ export default function Mieter() {
         titel={bearbeitung ? "Mieter bearbeiten" : "Neuen Mieter anlegen"}
         groesse="sm"
       >
-        <form onSubmit={handleSubmit} className="space-y-2.5 sm:space-y-3 pb-1">
-          <div className="grid grid-cols-2 gap-2">
+        <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4 pb-2">
+          <div className="grid grid-cols-2 gap-2 sm:gap-3">
             <Formularfeld
               label="Vorname"
               name="first_name"
               value={formDaten.first_name}
               onChange={(e) => setFormDaten({ ...formDaten, first_name: e.target.value })}
               required
-              icon={<Users className="w-4 h-4" />}
+              icon={<Users className="w-5 h-5" />}
             />
             <Formularfeld
               label="Nachname"
@@ -331,14 +331,14 @@ export default function Mieter() {
             type="email"
             value={formDaten.email}
             onChange={(e) => setFormDaten({ ...formDaten, email: e.target.value })}
-            icon={<Mail className="w-4 h-4" />}
+            icon={<Mail className="w-5 h-5" />}
           />
           <Formularfeld
             label="Telefon"
             name="phone"
             value={formDaten.phone}
             onChange={(e) => setFormDaten({ ...formDaten, phone: e.target.value })}
-            icon={<Phone className="w-4 h-4" />}
+            icon={<Phone className="w-5 h-5" />}
           />
           <Formularfeld
             label="IBAN (optional, aber empfohlen)"
@@ -346,11 +346,11 @@ export default function Mieter() {
             value={formDaten.iban}
             onChange={(e) => setFormDaten({ ...formDaten, iban: e.target.value })}
             placeholder="DE89370400440532013000"
-            icon={<CreditCard className="w-4 h-4" />}
+            icon={<CreditCard className="w-5 h-5" />}
           />
-          <div className="p-2 bg-emerald-50 border-2 border-emerald-200 rounded-lg flex items-start gap-1.5">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0 mt-0.5" />
-            <p className="text-xs font-medium text-emerald-900 leading-tight">
+          <div className="p-3 sm:p-4 bg-emerald-50 border-2 border-emerald-200 rounded-xl flex items-start gap-2 sm:gap-3">
+            <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
+            <p className="text-xs sm:text-sm font-medium text-emerald-900">
               Mit IBAN werden Zahlungen automatisch zu 100% korrekt zugeordnet!
             </p>
           </div>
@@ -359,7 +359,7 @@ export default function Mieter() {
             name="address"
             value={formDaten.address}
             onChange={(e) => setFormDaten({ ...formDaten, address: e.target.value })}
-            icon={<MapPin className="w-4 h-4" />}
+            icon={<MapPin className="w-5 h-5" />}
           />
           <Formularfeld
             label="Notizen"
@@ -367,9 +367,9 @@ export default function Mieter() {
             type="textarea"
             value={formDaten.notes}
             onChange={(e) => setFormDaten({ ...formDaten, notes: e.target.value })}
-            icon={<FileText className="w-4 h-4" />}
+            icon={<FileText className="w-5 h-5" />}
           />
-          <div className="flex flex-col sm:flex-row justify-end gap-2 pt-2.5 sm:pt-3 border-t border-gray-200 mt-3 sm:mt-0">
+          <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 pt-3 sm:pt-4 border-t border-gray-200 mt-4 sm:mt-0">
             <Button
               type="button"
               variant="secondary"
@@ -378,14 +378,14 @@ export default function Mieter() {
                 setBearbeitung(null);
                 formZuruecksetzen();
               }}
-              className="w-full sm:w-auto text-sm sm:text-base py-2 sm:py-2.5"
+              className="w-full sm:w-auto"
             >
               Abbrechen
             </Button>
             <Button 
               type="submit" 
-              icon={bearbeitung ? <Edit className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-              className="w-full sm:w-auto text-sm sm:text-base py-2 sm:py-2.5"
+              icon={bearbeitung ? <Edit className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
+              className="w-full sm:w-auto"
             >
               {bearbeitung ? "Aktualisieren" : "Erstellen"}
             </Button>
