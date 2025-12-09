@@ -324,36 +324,36 @@ const Sollstellungen = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white w-full max-w-full overflow-x-hidden">
       {/* Header */}
-      <div className="mb-4 sm:mb-6 lg:mb-8 px-4 sm:px-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="mb-6 sm:mb-8 lg:mb-10">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6">
           <div className="flex-1 min-w-0">
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-1 sm:mb-2 flex items-center gap-2 sm:gap-3">
-              <svg className="w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 text-primary-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-2 sm:mb-3 flex items-center gap-2 sm:gap-3">
+              <svg className="w-7 h-7 sm:w-9 sm:h-9 lg:w-12 lg:h-12 text-primary-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
               <span className="truncate">Sollstellungen</span>
             </h1>
-            <p className="text-gray-600 text-sm sm:text-base">
+            <p className="text-base sm:text-lg lg:text-xl text-gray-600">
               Verwalten Sie Mieteinnahmen und Zahlungseingänge
             </p>
           </div>
-          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+          <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0">
             <button
               onClick={handleRefresh}
               disabled={loading}
-              className="inline-flex items-center px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+              className="inline-flex items-center px-4 sm:px-5 py-3 sm:py-3.5 text-sm sm:text-base font-semibold text-slate-700 bg-white border-2 border-slate-300 rounded-xl hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
               title="Daten aktualisieren"
             >
-              <svg className={`w-4 h-4 sm:mr-2 ${loading ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className={`w-5 h-5 sm:w-6 sm:h-6 sm:mr-2 ${loading ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
               <span className="hidden sm:inline">Aktualisieren</span>
             </button>
             <Button
               onClick={() => setShowGenerateModal(true)}
-              className="inline-flex items-center px-4 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-base font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md whitespace-nowrap"
+              className="inline-flex items-center px-5 sm:px-7 py-3 sm:py-4 text-sm sm:text-lg font-bold text-white bg-primary-600 hover:bg-primary-700 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg whitespace-nowrap"
             >
-              <svg className="w-4 h-4 sm:w-5 sm:h-5 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 sm:w-6 sm:h-6 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
               <span className="hidden sm:inline">Neue Sollstellung</span>
@@ -363,20 +363,20 @@ const Sollstellungen = () => {
         </div>
       </div>
 
-      <div className="px-4 sm:px-6">
+      <div>
         {/* Auto-Sync Info Banner */}
         {(generateMutation.isPending || deleteMutation.isPending || loading) && (
-          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+          <div className="mb-6 sm:mb-8 p-4 sm:p-5 bg-blue-50 border-2 border-blue-200 rounded-xl">
             <div className="flex items-center">
-              <svg className="animate-spin h-5 w-5 text-blue-600 mr-3" fill="none" viewBox="0 0 24 24">
+              <svg className="animate-spin h-6 w-6 sm:h-7 sm:w-7 text-blue-600 mr-3 sm:mr-4" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
               <div>
-                <p className="text-sm font-medium text-blue-900">
+                <p className="text-base sm:text-lg font-semibold text-blue-900">
                   Daten werden aktualisiert...
                 </p>
-                <p className="text-xs text-blue-700 mt-0.5">
+                <p className="text-sm sm:text-base text-blue-700 mt-0.5">
                   Sollstellungen und Statistiken werden automatisch neu geladen
                 </p>
               </div>
@@ -384,88 +384,88 @@ const Sollstellungen = () => {
           </div>
         )}
 
-        {/* Dashboard-Karten */}
-        <div className="grid grid-cols-2 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8">
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 hover:shadow-md transition-shadow">
+        {/* Dashboard-Karten - Größer */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8 lg:mb-10">
+          <div className="bg-white rounded-xl sm:rounded-2xl shadow-md border-2 border-gray-200 p-5 sm:p-6 lg:p-8 hover:shadow-lg transition-shadow">
             <div className="flex flex-col items-center text-center">
-              <div className="mb-3">
-                <div className="w-14 h-14 bg-primary-50 rounded-xl flex items-center justify-center">
-                  <svg className="w-7 h-7 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="mb-4 sm:mb-5">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 bg-primary-50 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-sm">
+                  <svg className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                   </svg>
                 </div>
               </div>
               <div className="w-full">
-                <p className="text-xs font-medium text-slate-500 mb-2">Erwartete Einnahmen</p>
-                <p className="text-xl font-bold text-slate-900">{formatCurrency(stats.total_expected)}</p>
+                <p className="text-sm sm:text-base lg:text-lg font-semibold text-gray-600 mb-2 sm:mb-3">Erwartete Einnahmen</p>
+                <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">{formatCurrency(stats.total_expected)}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 hover:shadow-md transition-shadow">
+          <div className="bg-white rounded-xl sm:rounded-2xl shadow-md border-2 border-gray-200 p-5 sm:p-6 lg:p-8 hover:shadow-lg transition-shadow">
             <div className="flex flex-col items-center text-center">
-              <div className="mb-3">
-                <div className="w-14 h-14 bg-emerald-50 rounded-xl flex items-center justify-center">
-                  <svg className="w-7 h-7 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="mb-4 sm:mb-5">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 bg-emerald-50 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-sm">
+                  <svg className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
               </div>
               <div className="w-full">
-                <p className="text-xs font-medium text-slate-500 mb-2">Bereits bezahlt</p>
-                <p className="text-xl font-bold text-emerald-600">{formatCurrency(stats.total_paid)}</p>
+                <p className="text-sm sm:text-base lg:text-lg font-semibold text-gray-600 mb-2 sm:mb-3">Bereits bezahlt</p>
+                <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-emerald-600">{formatCurrency(stats.total_paid)}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 hover:shadow-md transition-shadow">
+          <div className="bg-white rounded-xl sm:rounded-2xl shadow-md border-2 border-gray-200 p-5 sm:p-6 lg:p-8 hover:shadow-lg transition-shadow">
             <div className="flex flex-col items-center text-center">
-              <div className="mb-3">
-                <div className="w-14 h-14 bg-red-50 rounded-xl flex items-center justify-center">
-                  <svg className="w-7 h-7 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="mb-4 sm:mb-5">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 bg-red-50 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-sm">
+                  <svg className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
                   </svg>
                 </div>
               </div>
               <div className="w-full">
-                <p className="text-xs font-medium text-slate-500 mb-2">Ausstehend</p>
-                <p className="text-xl font-bold text-red-600">{formatCurrency(stats.total_outstanding)}</p>
+                <p className="text-sm sm:text-base lg:text-lg font-semibold text-gray-600 mb-2 sm:mb-3">Ausstehend</p>
+                <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-red-600">{formatCurrency(stats.total_outstanding)}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 hover:shadow-md transition-shadow">
+          <div className="bg-white rounded-xl sm:rounded-2xl shadow-md border-2 border-gray-200 p-5 sm:p-6 lg:p-8 hover:shadow-lg transition-shadow">
             <div className="flex flex-col items-center text-center">
-              <div className="mb-3">
-                <div className="w-14 h-14 bg-purple-50 rounded-xl flex items-center justify-center">
-                  <svg className="w-7 h-7 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="mb-4 sm:mb-5">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 bg-purple-50 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-sm">
+                  <svg className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                   </svg>
                 </div>
               </div>
               <div className="w-full">
-                <p className="text-xs font-medium text-slate-500 mb-2">Zahlungsrate</p>
-                <p className="text-xl font-bold text-purple-600">{stats.payment_rate.toFixed(1)}%</p>
+                <p className="text-sm sm:text-base lg:text-lg font-semibold text-gray-600 mb-2 sm:mb-3">Zahlungsrate</p>
+                <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-purple-600">{stats.payment_rate.toFixed(1)}%</p>
               </div>
             </div>
           </div>
         </div>
 
         {/* Filter */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-8">
-          <div className="flex items-center mb-4">
-            <svg className="w-5 h-5 text-slate-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="bg-white rounded-2xl shadow-md border-2 border-gray-200 p-5 sm:p-6 lg:p-8 mb-6 sm:mb-8 lg:mb-10">
+          <div className="flex items-center mb-4 sm:mb-5">
+            <svg className="w-6 h-6 sm:w-7 sm:h-7 text-slate-400 mr-2 sm:mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
             </svg>
-            <h3 className="text-lg font-semibold text-slate-900">Filter</h3>
+            <h3 className="text-xl sm:text-2xl font-bold text-slate-900">Filter</h3>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 sm:gap-5">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Status</label>
+              <label className="block text-base sm:text-lg font-semibold text-slate-700 mb-2 sm:mb-3">Status</label>
               <select
                 value={filters.status}
                 onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
-                className="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-slate-900"
+                className="w-full px-4 sm:px-5 py-3 sm:py-3.5 border-2 border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-slate-900 text-base sm:text-lg"
               >
                 <option value="">Alle Status</option>
                 <option value="draft">Entwurf</option>
@@ -475,11 +475,11 @@ const Sollstellungen = () => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Jahr</label>
+              <label className="block text-base sm:text-lg font-semibold text-slate-700 mb-2 sm:mb-3">Jahr</label>
               <select
                 value={filters.year}
                 onChange={(e) => setFilters(prev => ({ ...prev, year: parseInt(e.target.value) }))}
-                className="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-slate-900"
+                className="w-full px-4 sm:px-5 py-3 sm:py-3.5 border-2 border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-slate-900 text-base sm:text-lg"
               >
                 {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i).map(year => (
                   <option key={year} value={year}>{year}</option>
@@ -487,11 +487,11 @@ const Sollstellungen = () => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Monat</label>
+              <label className="block text-base sm:text-lg font-semibold text-slate-700 mb-2 sm:mb-3">Monat</label>
               <select
                 value={filters.month}
                 onChange={(e) => setFilters(prev => ({ ...prev, month: parseInt(e.target.value) }))}
-                className="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-slate-900"
+                className="w-full px-4 sm:px-5 py-3 sm:py-3.5 border-2 border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-slate-900 text-base sm:text-lg"
               >
                 {Array.from({ length: 12 }, (_, i) => i + 1).map(month => (
                   <option key={month} value={month}>
@@ -503,9 +503,9 @@ const Sollstellungen = () => {
             <div className="flex items-end">
               <button
                 onClick={() => setFilters({ status: '', year: new Date().getFullYear(), month: new Date().getMonth() + 1 })}
-                className="w-full px-4 py-2.5 text-sm font-medium text-slate-700 bg-slate-50 hover:bg-slate-100 rounded-xl transition-colors inline-flex items-center justify-center"
+                className="w-full px-4 sm:px-5 py-3 sm:py-3.5 text-base sm:text-lg font-semibold text-slate-700 bg-slate-50 hover:bg-slate-100 rounded-xl transition-colors inline-flex items-center justify-center border-2 border-slate-200"
               >
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 sm:w-6 sm:h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
                 Zurücksetzen
@@ -515,10 +515,10 @@ const Sollstellungen = () => {
         </div>
 
         {/* Sollstellungen Tabelle */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 mb-8 overflow-hidden">
-          <div className="px-6 py-5 border-b border-slate-200">
-            <h2 className="text-lg font-semibold text-slate-900">Sollstellungen</h2>
-            <p className="text-sm text-slate-500 mt-0.5">Übersicht aller generierten Sollstellungen</p>
+        <div className="bg-white rounded-2xl shadow-md border-2 border-gray-200 mb-6 sm:mb-8 lg:mb-10 overflow-hidden">
+          <div className="px-5 sm:px-6 lg:px-8 py-4 sm:py-5 lg:py-6 border-b-2 border-gray-200">
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900">Sollstellungen</h2>
+            <p className="text-sm sm:text-base lg:text-lg text-slate-500 mt-1 sm:mt-2">Übersicht aller generierten Sollstellungen</p>
           </div>
           <Tabelle
             spalten={billRunColumns}
@@ -528,10 +528,10 @@ const Sollstellungen = () => {
         </div>
 
         {/* Offene Sollbuchungen */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-          <div className="px-6 py-5 border-b border-slate-200">
-            <h2 className="text-lg font-semibold text-slate-900">Offene Sollbuchungen</h2>
-            <p className="text-sm text-slate-500 mt-0.5">Alle noch nicht zugeordneten Sollbuchungen</p>
+        <div className="bg-white rounded-2xl shadow-md border-2 border-gray-200 overflow-hidden">
+          <div className="px-5 sm:px-6 lg:px-8 py-4 sm:py-5 lg:py-6 border-b-2 border-gray-200">
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900">Offene Sollbuchungen</h2>
+            <p className="text-sm sm:text-base lg:text-lg text-slate-500 mt-1 sm:mt-2">Alle noch nicht zugeordneten Sollbuchungen</p>
           </div>
           <Tabelle
             spalten={chargeColumns}
