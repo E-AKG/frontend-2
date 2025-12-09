@@ -256,7 +256,7 @@ export default function Objekte() {
         }}
         titel={bearbeitung ? "Objekt bearbeiten" : "Neues Objekt anlegen"}
       >
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4 pb-2">
           <Formularfeld
             label="Name des Objekts"
             name="name"
@@ -275,7 +275,7 @@ export default function Objekte() {
             required
             icon={<MapPin className="w-5 h-5" />}
           />
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-2 sm:gap-3">
             <Formularfeld
               label="Baujahr"
               name="year_built"
@@ -304,7 +304,7 @@ export default function Objekte() {
             placeholder="Zusätzliche Informationen..."
             icon={<FileText className="w-5 h-5" />}
           />
-          <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+          <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 pt-3 sm:pt-4 border-t border-gray-200 mt-4 sm:mt-0">
             <Button
               type="button"
               variant="secondary"
@@ -313,10 +313,11 @@ export default function Objekte() {
                 setBearbeitung(null);
                 formZuruecksetzen();
               }}
+              className="w-full sm:w-auto"
             >
               Abbrechen
             </Button>
-            <Button type="submit" icon={bearbeitung ? <Edit className="w-5 h-5" /> : <Plus className="w-5 h-5" />}>
+            <Button type="submit" icon={bearbeitung ? <Edit className="w-5 h-5" /> : <Plus className="w-5 h-5" />} className="w-full sm:w-auto">
               {bearbeitung ? "Aktualisieren" : "Erstellen"}
             </Button>
           </div>

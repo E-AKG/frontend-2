@@ -640,13 +640,13 @@ const Sollstellungen = () => {
         onClose={() => setShowGenerateModal(false)}
         titel="Neue Sollstellung generieren"
       >
-        <div className="space-y-5">
+        <div className="space-y-3 sm:space-y-4 pb-2">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Monat</label>
+            <label className="block text-sm sm:text-base font-semibold text-slate-700 mb-2">Monat</label>
             <select
               value={generateForm.period_month}
               onChange={(e) => setGenerateForm(prev => ({ ...prev, period_month: parseInt(e.target.value) }))}
-              className="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-slate-900"
+              className="w-full px-4 py-3 border-2 border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-slate-900 text-base"
             >
               {Array.from({ length: 12 }, (_, i) => i + 1).map(month => (
                 <option key={month} value={month}>
@@ -656,40 +656,40 @@ const Sollstellungen = () => {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Jahr</label>
+            <label className="block text-sm sm:text-base font-semibold text-slate-700 mb-2">Jahr</label>
             <input
               type="number"
               value={generateForm.period_year}
               onChange={(e) => setGenerateForm(prev => ({ ...prev, period_year: parseInt(e.target.value) }))}
-              className="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-slate-900"
+              className="w-full px-4 py-3 border-2 border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-slate-900 text-base"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Beschreibung (optional)</label>
+            <label className="block text-sm sm:text-base font-semibold text-slate-700 mb-2">Beschreibung (optional)</label>
             <input
               type="text"
               value={generateForm.description}
               onChange={(e) => setGenerateForm(prev => ({ ...prev, description: e.target.value }))}
               placeholder="z.B. Oktober 2025 - Mieteinnahmen"
-              className="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-slate-900"
+              className="w-full px-4 py-3 border-2 border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-slate-900 text-base"
             />
           </div>
-          <div className="flex justify-end space-x-3 pt-4">
+          <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 pt-3 sm:pt-4 border-t border-gray-200 mt-4 sm:mt-0">
             <button
               type="button"
               onClick={() => setShowGenerateModal(false)}
-              className="px-5 py-2.5 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 transition-colors"
+              className="w-full sm:w-auto px-5 py-3 text-base font-semibold text-slate-700 bg-white border-2 border-slate-300 rounded-xl hover:bg-slate-50 transition-colors touch-manipulation"
             >
               Abbrechen
             </button>
             <button
               onClick={handleGenerateBillRun}
               disabled={generateMutation.isPending}
-              className="inline-flex items-center px-5 py-2.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full sm:w-auto inline-flex items-center justify-center px-5 py-3 text-base font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
             >
               {generateMutation.isPending ? (
                 <>
-                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                  <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>

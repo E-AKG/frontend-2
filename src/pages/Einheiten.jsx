@@ -397,7 +397,7 @@ export default function Einheiten() {
         }}
         titel={bearbeitung ? "Einheit bearbeiten" : "Neue Einheit"}
       >
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4 pb-2">
           <Auswahl
             label="Objekt"
             name="property_id"
@@ -416,9 +416,8 @@ export default function Einheiten() {
             onChange={(e) => setFormDaten({ ...formDaten, unit_label: e.target.value })}
             placeholder="z.B. Wohnung 1A"
             required
-            className="mt-4"
           />
-          <div className="grid grid-cols-2 gap-4 mt-4">
+          <div className="grid grid-cols-2 gap-2 sm:gap-3">
             <Formularfeld
               label="Etage"
               name="floor"
@@ -446,9 +445,8 @@ export default function Einheiten() {
               { value: "occupied", label: "Vermietet" },
             ]}
             required
-            className="mt-4"
           />
-          <div className="flex justify-end space-x-3 mt-6">
+          <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 pt-3 sm:pt-4 border-t border-gray-200 mt-4 sm:mt-0">
             <Button
               type="button"
               variant="secondary"
@@ -457,10 +455,11 @@ export default function Einheiten() {
                 setBearbeitung(null);
                 formZuruecksetzen();
               }}
+              className="w-full sm:w-auto"
             >
               Abbrechen
             </Button>
-            <Button type="submit">
+            <Button type="submit" className="w-full sm:w-auto">
               {bearbeitung ? "Aktualisieren" : "Erstellen"}
             </Button>
           </div>

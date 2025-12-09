@@ -357,7 +357,7 @@ export default function Vertraege() {
         }}
         titel="Neuen Vertrag anlegen"
       >
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4 pb-2">
           <Auswahl
             label="Einheit"
             name="unit_id"
@@ -380,7 +380,7 @@ export default function Vertraege() {
             }))}
             required
           />
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-2 sm:gap-3">
             <Formularfeld
               label="Beginn"
               name="start_date"
@@ -399,7 +399,7 @@ export default function Vertraege() {
               icon={<Calendar className="w-5 h-5" />}
             />
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-2 sm:gap-3">
             <Auswahl
               label="Status"
               name="status"
@@ -422,11 +422,11 @@ export default function Vertraege() {
               icon={<Calendar className="w-5 h-5" />}
             />
           </div>
-          <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
-            <Button type="button" variant="secondary" onClick={() => setShowModal(false)}>
+          <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 pt-3 sm:pt-4 border-t border-gray-200 mt-4 sm:mt-0">
+            <Button type="button" variant="secondary" onClick={() => setShowModal(false)} className="w-full sm:w-auto">
               Abbrechen
             </Button>
-            <Button type="submit" icon={<Plus className="w-5 h-5" />}>Erstellen</Button>
+            <Button type="submit" icon={<Plus className="w-5 h-5" />} className="w-full sm:w-auto">Erstellen</Button>
           </div>
         </form>
       </Modal>
@@ -442,9 +442,9 @@ export default function Vertraege() {
         titel={`Mietkomponenten`}
         groesse="lg"
       >
-        <div className="mb-6">
-          <h3 className="text-base font-semibold mb-3">Neue Komponente</h3>
-          <form onSubmit={handleKomponenteHinzufuegen} className="grid grid-cols-4 gap-3">
+        <div className="mb-4 sm:mb-6">
+          <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Neue Komponente</h3>
+          <form onSubmit={handleKomponenteHinzufuegen} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
             <Auswahl
               name="type"
               value={komponentenForm.type}
@@ -476,7 +476,7 @@ export default function Vertraege() {
                 setKomponentenForm({ ...komponentenForm, description: e.target.value })
               }
             />
-            <Button type="submit">Hinzufügen</Button>
+            <Button type="submit" className="w-full sm:w-auto">Hinzufügen</Button>
           </form>
         </div>
 
