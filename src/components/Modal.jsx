@@ -18,7 +18,7 @@ export default function Modal({ isOpen, onClose, titel, children, groesse = "md"
 
       {/* Modal - Auf Mobile fast vollständig, auf Desktop zentriert */}
       <div
-        className={`relative bg-white rounded-t-3xl sm:rounded-2xl sm:rounded-3xl shadow-2xl ${groessenKlassen[groesse]} w-full h-[calc(100vh-1rem)] sm:h-auto sm:max-h-[90vh] flex flex-col overflow-hidden border border-gray-200/50 animate-scale-in`}
+        className={`relative bg-white rounded-t-3xl sm:rounded-2xl sm:rounded-3xl shadow-2xl ${groessenKlassen[groesse]} w-full h-[calc(100vh-2rem)] sm:h-auto sm:max-h-[75vh] flex flex-col overflow-hidden border border-gray-200/50 animate-scale-in`}
       >
         {/* Header - Fixed */}
         <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200 bg-gray-50/50 flex-shrink-0">
