@@ -305,6 +305,7 @@ export default function Mieter() {
           formZuruecksetzen();
         }}
         titel={bearbeitung ? "Mieter bearbeiten" : "Neuen Mieter anlegen"}
+        kompakt={true}
       >
         <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4 pb-2">
           <div className="grid grid-cols-2 gap-2 sm:gap-3">
