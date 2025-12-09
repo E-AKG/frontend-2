@@ -11,26 +11,26 @@ export default function Formularfeld({
   disabled = false,
   icon,
 }) {
-  const inputClasses = `w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 rounded-xl text-sm sm:text-[15px] transition-all duration-200 min-h-[44px] sm:min-h-[48px]
+  const inputClasses = `w-full px-4 sm:px-5 py-3.5 sm:py-4 border-2 rounded-xl text-base sm:text-lg transition-all duration-200 min-h-[52px] sm:min-h-[56px]
     ${error
       ? "border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200"
       : "border-gray-200 bg-white focus:border-primary-500 focus:ring-primary-200 active:border-gray-300"
     }
     ${disabled ? "bg-gray-50 text-gray-500 cursor-not-allowed border-gray-200" : "text-gray-900"}
-    ${icon ? "pl-10 sm:pl-11" : ""}
+    ${icon ? "pl-12 sm:pl-14" : ""}
     focus:outline-none focus:ring-2 focus:ring-offset-0 placeholder:text-gray-400`;
 
   return (
     <div className={`${className}`}>
       {label && (
-        <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2 sm:mb-2.5">
+        <label className="block text-sm sm:text-base lg:text-lg font-semibold text-gray-700 mb-2 sm:mb-3">
           {label}
           {required && <span className="text-red-500 ml-1">*</span>}
         </label>
       )}
       <div className="relative">
         {icon && (
-          <div className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 text-gray-400">
+          <div className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-gray-400">
             {icon}
           </div>
         )}
