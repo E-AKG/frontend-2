@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Formularfeld from "../components/Formularfeld";
 import Button from "../components/Button";
-import { Settings, User, Link2, FileText, Bell, Mail, Lock, CreditCard, CheckCircle, XCircle, AlertCircle, HelpCircle, ExternalLink } from "lucide-react";
+import { Settings, User, FileText, Bell, Mail, Lock, CreditCard, CheckCircle, XCircle, AlertCircle, HelpCircle, ExternalLink } from "lucide-react";
 import { subscriptionApi } from "../api/subscriptionApi";
 
 export default function Einstellungen() {
@@ -13,7 +13,6 @@ export default function Einstellungen() {
   const tabs = [
     { id: "account", label: "Benutzerkonto", icon: User },
     { id: "subscription", label: "Abonnement", icon: CreditCard },
-    { id: "finapi", label: "FinAPI-Verknüpfung", icon: Link2 },
     { id: "templates", label: "Vorlagen", icon: FileText },
     { id: "reminders", label: "Mahnregeln", icon: Bell },
     { id: "support", label: "Support & Hilfe", icon: HelpCircle },
@@ -47,44 +46,44 @@ export default function Einstellungen() {
 
   return (
     <div className="animate-fade-in">
-      <div className="mb-4 sm:mb-6 lg:mb-8">
-        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-1 sm:mb-2 flex items-center gap-2 sm:gap-3">
-          <Settings className="w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 text-primary-600" />
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-2 sm:mb-3 flex items-center gap-2 sm:gap-3">
+          <Settings className="w-7 h-7 sm:w-8 sm:h-8 lg:w-10 lg:h-10 text-primary-600" />
           Einstellungen
         </h1>
-        <p className="text-gray-600 text-sm sm:text-base">Passen Sie Ihre Präferenzen an</p>
+        <p className="text-base sm:text-lg text-gray-600">Passen Sie Ihre Präferenzen an</p>
       </div>
 
       <div className="bg-white rounded-2xl border-2 border-gray-200 shadow-sm overflow-hidden">
-        {/* Tabs */}
-        <div className="border-b border-gray-200 px-6">
-          <nav className="flex space-x-2" aria-label="Tabs">
+        {/* Tabs - Mobile optimized with scroll */}
+        <div className="border-b border-gray-200 px-2 sm:px-6 overflow-x-auto">
+          <nav className="flex space-x-2 sm:space-x-2 min-w-max sm:min-w-0" aria-label="Tabs">
             {tabs.map((tab) => {
               const Icon = tab.icon;
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`py-4 px-4 border-b-2 font-semibold text-sm transition-all duration-200 flex items-center gap-2 ${
+                  className={`py-4 sm:py-4 px-4 sm:px-5 border-b-2 font-bold text-sm sm:text-base transition-all duration-200 flex items-center gap-2 sm:gap-2 whitespace-nowrap touch-manipulation ${
                     activeTab === tab.id
                       ? "border-primary-600 text-primary-600 bg-primary-50/50"
                       : "border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50"
                   }`}
                 >
-                  <Icon className="w-4 h-4" />
-                  {tab.label}
+                  <Icon className="w-5 h-5 sm:w-5 sm:h-5 flex-shrink-0" />
+                  <span>{tab.label}</span>
                 </button>
               );
             })}
           </nav>
         </div>
 
-        {/* Content */}
-        <div className="p-6 lg:p-8">
+        {/* Content - Mehr Platz auf Mobile */}
+        <div className="p-5 sm:p-6 lg:p-8">
           {activeTab === "subscription" && (
-            <div className="max-w-2xl">
-              <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                <CreditCard className="w-5 h-5 text-primary-600" />
+            <div className="w-full">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-5 sm:mb-6 flex items-center gap-2 sm:gap-3">
+                <CreditCard className="w-6 h-6 sm:w-7 sm:h-7 text-primary-600 flex-shrink-0" />
                 Abonnement
               </h2>
               
@@ -219,109 +218,91 @@ export default function Einstellungen() {
           )}
 
           {activeTab === "account" && (
-            <div className="max-w-2xl space-y-5">
-              <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                <User className="w-5 h-5 text-primary-600" />
+            <div className="w-full space-y-5 sm:space-y-6">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-5 sm:mb-6 flex items-center gap-2 sm:gap-3">
+                <User className="w-6 h-6 sm:w-7 sm:h-7 text-primary-600 flex-shrink-0" />
                 Benutzerkonto
               </h2>
-              <Formularfeld
-                label="E-Mail-Adresse"
-                type="email"
-                value={localStorage.getItem("user_email") || ""}
-                disabled
-                icon={<Mail className="w-5 h-5" />}
-              />
-              <Formularfeld
-                label="Neues Passwort"
-                type="password"
-                placeholder="Leer lassen, um nicht zu ändern"
-                icon={<Lock className="w-5 h-5" />}
-              />
-              <Formularfeld
-                label="Passwort bestätigen"
-                type="password"
-                placeholder="Neues Passwort wiederholen"
-                icon={<Lock className="w-5 h-5" />}
-              />
-              <div className="pt-4">
-                <Button>Änderungen speichern</Button>
+              <div className="space-y-5 sm:space-y-6">
+                <Formularfeld
+                  label="E-Mail-Adresse"
+                  type="email"
+                  value={localStorage.getItem("user_email") || ""}
+                  disabled
+                  icon={<Mail className="w-6 h-6 sm:w-7 sm:h-7" />}
+                />
+                <Formularfeld
+                  label="Neues Passwort"
+                  type="password"
+                  placeholder="Leer lassen, um nicht zu ändern"
+                  icon={<Lock className="w-6 h-6 sm:w-7 sm:h-7" />}
+                />
+                <Formularfeld
+                  label="Passwort bestätigen"
+                  type="password"
+                  placeholder="Neues Passwort wiederholen"
+                  icon={<Lock className="w-6 h-6 sm:w-7 sm:h-7" />}
+                />
               </div>
-            </div>
-          )}
-
-          {activeTab === "finapi" && (
-            <div className="max-w-2xl">
-              <h2 className="text-xl font-bold text-gray-900 mb-2 flex items-center gap-2">
-                <Link2 className="w-5 h-5 text-primary-600" />
-                FinAPI-Verknüpfung
-              </h2>
-              <p className="text-gray-600 mb-6">
-                Verbinden Sie Ihr Bankkonto, um automatisch Transaktionen zu
-                synchronisieren.
-              </p>
-              <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl border-2 border-gray-200 p-8 text-center">
-                <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <Link2 className="w-8 h-8 text-gray-400" />
-                </div>
-                <p className="text-gray-600 font-medium mb-6">Noch kein Konto verknüpft</p>
-                <Button icon={<Link2 className="w-5 h-5" />}>Jetzt verknüpfen</Button>
+              <div className="pt-4 sm:pt-6">
+                <Button className="w-full text-lg sm:text-xl px-8 sm:px-10 py-4 sm:py-5 font-bold">Änderungen speichern</Button>
               </div>
             </div>
           )}
 
           {activeTab === "templates" && (
-            <div className="max-w-2xl">
-              <h2 className="text-xl font-bold text-gray-900 mb-2 flex items-center gap-2">
-                <FileText className="w-5 h-5 text-primary-600" />
+            <div className="w-full">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4 flex items-center gap-2 sm:gap-3">
+                <FileText className="w-6 h-6 sm:w-7 sm:h-7 text-primary-600 flex-shrink-0" />
                 Vorlagen
               </h2>
-              <p className="text-gray-600 mb-6">
+              <p className="text-base sm:text-lg text-gray-600 mb-5 sm:mb-6">
                 E-Mail-Vorlagen für Mahnungen und Benachrichtigungen
               </p>
-              <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl border-2 border-gray-200 p-12 text-center">
-                <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-500 font-medium">Bald verfügbar</p>
+              <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl border-2 border-gray-200 p-10 sm:p-12 lg:p-16 text-center">
+                <FileText className="w-16 h-16 sm:w-20 sm:h-20 text-gray-400 mx-auto mb-5" />
+                <p className="text-lg sm:text-xl text-gray-500 font-semibold">Bald verfügbar</p>
               </div>
             </div>
           )}
 
           {activeTab === "reminders" && (
-            <div className="max-w-2xl">
-              <h2 className="text-xl font-bold text-gray-900 mb-2 flex items-center gap-2">
-                <Bell className="w-5 h-5 text-primary-600" />
+            <div className="w-full">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4 flex items-center gap-2 sm:gap-3">
+                <Bell className="w-6 h-6 sm:w-7 sm:h-7 text-primary-600 flex-shrink-0" />
                 Mahnregeln
               </h2>
-              <p className="text-gray-600 mb-6">
+              <p className="text-base sm:text-lg text-gray-600 mb-5 sm:mb-6">
                 Automatische Mahnungen bei Zahlungsverzug
               </p>
-              <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl border-2 border-gray-200 p-12 text-center">
-                <Bell className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-500 font-medium">Bald verfügbar</p>
+              <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl border-2 border-gray-200 p-10 sm:p-12 lg:p-16 text-center">
+                <Bell className="w-16 h-16 sm:w-20 sm:h-20 text-gray-400 mx-auto mb-5" />
+                <p className="text-lg sm:text-xl text-gray-500 font-semibold">Bald verfügbar</p>
               </div>
             </div>
           )}
 
           {activeTab === "support" && (
-            <div className="max-w-2xl">
-              <h2 className="text-xl font-bold text-gray-900 mb-2 flex items-center gap-2">
-                <HelpCircle className="w-5 h-5 text-primary-600" />
+            <div className="w-full">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4 flex items-center gap-2 sm:gap-3">
+                <HelpCircle className="w-6 h-6 sm:w-7 sm:h-7 text-primary-600 flex-shrink-0" />
                 Support & Hilfe
               </h2>
-              <p className="text-gray-600 mb-6">
+              <p className="text-base sm:text-lg text-gray-600 mb-5 sm:mb-6">
                 Immpire wird von <strong className="text-gray-900">IZENIC</strong> entwickelt und betreut. 
                 Für Support, Fragen oder weitere Informationen kontaktieren Sie uns bitte.
               </p>
               
-              <div className="space-y-4">
+              <div className="space-y-5 sm:space-y-6">
                 {/* IZENIC Info Card */}
-                <div className="bg-gradient-to-br from-primary-50 to-white rounded-2xl border-2 border-primary-200 p-6 sm:p-8">
-                  <div className="flex items-start gap-4 mb-4">
-                    <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center">
-                      <HelpCircle className="w-6 h-6 text-white" />
+                <div className="bg-gradient-to-br from-primary-50 to-white rounded-2xl border-2 border-primary-200 p-4 sm:p-6 lg:p-8">
+                  <div className="flex items-start gap-3 sm:gap-4 mb-4">
+                    <div className="flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center">
+                      <HelpCircle className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold text-gray-900 mb-1">Über Immpire</h3>
-                      <p className="text-sm text-gray-600">
+                      <h3 className="text-base sm:text-lg lg:text-xl font-bold text-gray-900 mb-1 sm:mb-2">Über Immpire</h3>
+                      <p className="text-sm sm:text-base text-gray-600">
                         Immpire ist ein Produkt von <strong className="text-gray-900">IZENIC</strong>, 
                         einem Unternehmen für innovative Softwarelösungen.
                       </p>
@@ -331,58 +312,58 @@ export default function Einstellungen() {
                     href="https://www.izenic.com" 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 font-semibold text-sm transition-colors"
+                    className="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 font-semibold text-sm sm:text-base transition-colors touch-manipulation"
                   >
                     IZENIC Website besuchen
-                    <ExternalLink className="w-4 h-4" />
+                    <ExternalLink className="w-4 h-4 sm:w-5 sm:h-5" />
                   </a>
                 </div>
 
                 {/* Support Options */}
-                <div className="grid sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   <a 
                     href="mailto:kontakt@izenic.com" 
-                    className="bg-white rounded-xl border-2 border-gray-200 p-6 hover:border-primary-300 hover:shadow-lg transition-all group"
+                    className="bg-white rounded-xl border-2 border-gray-200 p-4 sm:p-6 hover:border-primary-300 hover:shadow-lg transition-all group touch-manipulation"
                   >
-                    <Mail className="w-8 h-8 text-primary-600 mb-3 group-hover:scale-110 transition-transform" />
-                    <h3 className="font-bold text-gray-900 mb-2">Support kontaktieren</h3>
-                    <p className="text-sm text-gray-600 mb-3">
+                    <Mail className="w-8 h-8 sm:w-10 sm:h-10 text-primary-600 mb-3 sm:mb-4 group-hover:scale-110 transition-transform" />
+                    <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-2">Support kontaktieren</h3>
+                    <p className="text-sm sm:text-base text-gray-600 mb-3">
                       Schreiben Sie uns eine E-Mail für technischen Support
                     </p>
-                    <span className="text-sm font-semibold text-primary-600 group-hover:text-primary-700">
+                    <span className="text-sm sm:text-base font-semibold text-primary-600 group-hover:text-primary-700">
                       kontakt@izenic.com →
                     </span>
                   </a>
 
                   <a 
                     href="mailto:kontakt@izenic.com" 
-                    className="bg-white rounded-xl border-2 border-gray-200 p-6 hover:border-primary-300 hover:shadow-lg transition-all group"
+                    className="bg-white rounded-xl border-2 border-gray-200 p-4 sm:p-6 hover:border-primary-300 hover:shadow-lg transition-all group touch-manipulation"
                   >
-                    <Mail className="w-8 h-8 text-primary-600 mb-3 group-hover:scale-110 transition-transform" />
-                    <h3 className="font-bold text-gray-900 mb-2">Allgemeine Anfragen</h3>
-                    <p className="text-sm text-gray-600 mb-3">
+                    <Mail className="w-8 h-8 sm:w-10 sm:h-10 text-primary-600 mb-3 sm:mb-4 group-hover:scale-110 transition-transform" />
+                    <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-2">Allgemeine Anfragen</h3>
+                    <p className="text-sm sm:text-base text-gray-600 mb-3">
                       Für allgemeine Fragen und Informationen
                     </p>
-                    <span className="text-sm font-semibold text-primary-600 group-hover:text-primary-700">
+                    <span className="text-sm sm:text-base font-semibold text-primary-600 group-hover:text-primary-700">
                       kontakt@izenic.com →
                     </span>
                   </a>
                 </div>
 
                 {/* Additional Info */}
-                <div className="bg-gray-50 rounded-xl border border-gray-200 p-6">
-                  <h4 className="font-bold text-gray-900 mb-3">Weitere Informationen</h4>
-                  <ul className="space-y-2 text-sm text-gray-600">
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" />
+                <div className="bg-gray-50 rounded-xl border border-gray-200 p-4 sm:p-6">
+                  <h4 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">Weitere Informationen</h4>
+                  <ul className="space-y-2 sm:space-y-3 text-sm sm:text-base text-gray-600">
+                    <li className="flex items-start gap-2 sm:gap-3">
+                      <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-500 flex-shrink-0 mt-0.5" />
                       <span>Immpire wird kontinuierlich von IZENIC weiterentwickelt</span>
                     </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" />
+                    <li className="flex items-start gap-2 sm:gap-3">
+                      <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-500 flex-shrink-0 mt-0.5" />
                       <span>Alle Daten werden sicher und DSGVO-konform gespeichert</span>
                     </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" />
+                    <li className="flex items-start gap-2 sm:gap-3">
+                      <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-500 flex-shrink-0 mt-0.5" />
                       <span>Support wird von IZENIC bereitgestellt</span>
                     </li>
                   </ul>
