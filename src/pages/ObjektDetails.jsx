@@ -1,23 +1,50 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { propertyApi } from "../api/propertyApi";
 import { unitApi } from "../api/unitApi";
+import { meterApi } from "../api/meterApi";
+import { keyApi } from "../api/keyApi";
+import { useApp } from "../contexts/AppContext";
 import Tabelle from "../components/Tabelle";
 import Modal from "../components/Modal";
 import Formularfeld from "../components/Formularfeld";
 import Auswahl from "../components/Auswahl";
 import Button from "../components/Button";
 import Benachrichtigung, { useBenachrichtigung } from "../components/Benachrichtigung";
+import { Gauge, Key as KeyIcon } from "lucide-react";
 
 export default function ObjektDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { selectedClient } = useApp();
   const [objekt, setObjekt] = useState(null);
   const [einheiten, setEinheiten] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("units");
   const [showModal, setShowModal] = useState(false);
   const [bearbeitung, setBearbeitung] = useState(null);
   const { benachrichtigung, zeigeBenachrichtigung } = useBenachrichtigung();
+
+  // Lade Zähler
+  const { data: meters = [], refetch: refetchMeters } = useQuery({
+    queryKey: ["meters", id],
+    queryFn: async () => {
+      const response = await meterApi.list({ property_id: id });
+      return response.data || [];
+    },
+    enabled: !!id,
+  });
+
+  // Lade Schlüssel
+  const { data: keys = [], refetch: refetchKeys } = useQuery({
+    queryKey: ["keys", id],
+    queryFn: async () => {
+      const response = await keyApi.list({ property_id: id });
+      return response.data || [];
+    },
+    enabled: !!id,
+  });
 
   const [formDaten, setFormDaten] = useState({
     unit_label: "",
@@ -231,25 +258,175 @@ export default function ObjektDetails() {
         )}
       </div>
 
-      {/* Einheiten */}
-      <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 p-4 sm:p-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
-          <h2 className="text-base sm:text-lg font-semibold text-slate-900">Wohneinheiten</h2>
-          <Button
-            onClick={() => {
-              setBearbeitung(null);
-              formZuruecksetzen();
-              setShowModal(true);
-            }}
-            size="sm"
-            className="w-full sm:w-auto"
-          >
-            + Neue Einheit
-          </Button>
-        </div>
-
-        <Tabelle spalten={spalten} daten={einheiten} loading={loading} />
+      {/* Tabs */}
+      <div className="border-b border-gray-200 dark:border-gray-700 mb-4">
+        <nav className="flex space-x-8">
+          {[
+            { id: "units", label: "Einheiten", count: einheiten.length },
+            { id: "meters", label: "Zähler", count: meters.length, icon: Gauge },
+            { id: "keys", label: "Schlüssel", count: keys.length, icon: KeyIcon },
+          ].map((tab) => {
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2 ${
+                  activeTab === tab.id
+                    ? "border-primary-500 text-primary-600 dark:text-primary-400"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300"
+                }`}
+              >
+                {Icon && <Icon className="w-4 h-4" />}
+                {tab.label}
+                {tab.count > 0 && (
+                  <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded-full text-xs">
+                    {tab.count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </nav>
       </div>
+
+      {/* Tab Content */}
+      {activeTab === "units" && (
+        <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
+            <h2 className="text-base sm:text-lg font-semibold text-slate-900">Wohneinheiten</h2>
+            <Button
+              onClick={() => {
+                setBearbeitung(null);
+                formZuruecksetzen();
+                setShowModal(true);
+              }}
+              size="sm"
+              className="w-full sm:w-auto"
+            >
+              + Neue Einheit
+            </Button>
+          </div>
+          <Tabelle spalten={spalten} daten={einheiten} loading={loading} />
+        </div>
+      )}
+
+      {activeTab === "meters" && (
+        <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
+            <h2 className="text-base sm:text-lg font-semibold text-slate-900">Zähler</h2>
+            <Button
+              onClick={() => {
+                // TODO: Modal für neuen Zähler
+                alert("Zähler-Verwaltung wird implementiert");
+              }}
+              size="sm"
+              className="w-full sm:w-auto"
+            >
+              + Neuer Zähler
+            </Button>
+          </div>
+          {meters.length > 0 ? (
+            <div className="space-y-3">
+              {meters.map((meter) => (
+                <div
+                  key={meter.id}
+                  className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="font-medium text-gray-900 dark:text-white">
+                        {meter.meter_number} - {meter.meter_type}
+                      </div>
+                      {meter.location && (
+                        <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                          {meter.location}
+                        </div>
+                      )}
+                      {meter.calibration_due_date && (
+                        <div className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                          Eichfrist: {new Date(meter.calibration_due_date).toLocaleDateString("de-DE")}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+              Keine Zähler vorhanden
+            </div>
+          )}
+        </div>
+      )}
+
+      {activeTab === "keys" && (
+        <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
+            <h2 className="text-base sm:text-lg font-semibold text-slate-900">Schlüssel</h2>
+            <Button
+              onClick={() => {
+                // TODO: Modal für neuen Schlüssel
+                alert("Schlüssel-Verwaltung wird implementiert");
+              }}
+              size="sm"
+              className="w-full sm:w-auto"
+            >
+              + Neuer Schlüssel
+            </Button>
+          </div>
+          {keys.length > 0 ? (
+            <div className="space-y-3">
+              {keys.map((key) => (
+                <div
+                  key={key.id}
+                  className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="font-medium text-gray-900 dark:text-white">
+                        {key.key_type} {key.key_number && `- ${key.key_number}`}
+                      </div>
+                      {key.description && (
+                        <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                          {key.description}
+                        </div>
+                      )}
+                      <div className="flex items-center gap-2 mt-2">
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs ${
+                            key.status === "available"
+                              ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
+                              : key.status === "out"
+                              ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+                              : "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+                          }`}
+                        >
+                          {key.status === "available"
+                            ? "Verfügbar"
+                            : key.status === "out"
+                            ? "Ausgegeben"
+                            : key.status}
+                        </span>
+                        {key.assigned_to_name && (
+                          <span className="text-xs text-gray-600 dark:text-gray-400">
+                            an: {key.assigned_to_name}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+              Keine Schlüssel vorhanden
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Modal */}
       <Modal

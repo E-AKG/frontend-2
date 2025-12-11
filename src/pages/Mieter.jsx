@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { tenantApi } from "../api/tenantApi";
 import Tabelle from "../components/Tabelle";
@@ -23,6 +23,7 @@ import {
 import RiskBadge from "../components/RiskBadge";
 
 export default function Mieter() {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
   const [suche, setSuche] = useState("");
@@ -196,14 +197,17 @@ export default function Mieter() {
       key: "name",
       label: "Name",
       render: (zeile) => (
-        <div>
+        <button
+          onClick={() => navigate(`/personen/${zeile.id}`)}
+          className="text-left hover:text-primary-600 transition-colors"
+        >
           <div className="font-semibold text-gray-900">
             {zeile.first_name} {zeile.last_name}
           </div>
           {zeile.email && (
             <div className="text-xs text-gray-500 mt-0.5">{zeile.email}</div>
           )}
-        </div>
+        </button>
       ),
     },
     {
