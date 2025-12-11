@@ -8,15 +8,20 @@ import Pricing from "./pages/Pricing";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import UpgradeRequired from "./pages/UpgradeRequired";
 import Dashboard from "./pages/Dashboard";
+import DashboardPro from "./pages/DashboardPro";
 import Objekte from "./pages/Objekte";
 import ObjektDetails from "./pages/ObjektDetails";
 import Einheiten from "./pages/Einheiten";
 import Mieter from "./pages/Mieter";
+import PersonenCRM from "./pages/PersonenCRM";
 import Vertraege from "./pages/Vertraege";
 import Sollstellungen from "./pages/Sollstellungen";
 import Bank from "./pages/Bank";
+import Finanzen from "./pages/Finanzen";
+import Abrechnung from "./pages/Abrechnung";
 import Einstellungen from "./pages/Einstellungen";
 import AppLayout from "./layout/AppLayout";
+import ProLayout from "./layout/ProLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 // Component to redirect authenticated users away from landing page
@@ -58,21 +63,30 @@ export default function App() {
           <Route path="/payment-success" element={<PaymentSuccess />} />
           <Route path="/upgrade" element={<UpgradeRequired />} />
 
-          {/* Protected Routes with Layout - Trial users have access */}
+          {/* Protected Routes with ProLayout - New Layout */}
           <Route
             path="/"
             element={
               <ProtectedRoute>
-                <AppLayout />
+                <ProLayout />
               </ProtectedRoute>
             }
           >
-            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="dashboard" element={<DashboardPro />} />
+            <Route path="verwaltung" element={<Objekte />} />
+            <Route path="verwaltung/:id" element={<ObjektDetails />} />
+            <Route path="personen" element={<Mieter />} />
+            <Route path="personen/:id" element={<PersonenCRM />} />
+            <Route path="vertraege" element={<Vertraege />} />
+            <Route path="finanzen" element={<Finanzen />} />
+            <Route path="bank" element={<Bank />} />
+            <Route path="abrechnung" element={<Abrechnung />} />
+            <Route path="sollstellungen" element={<Sollstellungen />} />
+            {/* Legacy routes for backward compatibility */}
             <Route path="objekte" element={<Objekte />} />
             <Route path="objekte/:id" element={<ObjektDetails />} />
             <Route path="einheiten" element={<Einheiten />} />
             <Route path="mieter" element={<Mieter />} />
-            <Route path="vertraege" element={<Vertraege />} />
             <Route path="sollstellungen" element={<Sollstellungen />} />
             <Route path="bank" element={<Bank />} />
             <Route path="einstellungen" element={<Einstellungen />} />
