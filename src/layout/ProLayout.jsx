@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import { Outlet, useNavigate, useLocation, NavLink } from "react-router-dom";
 import { useApp } from "../contexts/AppContext";
 import { searchApi } from "../api/searchApi";
-import { Building2, Users, FileText, Receipt, CreditCard, DoorOpen } from "lucide-react";
 import {
   LayoutDashboard,
   Building2,
