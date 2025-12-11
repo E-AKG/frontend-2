@@ -23,5 +23,9 @@ export const tenantApi = {
   remove: (id) => {
     return axiosInstance.delete(`/api/tenants/${id}`);
   },
+
+  getCrm: (id) => {
+    return axiosInstance.get(`/api/tenants/${id}/crm`);
+  },
 };
 
