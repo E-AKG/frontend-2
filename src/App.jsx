@@ -7,7 +7,6 @@ import Landing from "./pages/Landing";
 import Pricing from "./pages/Pricing";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import UpgradeRequired from "./pages/UpgradeRequired";
-import Dashboard from "./pages/Dashboard";
 import DashboardPro from "./pages/DashboardPro";
 import Objekte from "./pages/Objekte";
 import ObjektDetails from "./pages/ObjektDetails";
@@ -20,7 +19,6 @@ import Bank from "./pages/Bank";
 import Finanzen from "./pages/Finanzen";
 import Abrechnung from "./pages/Abrechnung";
 import Einstellungen from "./pages/Einstellungen";
-import AppLayout from "./layout/AppLayout";
 import ProLayout from "./layout/ProLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
 
