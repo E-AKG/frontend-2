@@ -18,11 +18,16 @@ import {
   FileText,
   Edit,
   Trash2,
-  CheckCircle2
+  CheckCircle2,
+  Building2,
+  Wrench
 } from "lucide-react";
 import RiskBadge from "../components/RiskBadge";
+import Eigentuemer from "./Eigentuemer";
+import Dienstleister from "./Dienstleister";
 
 export default function Mieter() {
+  const [activeTab, setActiveTab] = useState("tenants");
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -269,11 +274,41 @@ export default function Mieter() {
       <div className="mb-4 sm:mb-6 lg:mb-8">
         <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-1 sm:mb-2 flex items-center gap-2 sm:gap-3">
           <Users className="w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 text-primary-600" />
-          Mieter
+          Personen
         </h1>
-        <p className="text-gray-600 text-sm sm:text-base">Verwalten Sie Ihre Mieter-Kontakte</p>
+        <p className="text-gray-600 text-sm sm:text-base">Verwalten Sie Mieter, Eigentümer und Dienstleister</p>
       </div>
 
+      {/* Tabs */}
+      <div className="border-b border-gray-200 dark:border-gray-700 mb-6">
+        <nav className="flex space-x-8">
+          {[
+            { id: "tenants", label: "Mieter", icon: Users },
+            { id: "owners", label: "Eigentümer", icon: Building2 },
+            { id: "providers", label: "Dienstleister", icon: Wrench },
+          ].map((tab) => {
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2 ${
+                  activeTab === tab.id
+                    ? "border-primary-500 text-primary-600 dark:text-primary-400"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300"
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                {tab.label}
+              </button>
+            );
+          })}
+        </nav>
+      </div>
+
+      {/* Tab Content */}
+      {activeTab === "tenants" && (
+      <div>
       <div className="bg-white rounded-xl sm:rounded-2xl border-2 border-gray-200 shadow-sm p-3 sm:p-4 lg:p-5 mb-4 sm:mb-5 lg:mb-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 sm:gap-4">
           <div className="relative flex-1 max-w-md">
@@ -396,6 +431,11 @@ export default function Mieter() {
           </div>
         </form>
       </Modal>
+      </div>
+      )}
+
+      {activeTab === "owners" && <Eigentuemer />}
+      {activeTab === "providers" && <Dienstleister />}
     </div>
   );
 }
