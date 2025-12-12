@@ -226,48 +226,72 @@ export default function Finanzen() {
         {/* Charges Tab */}
         {activeTab === "charges" && (
           <div className="space-y-4">
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-gray-600 dark:text-gray-400">
+                {openCharges.length} offene Posten gefunden
+              </p>
+              <button
+                onClick={() => navigate("/offene-posten")}
+                className="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 font-medium"
+              >
+                Detaillierte Ansicht →
+              </button>
+            </div>
             {openCharges.length > 0 ? (
-              openCharges.map((charge) => (
-                <div
-                  key={charge.charge_id}
-                  className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="font-medium text-gray-900 dark:text-white mb-2">
-                        {charge.mieter} - {charge.einheit}
-                      </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                        {charge.objekt}
-                      </div>
-                      <div className="flex items-center gap-4 text-sm">
-                        <span className="text-gray-600 dark:text-gray-400">
-                          Fällig: {formatDate(charge.faellig)}
-                        </span>
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs ${
-                            charge.status === "overdue"
-                              ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                              : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
-                          }`}
-                        >
-                          {charge.status === "overdue" ? "Überfällig" : "Offen"}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="text-right ml-4">
-                      <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                        {formatCurrency(charge.offen)}
-                      </div>
-                      {charge.betrag !== charge.offen && (
-                        <div className="text-sm text-gray-500 dark:text-gray-400">
-                          von {formatCurrency(charge.betrag)}
+              <>
+                {openCharges.slice(0, 10).map((charge) => (
+                  <div
+                    key={charge.charge_id}
+                    onClick={() => navigate("/offene-posten")}
+                    className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-shadow cursor-pointer"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="font-medium text-gray-900 dark:text-white mb-2">
+                          {charge.mieter} - {charge.einheit}
                         </div>
-                      )}
+                        <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                          {charge.objekt}
+                        </div>
+                        <div className="flex items-center gap-4 text-sm">
+                          <span className="text-gray-600 dark:text-gray-400">
+                            Fällig: {formatDate(charge.faellig)}
+                          </span>
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs ${
+                              charge.status === "overdue"
+                                ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                                : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+                            }`}
+                          >
+                            {charge.status === "overdue" ? "Überfällig" : "Offen"}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="text-right ml-4">
+                        <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                          {formatCurrency(charge.offen)}
+                        </div>
+                        {charge.betrag !== charge.offen && (
+                          <div className="text-sm text-gray-500 dark:text-gray-400">
+                            von {formatCurrency(charge.betrag)}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))
+                ))}
+                {openCharges.length > 10 && (
+                  <div className="text-center py-4">
+                    <button
+                      onClick={() => navigate("/offene-posten")}
+                      className="text-primary-600 hover:text-primary-700 dark:text-primary-400 font-medium"
+                    >
+                      {openCharges.length - 10} weitere anzeigen →
+                    </button>
+                  </div>
+                )}
+              </>
             ) : (
               <div className="text-center py-12 text-gray-500 dark:text-gray-400">
                 Keine offenen Posten
