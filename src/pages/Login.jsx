@@ -66,12 +66,12 @@ export default function Login() {
         throw new Error("Token konnte nicht in localStorage gespeichert werden");
       }
       
-      console.log("✅ Token gespeichert, navigiere zu Dashboard");
+      console.log("✅ Token gespeichert, navigiere zu Client-Auswahl");
       
       // Verwende setTimeout für Navigation, falls React Router Probleme hat
       setTimeout(() => {
-        console.log("🚀 Navigiere zu /dashboard");
-        navigate("/dashboard");
+        console.log("🚀 Navigiere zu /client-selection");
+        navigate("/client-selection");
       }, 100);
       
     } catch (error) {
