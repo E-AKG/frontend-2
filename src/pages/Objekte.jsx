@@ -83,15 +83,18 @@ export default function Objekte() {
       if (bearbeitung) {
         await propertyApi.update(bearbeitung.id, daten);
         zeigeBenachrichtigung("Objekt erfolgreich aktualisiert");
+        setShowModal(false);
+        setBearbeitung(null);
+        formZuruecksetzen();
+        ladeObjekte();
       } else {
-        await propertyApi.create(daten);
+        const response = await propertyApi.create(daten);
         zeigeBenachrichtigung("Objekt erfolgreich erstellt");
+        setShowModal(false);
+        formZuruecksetzen();
+        // Navigiere direkt zur Detailansicht, damit Einheiten/Zähler/Schlüssel hinzugefügt werden können
+        navigate(`/verwaltung/${response.data.id}`);
       }
-
-      setShowModal(false);
-      setBearbeitung(null);
-      formZuruecksetzen();
-      ladeObjekte();
     } catch (error) {
       zeigeBenachrichtigung(
         error.response?.data?.detail || "Fehler beim Speichern",
@@ -243,7 +246,7 @@ export default function Objekte() {
         spalten={spalten}
         daten={objekte}
         loading={loading}
-        onZeileKlick={(zeile) => navigate(`/objekte/${zeile.id}`)}
+        onZeileKlick={(zeile) => navigate(`/verwaltung/${zeile.id}`)}
       />
 
       {/* Modal */}
