@@ -44,5 +44,15 @@ export const accountingApi = {
     const response = await axiosInstance.post(`/api/accounting/${accountingId}/generate`);
     return response;
   },
+
+  deleteItem: async (accountingId, itemId) => {
+    const response = await axiosInstance.delete(`/api/accounting/${accountingId}/items/${itemId}`);
+    return response;
+  },
+
+  checkMeters: async (accountingId) => {
+    const response = await axiosInstance.get(`/api/accounting/${accountingId}/meter-check`);
+    return response;
+  },
 };
 
