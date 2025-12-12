@@ -14,6 +14,8 @@ import ObjektDetails from "./pages/ObjektDetails";
 import Einheiten from "./pages/Einheiten";
 import Mieter from "./pages/Mieter";
 import PersonenCRM from "./pages/PersonenCRM";
+import Eigentuemer from "./pages/Eigentuemer";
+import Dienstleister from "./pages/Dienstleister";
 import Vertraege from "./pages/Vertraege";
 import Sollstellungen from "./pages/Sollstellungen";
 import Bank from "./pages/Bank";
@@ -92,6 +94,8 @@ export default function App() {
             <Route path="verwaltung/:id" element={<ObjektDetails />} />
             <Route path="personen" element={<Mieter />} />
             <Route path="personen/:id" element={<PersonenCRM />} />
+            <Route path="eigentuemer" element={<Eigentuemer />} />
+            <Route path="dienstleister" element={<Dienstleister />} />
             <Route path="vertraege" element={<Vertraege />} />
             <Route path="finanzen" element={<Finanzen />} />
             <Route path="bank" element={<Bank />} />
