@@ -14,6 +14,9 @@ import {
   Euro,
   TrendingUp,
   Clock,
+  CheckCircle,
+  X,
+  Eye,
 } from "lucide-react";
 import Button from "../components/Button";
 
@@ -23,6 +26,8 @@ export default function Finanzen() {
   const { selectedClient } = useApp();
   const [activeTab, setActiveTab] = useState("overview");
   const [showBulkReminderModal, setShowBulkReminderModal] = useState(false);
+  const [selectedReminder, setSelectedReminder] = useState(null);
+  const [showReminderModal, setShowReminderModal] = useState(false);
 
   // Lade Dashboard-Daten für Offene Posten
   const { data: dashboardData } = useQuery({
@@ -69,6 +74,35 @@ export default function Finanzen() {
       queryClient.invalidateQueries({ queryKey: ["dashboard"] });
       alert(`Mahnlauf gestartet: ${data.data.created} Mahnungen erstellt`);
       setShowBulkReminderModal(false);
+    },
+    onError: (error) => {
+      alert(`Fehler: ${error.response?.data?.detail || "Unbekannter Fehler"}`);
+    },
+  });
+
+  // Generate PDF Mutation
+  const generatePdfMutation = useMutation({
+    mutationFn: async (reminderId) => {
+      return await reminderApi.generatePdf(reminderId);
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["reminders"] });
+      alert("PDF wurde generiert");
+      // TODO: PDF Download implementieren
+    },
+    onError: (error) => {
+      alert(`Fehler: ${error.response?.data?.detail || "Unbekannter Fehler"}`);
+    },
+  });
+
+  // Mark Sent Mutation
+  const markSentMutation = useMutation({
+    mutationFn: async (reminderId) => {
+      return await reminderApi.markSent(reminderId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["reminders"] });
+      alert("Mahnung als versendet markiert");
     },
     onError: (error) => {
       alert(`Fehler: ${error.response?.data?.detail || "Unbekannter Fehler"}`);
@@ -303,11 +337,18 @@ export default function Finanzen() {
         {/* Reminders Tab */}
         {activeTab === "reminders" && (
           <div className="space-y-4">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Mahnungen</h2>
+              <Button onClick={() => setShowBulkReminderModal(true)} variant="primary" size="sm">
+                <Plus className="w-4 h-4 mr-2" />
+                Mahnlauf starten
+              </Button>
+            </div>
             {reminders.length > 0 ? (
               reminders.map((reminder) => (
                 <div
                   key={reminder.id}
-                  className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6"
+                  className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-shadow"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
@@ -327,15 +368,79 @@ export default function Finanzen() {
                         <div className="text-sm text-gray-500 dark:text-gray-500 mt-2">{reminder.notes}</div>
                       )}
                     </div>
-                    <div className="text-right ml-4">
-                      <div className="text-xl font-bold text-gray-900 dark:text-white">
-                        {formatCurrency(reminder.amount)}
-                      </div>
-                      {reminder.reminder_fee > 0 && (
-                        <div className="text-sm text-gray-500 dark:text-gray-400">
-                          + {formatCurrency(reminder.reminder_fee)} Gebühr
+                    <div className="flex items-center gap-4">
+                      <div className="text-right">
+                        <div className="text-xl font-bold text-gray-900 dark:text-white">
+                          {formatCurrency(reminder.amount)}
                         </div>
-                      )}
+                        {reminder.reminder_fee > 0 && (
+                          <div className="text-sm text-gray-500 dark:text-gray-400">
+                            + {formatCurrency(reminder.reminder_fee)} Gebühr
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex gap-2">
+                        {reminder.status === "draft" && (
+                          <>
+                            <button
+                              onClick={() => {
+                                setSelectedReminder(reminder);
+                                setShowReminderModal(true);
+                              }}
+                              className="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+                              title="Details anzeigen"
+                            >
+                              <Eye className="w-5 h-5" />
+                            </button>
+                            {!reminder.document_path && (
+                              <button
+                                onClick={() => generatePdfMutation.mutate(reminder.id)}
+                                className="p-2 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                                title="PDF generieren"
+                                disabled={generatePdfMutation.isPending}
+                              >
+                                <FileText className="w-5 h-5" />
+                              </button>
+                            )}
+                            {reminder.document_path && (
+                              <button
+                                onClick={() => {
+                                  // TODO: PDF Download
+                                  alert("PDF-Download wird implementiert");
+                                }}
+                                className="p-2 text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300"
+                                title="PDF herunterladen"
+                              >
+                                <Download className="w-5 h-5" />
+                              </button>
+                            )}
+                            <button
+                              onClick={() => {
+                                if (confirm("Mahnung als versendet markieren?")) {
+                                  markSentMutation.mutate(reminder.id);
+                                }
+                              }}
+                              className="p-2 text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300"
+                              title="Als versendet markieren"
+                              disabled={markSentMutation.isPending}
+                            >
+                              <CheckCircle className="w-5 h-5" />
+                            </button>
+                          </>
+                        )}
+                        {reminder.status === "sent" && reminder.document_path && (
+                          <button
+                            onClick={() => {
+                              // TODO: PDF Download
+                              alert("PDF-Download wird implementiert");
+                            }}
+                            className="p-2 text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300"
+                            title="PDF herunterladen"
+                          >
+                            <Download className="w-5 h-5" />
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -420,6 +525,143 @@ export default function Finanzen() {
                 </Button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Reminder Detail Modal */}
+      {showReminderModal && selectedReminder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                Mahnung: {getReminderTypeLabel(selectedReminder.reminder_type)}
+              </h2>
+              <button
+                onClick={() => {
+                  setShowReminderModal(false);
+                  setSelectedReminder(null);
+                }}
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Status
+                  </label>
+                  <span className={`inline-block px-3 py-1 rounded-full text-sm ${getStatusColor(selectedReminder.status)}`}>
+                    {selectedReminder.status === "sent" ? "Versendet" : selectedReminder.status === "paid" ? "Bezahlt" : "Entwurf"}
+                  </span>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Mahndatum
+                  </label>
+                  <p className="text-gray-900 dark:text-white">{formatDate(selectedReminder.reminder_date)}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Mahnbetrag
+                  </label>
+                  <p className="text-xl font-bold text-gray-900 dark:text-white">
+                    {formatCurrency(selectedReminder.amount)}
+                  </p>
+                </div>
+                {selectedReminder.reminder_fee > 0 && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Mahngebühr
+                    </label>
+                    <p className="text-gray-900 dark:text-white">
+                      {formatCurrency(selectedReminder.reminder_fee)}
+                    </p>
+                  </div>
+                )}
+                {selectedReminder.due_date && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Neue Fälligkeit
+                    </label>
+                    <p className="text-gray-900 dark:text-white">{formatDate(selectedReminder.due_date)}</p>
+                  </div>
+                )}
+                {selectedReminder.document_path && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      PDF generiert
+                    </label>
+                    <p className="text-sm text-emerald-600 dark:text-emerald-400">✓ Verfügbar</p>
+                  </div>
+                )}
+              </div>
+              {selectedReminder.notes && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Notizen
+                  </label>
+                  <p className="text-gray-900 dark:text-white">{selectedReminder.notes}</p>
+                </div>
+              )}
+              <div className="flex gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                {selectedReminder.status === "draft" && (
+                  <>
+                    {!selectedReminder.document_path && (
+                      <Button
+                        onClick={() => {
+                          generatePdfMutation.mutate(selectedReminder.id);
+                        }}
+                        variant="primary"
+                        disabled={generatePdfMutation.isPending}
+                      >
+                        <FileText className="w-4 h-4 mr-2" />
+                        PDF generieren
+                      </Button>
+                    )}
+                    {selectedReminder.document_path && (
+                      <Button
+                        onClick={() => {
+                          // TODO: PDF Download
+                          alert("PDF-Download wird implementiert");
+                        }}
+                        variant="primary"
+                      >
+                        <Download className="w-4 h-4 mr-2" />
+                        PDF herunterladen
+                      </Button>
+                    )}
+                    <Button
+                      onClick={() => {
+                        if (confirm("Mahnung als versendet markieren?")) {
+                          markSentMutation.mutate(selectedReminder.id);
+                          setShowReminderModal(false);
+                        }
+                      }}
+                      variant="secondary"
+                      disabled={markSentMutation.isPending}
+                    >
+                      <CheckCircle className="w-4 h-4 mr-2" />
+                      Als versendet markieren
+                    </Button>
+                  </>
+                )}
+                {selectedReminder.status === "sent" && selectedReminder.document_path && (
+                  <Button
+                    onClick={() => {
+                      // TODO: PDF Download
+                      alert("PDF-Download wird implementiert");
+                    }}
+                    variant="primary"
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    PDF herunterladen
+                  </Button>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       )}
