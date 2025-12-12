@@ -1,17 +1,23 @@
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
+import { useApp } from "../contexts/AppContext";
 
-export default function ProtectedRoute({ children }) {
-  // WICHTIG: Muss mit dem Key übereinstimmen, der in Login.jsx verwendet wird!
+export default function ProtectedRoute({ children, requireClientSelection = false }) {
   const token = localStorage.getItem("access_token");
+  const location = useLocation();
+  const { selectedClient, selectedFiscalYear } = useApp();
 
-  console.log("🔒 ProtectedRoute - Token vorhanden:", token ? "Ja" : "Nein");
-  
+  // Prüfe ob User eingeloggt ist
   if (!token) {
-    console.log("❌ ProtectedRoute - Kein Token, redirect zu /login");
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" replace state={{ from: location }} />;
   }
 
-  console.log("✅ ProtectedRoute - Token gefunden, erlaube Zugriff");
+  // Prüfe ob Client & Jahr gewählt sind (außer auf Client-Selection-Seite)
+  if (requireClientSelection && location.pathname !== "/client-selection") {
+    if (!selectedClient || !selectedFiscalYear) {
+      return <Navigate to="/client-selection" replace />;
+    }
+  }
+
   return children;
 }
 
