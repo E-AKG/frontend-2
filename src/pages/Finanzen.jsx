@@ -162,6 +162,11 @@ export default function Finanzen() {
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Finanzen</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">Zahlungsabgleich, Offene Posten & Mahnwesen</p>
+          <div className="mt-4">
+            <Button onClick={() => navigate("/zahlungsabgleich")} variant="secondary" size="sm">
+              Zum Zahlungsabgleich →
+            </Button>
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <Button
