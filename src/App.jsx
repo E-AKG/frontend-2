@@ -7,6 +7,7 @@ import Landing from "./pages/Landing";
 import Pricing from "./pages/Pricing";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import UpgradeRequired from "./pages/UpgradeRequired";
+import ClientSelection from "./pages/ClientSelection";
 import DashboardPro from "./pages/DashboardPro";
 import Objekte from "./pages/Objekte";
 import ObjektDetails from "./pages/ObjektDetails";
@@ -61,11 +62,21 @@ export default function App() {
           <Route path="/payment-success" element={<PaymentSuccess />} />
           <Route path="/upgrade" element={<UpgradeRequired />} />
 
+          {/* Client Selection - Protected but without Layout */}
+          <Route
+            path="/client-selection"
+            element={
+              <ProtectedRoute>
+                <ClientSelection />
+              </ProtectedRoute>
+            }
+          />
+
           {/* Protected Routes with ProLayout - New Layout */}
           <Route
             path="/"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requireClientSelection={true}>
                 <ProLayout />
               </ProtectedRoute>
             }
