@@ -23,6 +23,7 @@ import Kassenbuch from "./pages/Kassenbuch";
 import Tickets from "./pages/Tickets";
 import Dokumente from "./pages/Dokumente";
 import OffenePosten from "./pages/OffenePosten";
+import Berichte from "./pages/Berichte";
 import Einstellungen from "./pages/Einstellungen";
 import ProLayout from "./layout/ProLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -100,6 +101,7 @@ export default function App() {
             <Route path="tickets" element={<Tickets />} />
             <Route path="dokumente" element={<Dokumente />} />
             <Route path="offene-posten" element={<OffenePosten />} />
+            <Route path="berichte" element={<Berichte />} />
             {/* Legacy routes for backward compatibility */}
             <Route path="objekte" element={<Objekte />} />
             <Route path="objekte/:id" element={<ObjektDetails />} />
