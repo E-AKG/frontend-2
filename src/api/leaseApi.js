@@ -40,5 +40,24 @@ export const leaseApi = {
   removeComponent: (componentId) => {
     return axiosInstance.delete(`/api/lease-components/${componentId}`);
   },
+
+  // Rent Adjustments
+  getAdjustments: (componentId) => {
+    return axiosInstance.get(`/api/lease-components/${componentId}/adjustments`);
+  },
+
+  adjustRent: (componentId, newAmount, adjustmentDate, reason) => {
+    return axiosInstance.post(`/api/lease-components/${componentId}/adjust-rent`, null, {
+      params: {
+        new_amount: newAmount,
+        adjustment_date: adjustmentDate,
+        reason: reason,
+      },
+    });
+  },
+
+  getUpcomingAdjustments: (leaseId) => {
+    return axiosInstance.get(`/api/leases/${leaseId}/upcoming-adjustments`);
+  },
 };
 
