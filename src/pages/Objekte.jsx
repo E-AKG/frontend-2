@@ -161,7 +161,7 @@ export default function Objekte() {
           <button
             onClick={(e) => {
               e.stopPropagation();
-              navigate(`/objekte/${zeile.id}`);
+              navigate(`/verwaltung/${zeile.id}`);
             }}
             className="p-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-all duration-200"
             title="Details anzeigen"

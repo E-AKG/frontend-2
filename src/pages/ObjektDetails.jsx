@@ -63,6 +63,46 @@ export default function ObjektDetails() {
     status: "vacant",
   });
 
+  // Meter Form State
+  const [meterForm, setMeterForm] = useState({
+    meter_number: "",
+    meter_type: "water",
+    location: "",
+    unit_id: "",
+    calibration_due_date: "",
+  });
+
+  // Reading Form State
+  const [readingForm, setReadingForm] = useState({
+    reading_value: "",
+    reading_date: new Date().toISOString().split("T")[0],
+    notes: "",
+  });
+
+  // Key Form State
+  const [keyForm, setKeyForm] = useState({
+    key_type: "apartment",
+    key_number: "",
+    description: "",
+    unit_id: "",
+  });
+
+  // Key Assign Form State
+  const [keyAssignForm, setKeyAssignForm] = useState({
+    assigned_to_type: "tenant",
+    assigned_to_id: "",
+    notes: "",
+  });
+
+  // Lade Tenants für Schlüssel-Zuweisung
+  const { data: tenants = [] } = useQuery({
+    queryKey: ["tenants"],
+    queryFn: async () => {
+      const response = await tenantApi.list({});
+      return response.data?.items || [];
+    },
+  });
+
   useEffect(() => {
     ladeObjekt();
     ladeEinheiten();
@@ -373,7 +413,7 @@ export default function ObjektDetails() {
 
       {/* Breadcrumb */}
       <button
-        onClick={() => navigate("/objekte")}
+        onClick={() => navigate("/verwaltung")}
         className="flex items-center text-slate-600 hover:text-slate-900 mb-4 sm:mb-6 text-sm sm:text-[15px] touch-manipulation"
       >
         <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -479,13 +519,21 @@ export default function ObjektDetails() {
             <h2 className="text-base sm:text-lg font-semibold text-slate-900">Zähler</h2>
             <Button
               onClick={() => {
-                // TODO: Modal für neuen Zähler
-                alert("Zähler-Verwaltung wird implementiert");
+                setBearbeiteterZaehler(null);
+                setMeterForm({
+                  meter_number: "",
+                  meter_type: "water",
+                  location: "",
+                  unit_id: "",
+                  calibration_due_date: "",
+                });
+                setShowMeterModal(true);
               }}
               size="sm"
               className="w-full sm:w-auto"
+              icon={<Plus className="w-4 h-4" />}
             >
-              + Neuer Zähler
+              Neuer Zähler
             </Button>
           </div>
           {meters.length > 0 ? (
