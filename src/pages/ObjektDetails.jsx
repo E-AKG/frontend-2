@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { propertyApi } from "../api/propertyApi";
 import { unitApi } from "../api/unitApi";
 import { meterApi } from "../api/meterApi";
 import { keyApi } from "../api/keyApi";
+import { tenantApi } from "../api/tenantApi";
 import { useApp } from "../contexts/AppContext";
 import Tabelle from "../components/Tabelle";
 import Modal from "../components/Modal";
@@ -12,7 +13,7 @@ import Formularfeld from "../components/Formularfeld";
 import Auswahl from "../components/Auswahl";
 import Button from "../components/Button";
 import Benachrichtigung, { useBenachrichtigung } from "../components/Benachrichtigung";
-import { Gauge, Key as KeyIcon } from "lucide-react";
+import { Gauge, Key as KeyIcon, Plus, Edit, Trash2, Calendar, User, History, TrendingUp } from "lucide-react";
 
 export default function ObjektDetails() {
   const { id } = useParams();
@@ -22,8 +23,17 @@ export default function ObjektDetails() {
   const [einheiten, setEinheiten] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("units");
+  const queryClient = useQueryClient();
   const [showModal, setShowModal] = useState(false);
+  const [showMeterModal, setShowMeterModal] = useState(false);
+  const [showKeyModal, setShowKeyModal] = useState(false);
+  const [showMeterReadingsModal, setShowMeterReadingsModal] = useState(false);
+  const [showKeyHistoryModal, setShowKeyHistoryModal] = useState(false);
   const [bearbeitung, setBearbeitung] = useState(null);
+  const [bearbeiteterZaehler, setBearbeiteterZaehler] = useState(null);
+  const [bearbeiteterSchluessel, setBearbeiteterSchluessel] = useState(null);
+  const [ausgewaehlterZaehler, setAusgewaehlterZaehler] = useState(null);
+  const [ausgewaehlterSchluessel, setAusgewaehlterSchluessel] = useState(null);
   const { benachrichtigung, zeigeBenachrichtigung } = useBenachrichtigung();
 
   // Lade Zähler
@@ -138,6 +148,158 @@ export default function ObjektDetails() {
       status: "vacant",
     });
   };
+
+  // Meter Mutations
+  const createMeterMutation = useMutation({
+    mutationFn: (data) => meterApi.create(data, selectedClient?.id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["meters", id] });
+      zeigeBenachrichtigung("Zähler erfolgreich erstellt");
+      setShowMeterModal(false);
+      setMeterForm({
+        meter_number: "",
+        meter_type: "water",
+        location: "",
+        unit_id: "",
+        calibration_due_date: "",
+      });
+    },
+    onError: (error) => {
+      zeigeBenachrichtigung(
+        error.response?.data?.detail || "Fehler beim Erstellen",
+        "fehler"
+      );
+    },
+  });
+
+  const updateMeterMutation = useMutation({
+    mutationFn: ({ meterId, data }) => meterApi.update(meterId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["meters", id] });
+      zeigeBenachrichtigung("Zähler erfolgreich aktualisiert");
+      setShowMeterModal(false);
+      setBearbeiteterZaehler(null);
+    },
+    onError: (error) => {
+      zeigeBenachrichtigung(
+        error.response?.data?.detail || "Fehler beim Aktualisieren",
+        "fehler"
+      );
+    },
+  });
+
+  const deleteMeterMutation = useMutation({
+    mutationFn: (meterId) => meterApi.delete(meterId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["meters", id] });
+      zeigeBenachrichtigung("Zähler erfolgreich gelöscht");
+    },
+    onError: () => {
+      zeigeBenachrichtigung("Fehler beim Löschen", "fehler");
+    },
+  });
+
+  const createReadingMutation = useMutation({
+    mutationFn: ({ meterId, data }) => meterApi.createReading(meterId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["meters", id] });
+      queryClient.invalidateQueries({ queryKey: ["meterReadings", ausgewaehlterZaehler?.id] });
+      zeigeBenachrichtigung("Zählerstand erfolgreich erfasst");
+      setReadingForm({
+        reading_value: "",
+        reading_date: new Date().toISOString().split("T")[0],
+        notes: "",
+      });
+    },
+    onError: () => {
+      zeigeBenachrichtigung("Fehler beim Erfassen", "fehler");
+    },
+  });
+
+  // Key Mutations
+  const createKeyMutation = useMutation({
+    mutationFn: (data) => keyApi.create(data, selectedClient?.id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["keys", id] });
+      zeigeBenachrichtigung("Schlüssel erfolgreich erstellt");
+      setShowKeyModal(false);
+      setKeyForm({
+        key_type: "apartment",
+        key_number: "",
+        description: "",
+        unit_id: "",
+      });
+    },
+    onError: (error) => {
+      zeigeBenachrichtigung(
+        error.response?.data?.detail || "Fehler beim Erstellen",
+        "fehler"
+      );
+    },
+  });
+
+  const updateKeyMutation = useMutation({
+    mutationFn: ({ keyId, data }) => keyApi.update(keyId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["keys", id] });
+      zeigeBenachrichtigung("Schlüssel erfolgreich aktualisiert");
+      setShowKeyModal(false);
+      setBearbeiteterSchluessel(null);
+    },
+    onError: () => {
+      zeigeBenachrichtigung("Fehler beim Aktualisieren", "fehler");
+    },
+  });
+
+  const deleteKeyMutation = useMutation({
+    mutationFn: (keyId) => keyApi.delete(keyId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["keys", id] });
+      zeigeBenachrichtigung("Schlüssel erfolgreich gelöscht");
+    },
+    onError: () => {
+      zeigeBenachrichtigung("Fehler beim Löschen", "fehler");
+    },
+  });
+
+  const assignKeyMutation = useMutation({
+    mutationFn: ({ keyId, data }) => keyApi.action(keyId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["keys", id] });
+      queryClient.invalidateQueries({ queryKey: ["keyHistory", ausgewaehlterSchluessel?.id] });
+      zeigeBenachrichtigung("Schlüssel erfolgreich zugewiesen");
+      setKeyAssignForm({
+        assigned_to_type: "tenant",
+        assigned_to_id: "",
+        notes: "",
+      });
+    },
+    onError: () => {
+      zeigeBenachrichtigung("Fehler bei der Zuweisung", "fehler");
+    },
+  });
+
+  // Lade Zählerstände
+  const { data: meterReadings = [] } = useQuery({
+    queryKey: ["meterReadings", ausgewaehlterZaehler?.id],
+    queryFn: async () => {
+      if (!ausgewaehlterZaehler?.id) return [];
+      const response = await meterApi.listReadings(ausgewaehlterZaehler.id);
+      return response.data || [];
+    },
+    enabled: !!ausgewaehlterZaehler?.id,
+  });
+
+  // Lade Schlüssel-Historie
+  const { data: keyHistory = [] } = useQuery({
+    queryKey: ["keyHistory", ausgewaehlterSchluessel?.id],
+    queryFn: async () => {
+      if (!ausgewaehlterSchluessel?.id) return [];
+      const response = await keyApi.getHistory(ausgewaehlterSchluessel.id);
+      return response.data || [];
+    },
+    enabled: !!ausgewaehlterSchluessel?.id,
+  });
 
   const spalten = [
     { key: "unit_label", label: "Bezeichnung" },
@@ -331,23 +493,70 @@ export default function ObjektDetails() {
               {meters.map((meter) => (
                 <div
                   key={meter.id}
-                  className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg"
+                  className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-primary-300 transition-colors"
                 >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="font-medium text-gray-900 dark:text-white">
-                        {meter.meter_number} - {meter.meter_type}
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="font-medium text-gray-900 dark:text-white flex items-center gap-2">
+                        <Gauge className="w-4 h-4 text-primary-600" />
+                        {meter.meter_number} - {meter.meter_type === "water" ? "Wasser" : meter.meter_type === "heat" ? "Heizung" : meter.meter_type === "electricity" ? "Strom" : "Gas"}
                       </div>
                       {meter.location && (
                         <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                          {meter.location}
+                          Standort: {meter.location}
+                        </div>
+                      )}
+                      {meter.unit_label && (
+                        <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                          Einheit: {meter.unit_label}
                         </div>
                       )}
                       {meter.calibration_due_date && (
-                        <div className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                        <div className="text-xs text-amber-600 dark:text-amber-400 mt-1 flex items-center gap-1">
+                          <Calendar className="w-3 h-3" />
                           Eichfrist: {new Date(meter.calibration_due_date).toLocaleDateString("de-DE")}
                         </div>
                       )}
+                    </div>
+                    <div className="flex items-center gap-2 ml-4">
+                      <button
+                        onClick={() => {
+                          setAusgewaehlterZaehler(meter);
+                          setShowMeterReadingsModal(true);
+                        }}
+                        className="p-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-all"
+                        title="Zählerstände"
+                      >
+                        <TrendingUp className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => {
+                          setBearbeiteterZaehler(meter);
+                          setMeterForm({
+                            meter_number: meter.meter_number || "",
+                            meter_type: meter.meter_type || "water",
+                            location: meter.location || "",
+                            unit_id: meter.unit_id || "",
+                            calibration_due_date: meter.calibration_due_date ? new Date(meter.calibration_due_date).toISOString().split("T")[0] : "",
+                          });
+                          setShowMeterModal(true);
+                        }}
+                        className="p-2 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-all"
+                        title="Bearbeiten"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => {
+                          if (confirm("Zähler wirklich löschen?")) {
+                            deleteMeterMutation.mutate(meter.id);
+                          }
+                        }}
+                        className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all"
+                        title="Löschen"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -367,13 +576,20 @@ export default function ObjektDetails() {
             <h2 className="text-base sm:text-lg font-semibold text-slate-900">Schlüssel</h2>
             <Button
               onClick={() => {
-                // TODO: Modal für neuen Schlüssel
-                alert("Schlüssel-Verwaltung wird implementiert");
+                setBearbeiteterSchluessel(null);
+                setKeyForm({
+                  key_type: "apartment",
+                  key_number: "",
+                  description: "",
+                  unit_id: "",
+                });
+                setShowKeyModal(true);
               }}
               size="sm"
               className="w-full sm:w-auto"
+              icon={<Plus className="w-4 h-4" />}
             >
-              + Neuer Schlüssel
+              Neuer Schlüssel
             </Button>
           </div>
           {keys.length > 0 ? (
@@ -381,16 +597,23 @@ export default function ObjektDetails() {
               {keys.map((key) => (
                 <div
                   key={key.id}
-                  className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg"
+                  className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-primary-300 transition-colors"
                 >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="font-medium text-gray-900 dark:text-white">
-                        {key.key_type} {key.key_number && `- ${key.key_number}`}
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="font-medium text-gray-900 dark:text-white flex items-center gap-2">
+                        <KeyIcon className="w-4 h-4 text-primary-600" />
+                        {key.key_type === "apartment" ? "Wohnungsschlüssel" : key.key_type === "basement" ? "Kellerschlüssel" : key.key_type === "mailbox" ? "Briefkastenschlüssel" : "Sonstiger Schlüssel"}
+                        {key.key_number && ` - ${key.key_number}`}
                       </div>
                       {key.description && (
                         <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                           {key.description}
+                        </div>
+                      )}
+                      {key.unit_label && (
+                        <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                          Einheit: {key.unit_label}
                         </div>
                       )}
                       <div className="flex items-center gap-2 mt-2">
@@ -410,11 +633,69 @@ export default function ObjektDetails() {
                             : key.status}
                         </span>
                         {key.assigned_to_name && (
-                          <span className="text-xs text-gray-600 dark:text-gray-400">
+                          <span className="text-xs text-gray-600 dark:text-gray-400 flex items-center gap-1">
+                            <User className="w-3 h-3" />
                             an: {key.assigned_to_name}
                           </span>
                         )}
                       </div>
+                    </div>
+                    <div className="flex items-center gap-2 ml-4">
+                      <button
+                        onClick={() => {
+                          setAusgewaehlterSchluessel(key);
+                          setShowKeyHistoryModal(true);
+                        }}
+                        className="p-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-all"
+                        title="Historie"
+                      >
+                        <History className="w-4 h-4" />
+                      </button>
+                      {key.status === "available" && (
+                        <button
+                          onClick={() => {
+                            setAusgewaehlterSchluessel(key);
+                            setKeyAssignForm({
+                              assigned_to_type: "tenant",
+                              assigned_to_id: "",
+                              notes: "",
+                            });
+                            // Öffne Zuweisungs-Modal
+                            setShowKeyModal(true);
+                          }}
+                          className="p-2 text-primary-600 hover:text-primary-700 hover:bg-primary-50 rounded-lg transition-all"
+                          title="Zuweisen"
+                        >
+                          <User className="w-4 h-4" />
+                        </button>
+                      )}
+                      <button
+                        onClick={() => {
+                          setBearbeiteterSchluessel(key);
+                          setKeyForm({
+                            key_type: key.key_type || "apartment",
+                            key_number: key.key_number || "",
+                            description: key.description || "",
+                            unit_id: key.unit_id || "",
+                          });
+                          setShowKeyModal(true);
+                        }}
+                        className="p-2 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-all"
+                        title="Bearbeiten"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => {
+                          if (confirm("Schlüssel wirklich löschen?")) {
+                            deleteKeyMutation.mutate(key.id);
+                          }
+                        }}
+                        className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all"
+                        title="Löschen"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -495,6 +776,374 @@ export default function ObjektDetails() {
             </Button>
           </div>
         </form>
+      </Modal>
+
+      {/* Meter Modal */}
+      <Modal
+        isOpen={showMeterModal}
+        onClose={() => {
+          setShowMeterModal(false);
+          setBearbeiteterZaehler(null);
+        }}
+        titel={bearbeiteterZaehler ? "Zähler bearbeiten" : "Neuer Zähler"}
+      >
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            const data = {
+              property_id: id,
+              meter_number: meterForm.meter_number,
+              meter_type: meterForm.meter_type,
+              location: meterForm.location || null,
+              unit_id: meterForm.unit_id || null,
+              calibration_due_date: meterForm.calibration_due_date || null,
+            };
+            if (bearbeiteterZaehler) {
+              updateMeterMutation.mutate({ meterId: bearbeiteterZaehler.id, data });
+            } else {
+              createMeterMutation.mutate(data);
+            }
+          }}
+          className="space-y-4"
+        >
+          <Formularfeld
+            label="Zählernummer"
+            value={meterForm.meter_number}
+            onChange={(e) => setMeterForm({ ...meterForm, meter_number: e.target.value })}
+            required
+          />
+          <Auswahl
+            label="Zählertyp"
+            value={meterForm.meter_type}
+            onChange={(e) => setMeterForm({ ...meterForm, meter_type: e.target.value })}
+            optionen={[
+              { value: "water", label: "Wasser" },
+              { value: "heat", label: "Heizung" },
+              { value: "electricity", label: "Strom" },
+              { value: "gas", label: "Gas" },
+            ]}
+            required
+          />
+          <Auswahl
+            label="Einheit (optional)"
+            value={meterForm.unit_id}
+            onChange={(e) => setMeterForm({ ...meterForm, unit_id: e.target.value })}
+            optionen={[
+              { value: "", label: "Keine Zuordnung" },
+              ...einheiten.map((u) => ({ value: u.id, label: u.unit_label })),
+            ]}
+          />
+          <Formularfeld
+            label="Standort"
+            value={meterForm.location}
+            onChange={(e) => setMeterForm({ ...meterForm, location: e.target.value })}
+            placeholder="z.B. Keller, Wohnung 1A"
+          />
+          <Formularfeld
+            label="Eichfrist"
+            type="date"
+            value={meterForm.calibration_due_date}
+            onChange={(e) => setMeterForm({ ...meterForm, calibration_due_date: e.target.value })}
+          />
+          <div className="flex justify-end gap-2 pt-4">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => {
+                setShowMeterModal(false);
+                setBearbeiteterZaehler(null);
+              }}
+            >
+              Abbrechen
+            </Button>
+            <Button type="submit">
+              {bearbeiteterZaehler ? "Aktualisieren" : "Erstellen"}
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Meter Readings Modal */}
+      <Modal
+        isOpen={showMeterReadingsModal}
+        onClose={() => {
+          setShowMeterReadingsModal(false);
+          setAusgewaehlterZaehler(null);
+        }}
+        titel={`Zählerstände - ${ausgewaehlterZaehler?.meter_number || ""}`}
+        groesse="lg"
+      >
+        <div className="space-y-4">
+          <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Neuer Zählerstand</h3>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                createReadingMutation.mutate({
+                  meterId: ausgewaehlterZaehler.id,
+                  data: {
+                    reading_value: parseFloat(readingForm.reading_value),
+                    reading_date: readingForm.reading_date,
+                    notes: readingForm.notes || null,
+                  },
+                });
+              }}
+              className="space-y-3"
+            >
+              <div className="grid grid-cols-2 gap-3">
+                <Formularfeld
+                  label="Wert"
+                  type="number"
+                  step="0.01"
+                  value={readingForm.reading_value}
+                  onChange={(e) => setReadingForm({ ...readingForm, reading_value: e.target.value })}
+                  required
+                />
+                <Formularfeld
+                  label="Datum"
+                  type="date"
+                  value={readingForm.reading_date}
+                  onChange={(e) => setReadingForm({ ...readingForm, reading_date: e.target.value })}
+                  required
+                />
+              </div>
+              <Formularfeld
+                label="Notizen"
+                type="textarea"
+                value={readingForm.notes}
+                onChange={(e) => setReadingForm({ ...readingForm, notes: e.target.value })}
+              />
+              <Button type="submit" size="sm">Erfassen</Button>
+            </form>
+          </div>
+
+          <div>
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Historie</h3>
+            {meterReadings.length > 0 ? (
+              <div className="space-y-2">
+                {meterReadings.map((reading) => (
+                  <div
+                    key={reading.id}
+                    className="p-3 border border-gray-200 dark:border-gray-700 rounded-lg"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="font-medium text-gray-900 dark:text-white">
+                          {reading.reading_value} {ausgewaehlterZaehler?.meter_type === "water" ? "m³" : "kWh"}
+                        </div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">
+                          {new Date(reading.reading_date).toLocaleDateString("de-DE")}
+                        </div>
+                        {reading.notes && (
+                          <div className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                            {reading.notes}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-500 dark:text-gray-400 text-center py-4">
+                Noch keine Zählerstände erfasst
+              </p>
+            )}
+          </div>
+        </div>
+      </Modal>
+
+      {/* Key Modal */}
+      <Modal
+        isOpen={showKeyModal}
+        onClose={() => {
+          setShowKeyModal(false);
+          setBearbeiteterSchluessel(null);
+          setAusgewaehlterSchluessel(null);
+        }}
+        titel={
+          ausgewaehlterSchluessel && ausgewaehlterSchluessel.status === "available"
+            ? "Schlüssel zuweisen"
+            : bearbeiteterSchluessel
+            ? "Schlüssel bearbeiten"
+            : "Neuer Schlüssel"
+        }
+      >
+        {ausgewaehlterSchluessel && ausgewaehlterSchluessel.status === "available" ? (
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              assignKeyMutation.mutate({
+                keyId: ausgewaehlterSchluessel.id,
+                data: {
+                  action: "assign",
+                  assigned_to_type: keyAssignForm.assigned_to_type,
+                  assigned_to_id: keyAssignForm.assigned_to_id,
+                  notes: keyAssignForm.notes || null,
+                },
+              });
+              setShowKeyModal(false);
+              setAusgewaehlterSchluessel(null);
+            }}
+            className="space-y-4"
+          >
+            <Auswahl
+              label="Zuweisen an"
+              value={keyAssignForm.assigned_to_type}
+              onChange={(e) =>
+                setKeyAssignForm({ ...keyAssignForm, assigned_to_type: e.target.value })
+              }
+              optionen={[{ value: "tenant", label: "Mieter" }]}
+            />
+            <Auswahl
+              label="Mieter"
+              value={keyAssignForm.assigned_to_id}
+              onChange={(e) =>
+                setKeyAssignForm({ ...keyAssignForm, assigned_to_id: e.target.value })
+              }
+              optionen={[
+                { value: "", label: "Bitte wählen" },
+                ...tenants.map((t) => ({
+                  value: t.id,
+                  label: `${t.first_name} ${t.last_name}`,
+                })),
+              ]}
+              required
+            />
+            <Formularfeld
+              label="Notizen"
+              type="textarea"
+              value={keyAssignForm.notes}
+              onChange={(e) => setKeyAssignForm({ ...keyAssignForm, notes: e.target.value })}
+            />
+            <div className="flex justify-end gap-2 pt-4">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => {
+                  setShowKeyModal(false);
+                  setAusgewaehlterSchluessel(null);
+                }}
+              >
+                Abbrechen
+              </Button>
+              <Button type="submit">Zuweisen</Button>
+            </div>
+          </form>
+        ) : (
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              const data = {
+                property_id: id,
+                key_type: keyForm.key_type,
+                key_number: keyForm.key_number || null,
+                description: keyForm.description || null,
+                unit_id: keyForm.unit_id || null,
+              };
+              if (bearbeiteterSchluessel) {
+                updateKeyMutation.mutate({ keyId: bearbeiteterSchluessel.id, data });
+              } else {
+                createKeyMutation.mutate(data);
+              }
+            }}
+            className="space-y-4"
+          >
+            <Auswahl
+              label="Schlüsseltyp"
+              value={keyForm.key_type}
+              onChange={(e) => setKeyForm({ ...keyForm, key_type: e.target.value })}
+              optionen={[
+                { value: "apartment", label: "Wohnungsschlüssel" },
+                { value: "basement", label: "Kellerschlüssel" },
+                { value: "mailbox", label: "Briefkastenschlüssel" },
+                { value: "other", label: "Sonstiger Schlüssel" },
+              ]}
+              required
+            />
+            <Formularfeld
+              label="Schlüsselnummer"
+              value={keyForm.key_number}
+              onChange={(e) => setKeyForm({ ...keyForm, key_number: e.target.value })}
+              placeholder="z.B. 1A, Keller-1"
+            />
+            <Auswahl
+              label="Einheit (optional)"
+              value={keyForm.unit_id}
+              onChange={(e) => setKeyForm({ ...keyForm, unit_id: e.target.value })}
+              optionen={[
+                { value: "", label: "Keine Zuordnung" },
+                ...einheiten.map((u) => ({ value: u.id, label: u.unit_label })),
+              ]}
+            />
+            <Formularfeld
+              label="Beschreibung"
+              type="textarea"
+              value={keyForm.description}
+              onChange={(e) => setKeyForm({ ...keyForm, description: e.target.value })}
+            />
+            <div className="flex justify-end gap-2 pt-4">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => {
+                  setShowKeyModal(false);
+                  setBearbeiteterSchluessel(null);
+                }}
+              >
+                Abbrechen
+              </Button>
+              <Button type="submit">
+                {bearbeiteterSchluessel ? "Aktualisieren" : "Erstellen"}
+              </Button>
+            </div>
+          </form>
+        )}
+      </Modal>
+
+      {/* Key History Modal */}
+      <Modal
+        isOpen={showKeyHistoryModal}
+        onClose={() => {
+          setShowKeyHistoryModal(false);
+          setAusgewaehlterSchluessel(null);
+        }}
+        titel={`Historie - ${ausgewaehlterSchluessel?.key_type || ""} ${ausgewaehlterSchluessel?.key_number || ""}`}
+        groesse="lg"
+      >
+        <div className="space-y-3">
+          {keyHistory.length > 0 ? (
+            keyHistory.map((entry) => (
+              <div
+                key={entry.id}
+                className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg"
+              >
+                <div className="flex items-start justify-between">
+                  <div>
+                    <div className="font-medium text-gray-900 dark:text-white">
+                      {entry.action === "assign" ? "Zugewiesen" : entry.action === "return" ? "Zurückgegeben" : entry.action}
+                    </div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                      {entry.assigned_to_name && `an: ${entry.assigned_to_name}`}
+                    </div>
+                    {entry.notes && (
+                      <div className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                        {entry.notes}
+                      </div>
+                    )}
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-gray-500">
+                    {new Date(entry.created_at).toLocaleDateString("de-DE")}
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-500 dark:text-gray-400 text-center py-4">
+              Noch keine Historie vorhanden
+            </p>
+          )}
+        </div>
       </Modal>
     </div>
   );
