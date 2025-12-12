@@ -12,6 +12,10 @@ import {
   AlertCircle,
   ArrowRight,
   ArrowLeft,
+  Trash2,
+  Edit,
+  X,
+  Gauge,
 } from "lucide-react";
 import Button from "../components/Button";
 
@@ -29,6 +33,15 @@ export default function Abrechnung() {
   });
   const [allocationMethod, setAllocationMethod] = useState("area");
   const [currentAccountingId, setCurrentAccountingId] = useState(null);
+  const [showItemForm, setShowItemForm] = useState(false);
+  const [editingItem, setEditingItem] = useState(null);
+  const [itemFormData, setItemFormData] = useState({
+    cost_type: "",
+    description: "",
+    amount: "",
+    is_allocable: true,
+    notes: "",
+  });
 
   // Lade Abrechnungen
   const { data: accountings = [], refetch: refetchAccountings } = useQuery({
@@ -71,6 +84,52 @@ export default function Abrechnung() {
       return response.data || [];
     },
     enabled: !!currentAccountingId && wizardStep >= 3,
+  });
+
+  // Lade Zählerprüfung
+  const { data: meterCheck } = useQuery({
+    queryKey: ["meterCheck", currentAccountingId],
+    queryFn: async () => {
+      const response = await accountingApi.checkMeters(currentAccountingId);
+      return response.data;
+    },
+    enabled: !!currentAccountingId && wizardStep === 1.5,
+  });
+
+  // Add Item Mutation
+  const addItemMutation = useMutation({
+    mutationFn: async (data) => {
+      return await accountingApi.addItem(currentAccountingId, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["accountingItems", currentAccountingId] });
+      queryClient.invalidateQueries({ queryKey: ["accounting", currentAccountingId] });
+      setShowItemForm(false);
+      setItemFormData({
+        cost_type: "",
+        description: "",
+        amount: "",
+        is_allocable: true,
+        notes: "",
+      });
+    },
+    onError: (error) => {
+      alert(`Fehler: ${error.response?.data?.detail || "Unbekannter Fehler"}`);
+    },
+  });
+
+  // Delete Item Mutation
+  const deleteItemMutation = useMutation({
+    mutationFn: async (itemId) => {
+      return await accountingApi.deleteItem(currentAccountingId, itemId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["accountingItems", currentAccountingId] });
+      queryClient.invalidateQueries({ queryKey: ["accounting", currentAccountingId] });
+    },
+    onError: (error) => {
+      alert(`Fehler: ${error.response?.data?.detail || "Unbekannter Fehler"}`);
+    },
   });
 
   // Create Accounting Mutation
@@ -154,11 +213,39 @@ export default function Abrechnung() {
     if (wizardStep === 0) {
       createMutation.mutate(accountingData);
     } else if (wizardStep === 1) {
+      // Prüfe Zählerstände vor Berechnung
+      setWizardStep(1.5);
+    } else if (wizardStep === 1.5) {
       setWizardStep(2);
     } else if (wizardStep === 2) {
       calculateMutation.mutate();
     } else if (wizardStep === 3) {
       generateMutation.mutate();
+    }
+  };
+
+  const handleAddItem = () => {
+    setEditingItem(null);
+    setItemFormData({
+      cost_type: "",
+      description: "",
+      amount: "",
+      is_allocable: true,
+      notes: "",
+    });
+    setShowItemForm(true);
+  };
+
+  const handleSaveItem = () => {
+    addItemMutation.mutate({
+      ...itemFormData,
+      amount: parseFloat(itemFormData.amount),
+    });
+  };
+
+  const handleDeleteItem = (itemId) => {
+    if (confirm("Möchten Sie diesen Kostenposten wirklich löschen?")) {
+      deleteItemMutation.mutate(itemId);
     }
   };
 
@@ -361,19 +448,282 @@ export default function Abrechnung() {
               {/* Step 1: Kostenposten */}
               {wizardStep === 1 && (
                 <div className="space-y-4">
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-                    Schritt 2: Kostenposten
-                  </h3>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                      Schritt 2: Kostenposten
+                    </h3>
+                    <Button onClick={handleAddItem} variant="primary" size="sm">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Kostenposten hinzufügen
+                    </Button>
+                  </div>
                   <div className="text-sm text-gray-600 dark:text-gray-400 mb-4">
                     Fügen Sie alle Kosten hinzu, die umgelegt werden sollen.
                   </div>
-                  {/* TODO: Kostenposten hinzufügen UI */}
-                  <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Kostenposten-Verwaltung wird implementiert. Für jetzt können Sie mit der
-                      Berechnung fortfahren.
-                    </p>
-                  </div>
+
+                  {/* Kostenposten-Formular */}
+                  {showItemForm && (
+                    <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 mb-4 border border-gray-200 dark:border-gray-600">
+                      <div className="flex items-center justify-between mb-4">
+                        <h4 className="font-semibold text-gray-900 dark:text-white">
+                          {editingItem ? "Kostenposten bearbeiten" : "Neuer Kostenposten"}
+                        </h4>
+                        <button
+                          onClick={() => setShowItemForm(false)}
+                          className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                        >
+                          <X className="w-5 h-5" />
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Kostentyp
+                          </label>
+                          <input
+                            type="text"
+                            value={itemFormData.cost_type}
+                            onChange={(e) =>
+                              setItemFormData({ ...itemFormData, cost_type: e.target.value })
+                            }
+                            placeholder="z.B. Heizung, Wasser, Müll"
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Betrag (€)
+                          </label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={itemFormData.amount}
+                            onChange={(e) =>
+                              setItemFormData({ ...itemFormData, amount: e.target.value })
+                            }
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                          />
+                        </div>
+                      </div>
+                      <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                          Beschreibung
+                        </label>
+                        <input
+                          type="text"
+                          value={itemFormData.description}
+                          onChange={(e) =>
+                            setItemFormData({ ...itemFormData, description: e.target.value })
+                          }
+                          placeholder="Kurze Beschreibung"
+                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        />
+                      </div>
+                      <div className="mb-4">
+                        <label className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            checked={itemFormData.is_allocable}
+                            onChange={(e) =>
+                              setItemFormData({ ...itemFormData, is_allocable: e.target.checked })
+                            }
+                            className="rounded border-gray-300"
+                          />
+                          <span className="text-sm text-gray-700 dark:text-gray-300">
+                            Umlagefähig
+                          </span>
+                        </label>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button onClick={handleSaveItem} variant="primary" size="sm">
+                          Speichern
+                        </Button>
+                        <Button
+                          onClick={() => setShowItemForm(false)}
+                          variant="secondary"
+                          size="sm"
+                        >
+                          Abbrechen
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Kostenposten-Liste */}
+                  {items.length === 0 ? (
+                    <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-8 text-center">
+                      <p className="text-gray-600 dark:text-gray-400">
+                        Noch keine Kostenposten hinzugefügt
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {items.map((item) => (
+                        <div
+                          key={item.id}
+                          className="flex items-center justify-between p-4 bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600"
+                        >
+                          <div className="flex-1">
+                            <div className="font-medium text-gray-900 dark:text-white">
+                              {item.cost_type}
+                            </div>
+                            <div className="text-sm text-gray-600 dark:text-gray-400">
+                              {item.description}
+                            </div>
+                            {item.notes && (
+                              <div className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                                {item.notes}
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <div className="text-right">
+                              <div className="font-bold text-gray-900 dark:text-white">
+                                {formatCurrency(item.amount)}
+                              </div>
+                              {!item.is_allocable && (
+                                <div className="text-xs text-gray-500 dark:text-gray-500">
+                                  Nicht umlagefähig
+                                </div>
+                              )}
+                            </div>
+                            <button
+                              onClick={() => handleDeleteItem(item.id)}
+                              className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                            >
+                              <Trash2 className="w-5 h-5" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                      <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                        <div className="flex items-center justify-between">
+                          <span className="font-semibold text-gray-900 dark:text-white">
+                            Gesamtkosten:
+                          </span>
+                          <span className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                            {formatCurrency(
+                              items.reduce((sum, item) => sum + (item.amount || 0), 0)
+                            )}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Step 1.5: Zählerstände-Prüfung */}
+              {wizardStep === 1.5 && (
+                <div className="space-y-4">
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+                    Schritt 2.5: Zählerstände prüfen
+                  </h3>
+                  {meterCheck ? (
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-3 gap-4 mb-6">
+                        <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
+                          <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                            Gesamt Zähler
+                          </div>
+                          <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                            {meterCheck.total_meters}
+                          </div>
+                        </div>
+                        <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-lg p-4">
+                          <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                            Mit Ablesung
+                          </div>
+                          <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+                            {meterCheck.meters_with_readings}
+                          </div>
+                        </div>
+                        <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-4">
+                          <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                            Fehlend
+                          </div>
+                          <div className="text-2xl font-bold text-red-600 dark:text-red-400">
+                            {meterCheck.meters_needing_readings}
+                          </div>
+                        </div>
+                      </div>
+
+                      {meterCheck.meters.length === 0 ? (
+                        <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-8 text-center">
+                          <p className="text-gray-600 dark:text-gray-400">
+                            Keine Zähler für diesen Zeitraum gefunden
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="space-y-2 max-h-96 overflow-y-auto">
+                          {meterCheck.meters.map((meter) => (
+                            <div
+                              key={meter.meter_id}
+                              className={`p-4 rounded-lg border ${
+                                meter.needs_reading
+                                  ? "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800"
+                                  : "bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600"
+                              }`}
+                            >
+                              <div className="flex items-center justify-between">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <Gauge className="w-4 h-4 text-gray-500" />
+                                    <span className="font-medium text-gray-900 dark:text-white">
+                                      {meter.meter_number} ({meter.meter_type})
+                                    </span>
+                                    {meter.needs_reading && (
+                                      <span className="px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-full text-xs font-medium">
+                                        Ablesung fehlt
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="text-sm text-gray-600 dark:text-gray-400">
+                                    {meter.property_name}
+                                    {meter.unit_label && ` - ${meter.unit_label}`}
+                                    {meter.location && ` (${meter.location})`}
+                                  </div>
+                                  {meter.has_reading && (
+                                    <div className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                                      Ablesung: {meter.reading_value} am{" "}
+                                      {formatDate(meter.reading_date)}
+                                    </div>
+                                  )}
+                                  {meter.previous_reading_value && (
+                                    <div className="text-xs text-gray-500 dark:text-gray-500">
+                                      Vorher: {meter.previous_reading_value} am{" "}
+                                      {formatDate(meter.previous_reading_date)}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {meterCheck.meters_needing_readings > 0 && (
+                        <div className="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-4 border border-amber-200 dark:border-amber-800">
+                          <div className="flex items-start gap-2">
+                            <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5" />
+                            <div>
+                              <p className="font-medium text-amber-900 dark:text-amber-300">
+                                {meterCheck.meters_needing_readings} Zähler benötigen Ablesungen
+                              </p>
+                              <p className="text-sm text-amber-700 dark:text-amber-400 mt-1">
+                                Bitte erfassen Sie die fehlenden Zählerstände, bevor Sie mit der
+                                Berechnung fortfahren.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="text-gray-600 dark:text-gray-400">Lade Zählerstände...</p>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -530,13 +880,19 @@ export default function Abrechnung() {
                   disabled={
                     (wizardStep === 0 &&
                       (!accountingData.period_start || !accountingData.period_end)) ||
+                    (wizardStep === 1 && items.length === 0) ||
                     createMutation.isPending ||
                     calculateMutation.isPending ||
-                    generateMutation.isPending
+                    generateMutation.isPending ||
+                    addItemMutation.isPending
                   }
                 >
                   {wizardStep === 0
                     ? "Erstellen"
+                    : wizardStep === 1
+                    ? "Zählerstände prüfen"
+                    : wizardStep === 1.5
+                    ? "Weiter zur Berechnung"
                     : wizardStep === 2
                     ? "Berechnen"
                     : wizardStep === 3
