@@ -151,7 +151,7 @@ export default function DashboardPro() {
       </div>
 
       {/* KPI-Ampel */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {/* Offene Posten */}
         <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
           <div className="flex items-center justify-between mb-4">
@@ -202,6 +202,30 @@ export default function DashboardPro() {
             {rentData.bezahlt.toLocaleString("de-DE", { style: "currency", currency: "EUR" })} von{" "}
             {rentData.erwartet.toLocaleString("de-DE", { style: "currency", currency: "EUR" })}
           </div>
+        </div>
+
+        {/* Tickets */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">Offene Tickets</h3>
+            <div className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(kpis.urgent_tickets?.status || "ok")}`}>
+              {kpis.urgent_tickets?.status === "error" ? "🔴" : "✓"}
+            </div>
+          </div>
+          <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+            {kpis.open_tickets?.count || 0}
+          </div>
+          <div className="text-sm text-gray-600 dark:text-gray-400">
+            {kpis.urgent_tickets?.count || 0} dringend
+          </div>
+          {kpis.urgent_tickets?.count > 0 && (
+            <button
+              onClick={() => navigate("/vorgaenge?filter=urgent")}
+              className="mt-2 text-xs text-red-600 dark:text-red-400 hover:underline"
+            >
+              Jetzt ansehen →
+            </button>
+          )}
         </div>
       </div>
 

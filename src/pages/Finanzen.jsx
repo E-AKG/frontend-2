@@ -137,6 +137,12 @@ export default function Finanzen() {
             CSV-Import
           </Button>
           <Button
+            onClick={() => navigate("/kassenbuch")}
+            variant="secondary"
+          >
+            Kassenbuch
+          </Button>
+          <Button
             onClick={() => setShowBulkReminderModal(true)}
             variant="primary"
           >
