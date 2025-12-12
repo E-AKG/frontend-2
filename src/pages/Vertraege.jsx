@@ -20,7 +20,12 @@ import {
   Settings,
   Layers,
   Trash2,
-  Edit
+  Edit,
+  TrendingUp,
+  Calculator,
+  X,
+  AlertCircle,
+  Clock
 } from "lucide-react";
 
 export default function Vertraege() {
@@ -44,7 +49,19 @@ export default function Vertraege() {
     type: "cold_rent",
     amount: "",
     description: "",
+    adjustment_type: "fixed",
+    staggered_schedule: [],
+    index_type: "",
+    index_base_value: "",
+    index_base_date: "",
+    index_adjustment_date: "",
+    index_adjustment_percentage: "",
+    allocation_key: "",
+    allocation_factor: "",
+    allocation_notes: "",
   });
+  const [showStaggeredForm, setShowStaggeredForm] = useState(false);
+  const [staggeredEntry, setStaggeredEntry] = useState({ date: "", amount: "" });
 
   // React Query: Fetch Leases
   const { data: vertraege = [], isLoading: loading } = useQuery({
@@ -141,10 +158,25 @@ export default function Vertraege() {
 
   const addComponentMutation = useMutation({
     mutationFn: async ({ leaseId, componentData }) => {
-      return await leaseApi.createComponent(leaseId, {
+      const payload = {
         ...componentData,
         amount: parseFloat(componentData.amount),
-      });
+      };
+      
+      // Bereinige leere Felder
+      if (!payload.staggered_schedule || payload.staggered_schedule.length === 0) {
+        delete payload.staggered_schedule;
+      }
+      if (!payload.index_type) delete payload.index_type;
+      if (!payload.index_base_value) delete payload.index_base_value;
+      if (!payload.index_base_date) delete payload.index_base_date;
+      if (!payload.index_adjustment_date) delete payload.index_adjustment_date;
+      if (!payload.index_adjustment_percentage) delete payload.index_adjustment_percentage;
+      if (!payload.allocation_key) delete payload.allocation_key;
+      if (!payload.allocation_factor) delete payload.allocation_factor;
+      if (!payload.allocation_notes) delete payload.allocation_notes;
+      
+      return await leaseApi.createComponent(leaseId, payload);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['leaseComponents'] });
@@ -444,41 +476,260 @@ export default function Vertraege() {
       >
         <div className="mb-4 sm:mb-6">
           <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Neue Komponente</h3>
-          <form onSubmit={handleKomponenteHinzufuegen} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
-            <Auswahl
-              name="type"
-              value={komponentenForm.type}
-              onChange={(e) =>
-                setKomponentenForm({ ...komponentenForm, type: e.target.value })
-              }
-              optionen={[
-                { value: "cold_rent", label: "Kaltmiete" },
-                { value: "operating_costs", label: "Nebenkosten" },
-                { value: "heating_costs", label: "Heizkosten" },
-                { value: "other", label: "Sonstiges" },
-              ]}
-            />
-            <Formularfeld
-              placeholder="Betrag (€)"
-              name="amount"
-              type="number"
-              value={komponentenForm.amount}
-              onChange={(e) =>
-                setKomponentenForm({ ...komponentenForm, amount: e.target.value })
-              }
-              required
-            />
-            <Formularfeld
-              placeholder="Beschreibung"
-              name="description"
-              value={komponentenForm.description}
-              onChange={(e) =>
-                setKomponentenForm({ ...komponentenForm, description: e.target.value })
-              }
-            />
-            <Button type="submit" className="w-full sm:w-auto">Hinzufügen</Button>
+          <form onSubmit={handleKomponenteHinzufuegen} className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
+              <Auswahl
+                name="type"
+                value={komponentenForm.type}
+                onChange={(e) =>
+                  setKomponentenForm({ ...komponentenForm, type: e.target.value })
+                }
+                optionen={[
+                  { value: "cold_rent", label: "Kaltmiete" },
+                  { value: "operating_costs", label: "Nebenkosten" },
+                  { value: "heating_costs", label: "Heizkosten" },
+                  { value: "other", label: "Sonstiges" },
+                ]}
+              />
+              <Formularfeld
+                placeholder="Betrag (€)"
+                name="amount"
+                type="number"
+                step="0.01"
+                value={komponentenForm.amount}
+                onChange={(e) =>
+                  setKomponentenForm({ ...komponentenForm, amount: e.target.value })
+                }
+                required
+              />
+              <Formularfeld
+                placeholder="Beschreibung"
+                name="description"
+                value={komponentenForm.description}
+                onChange={(e) =>
+                  setKomponentenForm({ ...komponentenForm, description: e.target.value })
+                }
+              />
+              <Button type="submit" className="w-full sm:w-auto">Hinzufügen</Button>
+            </div>
+
+            {/* Mietanpassung */}
+            <div className="border-t border-gray-200 pt-4">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Mietanpassung
+              </label>
+              <Auswahl
+                name="adjustment_type"
+                value={komponentenForm.adjustment_type}
+                onChange={(e) =>
+                  setKomponentenForm({ ...komponentenForm, adjustment_type: e.target.value })
+                }
+                optionen={[
+                  { value: "fixed", label: "Feste Miete" },
+                  { value: "staggered", label: "Staffelmiete" },
+                  { value: "index_linked", label: "Indexmiete" },
+                ]}
+              />
+            </div>
+
+            {/* Staffelmiete */}
+            {komponentenForm.adjustment_type === "staggered" && (
+              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="font-medium text-gray-900 dark:text-white">Staffelmiete-Zeitplan</h4>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setShowStaggeredForm(true)}
+                  >
+                    <Plus className="w-4 h-4 mr-1" />
+                    Stufe hinzufügen
+                  </Button>
+                </div>
+                {komponentenForm.staggered_schedule && komponentenForm.staggered_schedule.length > 0 ? (
+                  <div className="space-y-2">
+                    {komponentenForm.staggered_schedule.map((item, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-center justify-between p-2 bg-white dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600"
+                      >
+                        <span className="text-sm">
+                          {new Date(item.date).toLocaleDateString("de-DE")}: {parseFloat(item.amount).toFixed(2)} €
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newSchedule = komponentenForm.staggered_schedule.filter((_, i) => i !== idx);
+                            setKomponentenForm({ ...komponentenForm, staggered_schedule: newSchedule });
+                          }}
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Noch keine Staffelstufen hinzugefügt
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Indexmiete */}
+            {komponentenForm.adjustment_type === "index_linked" && (
+              <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4 border border-purple-200 dark:border-purple-800 space-y-3">
+                <h4 className="font-medium text-gray-900 dark:text-white">Indexmiete-Konfiguration</h4>
+                <div className="grid grid-cols-2 gap-3">
+                  <Formularfeld
+                    label="Index-Typ"
+                    placeholder="z.B. VPI, Mietspiegel"
+                    value={komponentenForm.index_type}
+                    onChange={(e) =>
+                      setKomponentenForm({ ...komponentenForm, index_type: e.target.value })
+                    }
+                  />
+                  <Formularfeld
+                    label="Basiswert"
+                    type="number"
+                    step="0.01"
+                    value={komponentenForm.index_base_value}
+                    onChange={(e) =>
+                      setKomponentenForm({ ...komponentenForm, index_base_value: e.target.value })
+                    }
+                  />
+                  <Formularfeld
+                    label="Basis-Datum"
+                    type="date"
+                    value={komponentenForm.index_base_date}
+                    onChange={(e) =>
+                      setKomponentenForm({ ...komponentenForm, index_base_date: e.target.value })
+                    }
+                  />
+                  <Formularfeld
+                    label="Nächstes Anpassungsdatum"
+                    type="date"
+                    value={komponentenForm.index_adjustment_date}
+                    onChange={(e) =>
+                      setKomponentenForm({ ...komponentenForm, index_adjustment_date: e.target.value })
+                    }
+                  />
+                  <Formularfeld
+                    label="Anpassungsprozentsatz (%)"
+                    type="number"
+                    step="0.01"
+                    value={komponentenForm.index_adjustment_percentage}
+                    onChange={(e) =>
+                      setKomponentenForm({ ...komponentenForm, index_adjustment_percentage: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Umlageschlüssel (für Betriebskosten) */}
+            {(komponentenForm.type === "operating_costs" || komponentenForm.type === "heating_costs") && (
+              <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-lg p-4 border border-emerald-200 dark:border-emerald-800 space-y-3">
+                <h4 className="font-medium text-gray-900 dark:text-white">Umlageschlüssel</h4>
+                <Auswahl
+                  label="Umlageschlüssel"
+                  value={komponentenForm.allocation_key}
+                  onChange={(e) =>
+                    setKomponentenForm({ ...komponentenForm, allocation_key: e.target.value })
+                  }
+                  optionen={[
+                    { value: "", label: "Standard" },
+                    { value: "area", label: "Nach Fläche (m²)" },
+                    { value: "units", label: "Nach Einheiten" },
+                    { value: "persons", label: "Nach Personen" },
+                    { value: "custom", label: "Individuell" },
+                  ]}
+                />
+                {komponentenForm.allocation_key === "custom" && (
+                  <Formularfeld
+                    label="Individueller Faktor"
+                    type="number"
+                    step="0.0001"
+                    value={komponentenForm.allocation_factor}
+                    onChange={(e) =>
+                      setKomponentenForm({ ...komponentenForm, allocation_factor: e.target.value })
+                    }
+                  />
+                )}
+                <Formularfeld
+                  label="Notizen zum Umlageschlüssel"
+                  type="textarea"
+                  value={komponentenForm.allocation_notes}
+                  onChange={(e) =>
+                    setKomponentenForm({ ...komponentenForm, allocation_notes: e.target.value })
+                  }
+                />
+              </div>
+            )}
           </form>
         </div>
+
+        {/* Staffelmiete-Eintrag Modal */}
+        {showStaggeredForm && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md w-full mx-4">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
+                Staffelstufe hinzufügen
+              </h3>
+              <div className="space-y-4">
+                <Formularfeld
+                  label="Datum"
+                  type="date"
+                  value={staggeredEntry.date}
+                  onChange={(e) => setStaggeredEntry({ ...staggeredEntry, date: e.target.value })}
+                  required
+                />
+                <Formularfeld
+                  label="Betrag (€)"
+                  type="number"
+                  step="0.01"
+                  value={staggeredEntry.amount}
+                  onChange={(e) => setStaggeredEntry({ ...staggeredEntry, amount: e.target.value })}
+                  required
+                />
+                <div className="flex gap-2 pt-4">
+                  <Button
+                    type="button"
+                    variant="primary"
+                    onClick={() => {
+                      if (staggeredEntry.date && staggeredEntry.amount) {
+                        const newSchedule = [
+                          ...(komponentenForm.staggered_schedule || []),
+                          {
+                            date: staggeredEntry.date,
+                            amount: parseFloat(staggeredEntry.amount),
+                          },
+                        ].sort((a, b) => new Date(a.date) - new Date(b.date));
+                        setKomponentenForm({ ...komponentenForm, staggered_schedule: newSchedule });
+                        setStaggeredEntry({ date: "", amount: "" });
+                        setShowStaggeredForm(false);
+                      }
+                    }}
+                  >
+                    Hinzufügen
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => {
+                      setShowStaggeredForm(false);
+                      setStaggeredEntry({ date: "", amount: "" });
+                    }}
+                  >
+                    Abbrechen
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div>
           <h3 className="text-base font-semibold mb-3">Komponenten</h3>
@@ -498,6 +749,9 @@ export default function Vertraege() {
                     Beschreibung
                   </th>
                   <th className="px-4 py-2 text-left text-xs font-semibold text-slate-700">
+                    Details
+                  </th>
+                  <th className="px-4 py-2 text-left text-xs font-semibold text-slate-700">
                     Aktionen
                   </th>
                 </tr>
@@ -506,16 +760,48 @@ export default function Vertraege() {
                 {komponenten.map((komp) => (
                   <tr key={komp.id}>
                     <td className="px-4 py-2 text-sm">
-                      {komp.type === "cold_rent"
-                        ? "Kaltmiete"
-                        : komp.type === "operating_costs"
-                        ? "Nebenkosten"
-                        : komp.type === "heating_costs"
-                        ? "Heizkosten"
-                        : "Sonstiges"}
+                      <div>
+                        {komp.type === "cold_rent"
+                          ? "Kaltmiete"
+                          : komp.type === "operating_costs"
+                          ? "Nebenkosten"
+                          : komp.type === "heating_costs"
+                          ? "Heizkosten"
+                          : "Sonstiges"}
+                        {komp.adjustment_type && komp.adjustment_type !== "fixed" && (
+                          <span className="ml-2 text-xs text-blue-600 dark:text-blue-400">
+                            ({komp.adjustment_type === "staggered" ? "Staffel" : "Index"})
+                          </span>
+                        )}
+                      </div>
                     </td>
-                    <td className="px-4 py-2 text-sm">{parseFloat(komp.amount).toFixed(2)} €</td>
+                    <td className="px-4 py-2 text-sm">
+                      <div>{parseFloat(komp.amount).toFixed(2)} €</div>
+                      {komp.allocation_key && (
+                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                          Umlage: {komp.allocation_key === "area" ? "Fläche" : komp.allocation_key === "units" ? "Einheiten" : komp.allocation_key === "persons" ? "Personen" : "Individuell"}
+                        </div>
+                      )}
+                    </td>
                     <td className="px-4 py-2 text-sm">{komp.description || "—"}</td>
+                    <td className="px-4 py-2 text-sm">
+                      {komp.adjustment_type === "staggered" && komp.staggered_schedule && (
+                        <div className="text-xs text-blue-600 dark:text-blue-400">
+                          {komp.staggered_schedule.length} Staffelstufe(n)
+                        </div>
+                      )}
+                      {komp.adjustment_type === "index_linked" && komp.index_type && (
+                        <div className="text-xs text-purple-600 dark:text-purple-400">
+                          Index: {komp.index_type}
+                          {komp.index_adjustment_date && (
+                            <div>Nächste Anpassung: {new Date(komp.index_adjustment_date).toLocaleDateString("de-DE")}</div>
+                          )}
+                        </div>
+                      )}
+                      {(!komp.adjustment_type || komp.adjustment_type === "fixed") && (
+                        <span className="text-xs text-gray-400">Feste Miete</span>
+                      )}
+                    </td>
                     <td className="px-4 py-2 text-sm">
                       <button
                         onClick={() => handleKomponenteLoeschen(komp.id)}
@@ -534,7 +820,7 @@ export default function Vertraege() {
                       .toFixed(2)}{" "}
                     €
                   </td>
-                  <td colSpan="2"></td>
+                  <td colSpan="3"></td>
                 </tr>
               </tbody>
             </table>
