@@ -3,17 +3,25 @@ import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Formularfeld from "../components/Formularfeld";
 import Button from "../components/Button";
-import { Settings, User, FileText, Bell, Mail, Lock, CreditCard, CheckCircle, XCircle, AlertCircle, HelpCircle, ExternalLink } from "lucide-react";
+import Auswahl from "../components/Auswahl";
+import { Settings, User, FileText, Bell, Mail, Lock, CreditCard, CheckCircle, XCircle, AlertCircle, HelpCircle, ExternalLink, Building2, Upload, X, Euro, Calendar, Image } from "lucide-react";
 import { subscriptionApi } from "../api/subscriptionApi";
+import { clientSettingsApi } from "../api/clientSettingsApi";
+import { useApp } from "../contexts";
+import { bankApi } from "../api/bankApi";
+import Benachrichtigung, { useBenachrichtigung } from "../components/Benachrichtigung";
 
 export default function Einstellungen() {
   const navigate = useNavigate();
+  const { selectedClient } = useApp();
+  const { benachrichtigung, zeigeBenachrichtigung } = useBenachrichtigung();
   const [activeTab, setActiveTab] = useState("account");
 
   const tabs = [
     { id: "account", label: "Benutzerkonto", icon: User },
+    { id: "client", label: "Mandant", icon: Building2 },
     { id: "subscription", label: "Abonnement", icon: CreditCard },
-    { id: "templates", label: "Vorlagen", icon: FileText },
+    { id: "templates", label: "Textbausteine", icon: FileText },
     { id: "reminders", label: "Mahnregeln", icon: Bell },
     { id: "support", label: "Support & Hilfe", icon: HelpCircle },
   ];
@@ -44,8 +52,60 @@ export default function Einstellungen() {
     },
   });
 
+  const handleSaveSettings = () => {
+    updateSettingsMutation.mutate(settingsForm);
+  };
+
+  const handleLogoUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      uploadLogoMutation.mutate(file);
+    }
+  };
+
+  const handleReminderFeeChange = (key, value) => {
+    setSettingsForm({
+      ...settingsForm,
+      reminder_fees: {
+        ...settingsForm.reminder_fees,
+        [key]: parseFloat(value) || 0,
+      },
+    });
+  };
+
+  const handleReminderDaysChange = (key, value) => {
+    setSettingsForm({
+      ...settingsForm,
+      reminder_days: {
+        ...settingsForm.reminder_days,
+        [key]: parseInt(value) || 0,
+      },
+    });
+  };
+
+  const handleReminderEnabledChange = (key, value) => {
+    setSettingsForm({
+      ...settingsForm,
+      reminder_enabled: {
+        ...settingsForm.reminder_enabled,
+        [key]: value,
+      },
+    });
+  };
+
+  const handleTemplateChange = (key, value) => {
+    setSettingsForm({
+      ...settingsForm,
+      text_templates: {
+        ...settingsForm.text_templates,
+        [key]: value,
+      },
+    });
+  };
+
   return (
     <div className="animate-fade-in">
+      <Benachrichtigung benachrichtigung={benachrichtigung} onClose={() => {}} />
       <div className="mb-6 sm:mb-8">
         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-2 sm:mb-3 flex items-center gap-2 sm:gap-3">
           <Settings className="w-7 h-7 sm:w-8 sm:h-8 lg:w-10 lg:h-10 text-primary-600" />
@@ -266,8 +326,8 @@ export default function Einstellungen() {
             </div>
           )}
 
-          {activeTab === "reminders" && (
-            <div className="w-full">
+          {activeTab === "reminders" && selectedClient && (
+            <div className="w-full space-y-6">
               <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4 flex items-center gap-2 sm:gap-3">
                 <Bell className="w-6 h-6 sm:w-7 sm:h-7 text-primary-600 flex-shrink-0" />
                 Mahnregeln
@@ -275,10 +335,71 @@ export default function Einstellungen() {
               <p className="text-base sm:text-lg text-gray-600 mb-5 sm:mb-6">
                 Automatische Mahnungen bei Zahlungsverzug
               </p>
-              <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl border-2 border-gray-200 p-10 sm:p-12 lg:p-16 text-center">
-                <Bell className="w-16 h-16 sm:w-20 sm:h-20 text-gray-400 mx-auto mb-5" />
-                <p className="text-lg sm:text-xl text-gray-500 font-semibold">Bald verfügbar</p>
-              </div>
+
+              {settingsLoading ? (
+                <div className="text-center py-8">
+                  <p className="text-gray-600">Lade Mahnregeln...</p>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {[
+                    { key: "payment_reminder", label: "Zahlungserinnerung", defaultDays: 14, defaultFee: 0 },
+                    { key: "first_reminder", label: "1. Mahnung", defaultDays: 30, defaultFee: 5 },
+                    { key: "second_reminder", label: "2. Mahnung", defaultDays: 60, defaultFee: 10 },
+                    { key: "final_reminder", label: "Mahnung (letzte)", defaultDays: 90, defaultFee: 15 },
+                  ].map((reminder) => (
+                    <div key={reminder.key} className="bg-white rounded-xl border-2 border-gray-200 p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-bold text-gray-900">{reminder.label}</h3>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={settingsForm.reminder_enabled?.[reminder.key] ?? true}
+                            onChange={(e) =>
+                              handleReminderEnabledChange(reminder.key, e.target.checked)
+                            }
+                            className="w-4 h-4 text-primary-600 rounded"
+                          />
+                          <span className="text-sm text-gray-700">Aktiviert</span>
+                        </label>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <Formularfeld
+                          label="Tage nach Fälligkeit"
+                          type="number"
+                          icon={<Calendar className="w-5 h-5" />}
+                          value={
+                            settingsForm.reminder_days?.[reminder.key] ?? reminder.defaultDays
+                          }
+                          onChange={(e) =>
+                            handleReminderDaysChange(reminder.key, e.target.value)
+                          }
+                        />
+                        <Formularfeld
+                          label="Mahngebühr (€)"
+                          type="number"
+                          step="0.01"
+                          icon={<Euro className="w-5 h-5" />}
+                          value={
+                            settingsForm.reminder_fees?.[reminder.key] ?? reminder.defaultFee
+                          }
+                          onChange={(e) =>
+                            handleReminderFeeChange(reminder.key, e.target.value)
+                          }
+                        />
+                      </div>
+                    </div>
+                  ))}
+                  <div className="flex justify-end pt-4">
+                    <Button
+                      onClick={handleSaveSettings}
+                      disabled={updateSettingsMutation.isPending}
+                    >
+                      {updateSettingsMutation.isPending ? "Speichere..." : "Speichern"}
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
