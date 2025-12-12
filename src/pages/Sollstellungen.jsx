@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useApp } from '../contexts/AppContext';
 import axiosInstance from '../api/axiosInstance';
 import Button from '../components/Button';
 import Modal from '../components/Modal';
@@ -10,6 +11,7 @@ import { formatCurrency, formatDate } from '../utils/formatting';
 const Sollstellungen = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { selectedClient, selectedFiscalYear } = useApp();
   const [showGenerateModal, setShowGenerateModal] = useState(false);
   const [selectedBillRun, setSelectedBillRun] = useState(null);
   
@@ -157,7 +159,15 @@ const Sollstellungen = () => {
   });
 
   const handleGenerateBillRun = () => {
-    generateMutation.mutate(generateForm);
+    if (!selectedClient) {
+      alert("Bitte wählen Sie einen Mandanten aus");
+      return;
+    }
+    generateMutation.mutate({
+      ...generateForm,
+      client_id: selectedClient.id,
+      fiscal_year_id: selectedFiscalYear?.id,
+    });
   };
 
   const handleDeleteBillRun = (billRunId) => {
