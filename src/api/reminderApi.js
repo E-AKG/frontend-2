@@ -34,5 +34,15 @@ export const reminderApi = {
     });
     return response;
   },
+
+  generatePdf: async (reminderId) => {
+    const response = await axiosInstance.post(`/api/reminders/${reminderId}/generate-pdf`);
+    return response;
+  },
+
+  markSent: async (reminderId) => {
+    const response = await axiosInstance.post(`/api/reminders/${reminderId}/mark-sent`);
+    return response;
+  },
 };
 
