@@ -19,6 +19,9 @@ import Sollstellungen from "./pages/Sollstellungen";
 import Bank from "./pages/Bank";
 import Finanzen from "./pages/Finanzen";
 import Abrechnung from "./pages/Abrechnung";
+import Kassenbuch from "./pages/Kassenbuch";
+import Tickets from "./pages/Tickets";
+import Dokumente from "./pages/Dokumente";
 import Einstellungen from "./pages/Einstellungen";
 import ProLayout from "./layout/ProLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -89,8 +92,12 @@ export default function App() {
             <Route path="vertraege" element={<Vertraege />} />
             <Route path="finanzen" element={<Finanzen />} />
             <Route path="bank" element={<Bank />} />
+            <Route path="kassenbuch" element={<Kassenbuch />} />
             <Route path="abrechnung" element={<Abrechnung />} />
             <Route path="sollstellungen" element={<Sollstellungen />} />
+            <Route path="vorgaenge" element={<Tickets />} />
+            <Route path="tickets" element={<Tickets />} />
+            <Route path="dokumente" element={<Dokumente />} />
             {/* Legacy routes for backward compatibility */}
             <Route path="objekte" element={<Objekte />} />
             <Route path="objekte/:id" element={<ObjektDetails />} />
