@@ -393,30 +393,68 @@ export default function ClientSelection() {
                   </Button>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {fiscalYears.map((fy) => (
-                    <button
-                      key={fy.id}
-                      onClick={() => handleFiscalYearSelect(fy.id)}
-                      className={`p-4 rounded-xl border-2 transition-all text-left ${
-                        selectedFiscalYearId === fy.id
-                          ? "border-primary-600 bg-primary-50"
-                          : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
-                      }`}
-                    >
-                      <div className="font-semibold text-gray-900">{fy.year}</div>
-                      <div className="text-sm text-gray-600 mt-1">
-                        {new Date(fy.start_date).toLocaleDateString("de-DE")} -{" "}
-                        {new Date(fy.end_date).toLocaleDateString("de-DE")}
-                      </div>
-                      {fy.is_active && (
-                        <span className="inline-block mt-2 px-2 py-1 text-xs font-semibold bg-green-100 text-green-700 rounded">
-                          Aktiv
-                        </span>
-                      )}
-                    </button>
-                  ))}
-                </div>
+                <>
+                  {(() => {
+                    // Prüfe auf Duplikate
+                    const duplicateIds = fiscalYears.filter(
+                      (fy, index, self) => self.findIndex((f) => f.id === fy.id) !== index
+                    );
+                    const duplicateYears = fiscalYears.filter(
+                      (fy, index, self) => self.findIndex((f) => f.year === fy.year && f.id !== fy.id) !== -1
+                    );
+                    
+                    // Entferne Duplikate: Behalte nur das erste Vorkommen jeder ID
+                    const uniqueFiscalYears = fiscalYears.filter(
+                      (fy, index, self) => index === self.findIndex((f) => f.id === fy.id)
+                    );
+                    
+                    // Sortiere nach Jahr (neueste zuerst), dann nach is_active
+                    const sortedFiscalYears = [...uniqueFiscalYears].sort((a, b) => {
+                      if (a.is_active && !b.is_active) return -1;
+                      if (!a.is_active && b.is_active) return 1;
+                      return b.year - a.year;
+                    });
+                    
+                    return (
+                      <>
+                        {(duplicateIds.length > 0 || duplicateYears.length > 0) && (
+                          <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                            <div className="flex items-start gap-2">
+                              <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                              <div className="text-sm text-yellow-800">
+                                <strong>Hinweis:</strong> Es wurden {fiscalYears.length - uniqueFiscalYears.length} doppelte Geschäftsjahre gefunden und entfernt.
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          {sortedFiscalYears.map((fy) => (
+                            <button
+                              key={fy.id}
+                              onClick={() => handleFiscalYearSelect(fy.id)}
+                              className={`p-4 rounded-xl border-2 transition-all text-left ${
+                                selectedFiscalYearId === fy.id
+                                  ? "border-primary-600 bg-primary-50"
+                                  : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                              }`}
+                            >
+                              <div className="font-semibold text-gray-900">{fy.year}</div>
+                              <div className="text-sm text-gray-600 mt-1">
+                                {new Date(fy.start_date).toLocaleDateString("de-DE")} -{" "}
+                                {new Date(fy.end_date).toLocaleDateString("de-DE")}
+                              </div>
+                              {fy.is_active && (
+                                <span className="inline-block mt-2 px-2 py-1 text-xs font-semibold bg-green-100 text-green-700 rounded">
+                                  Aktiv
+                                </span>
+                              )}
+                            </button>
+                          ))}
+                        </div>
+                      </>
+                    );
+                  })()}
+                </>
               )}
             </div>
           )}
