@@ -395,18 +395,30 @@ export default function ClientSelection() {
               ) : (
                 <>
                   {(() => {
-                    // Prüfe auf Duplikate
-                    const duplicateIds = fiscalYears.filter(
-                      (fy, index, self) => self.findIndex((f) => f.id === fy.id) !== index
-                    );
-                    const duplicateYears = fiscalYears.filter(
-                      (fy, index, self) => self.findIndex((f) => f.year === fy.year && f.id !== fy.id) !== -1
-                    );
+                    // Entferne Duplikate nach Jahr: Pro Jahr nur ein Geschäftsjahr behalten
+                    // Bevorzuge: 1. Aktive, 2. Neueste (nach created_at)
+                    const yearMap = new Map();
                     
-                    // Entferne Duplikate: Behalte nur das erste Vorkommen jeder ID
-                    const uniqueFiscalYears = fiscalYears.filter(
-                      (fy, index, self) => index === self.findIndex((f) => f.id === fy.id)
-                    );
+                    fiscalYears.forEach((fy) => {
+                      const existing = yearMap.get(fy.year);
+                      if (!existing) {
+                        yearMap.set(fy.year, fy);
+                      } else {
+                        // Entscheide welches behalten werden soll
+                        // Priorität: 1. Aktiv, 2. Neueres created_at
+                        const keepExisting = 
+                          (existing.is_active && !fy.is_active) ||
+                          (existing.is_active === fy.is_active && 
+                           new Date(existing.created_at) > new Date(fy.created_at));
+                        
+                        if (!keepExisting) {
+                          yearMap.set(fy.year, fy);
+                        }
+                      }
+                    });
+                    
+                    const uniqueFiscalYears = Array.from(yearMap.values());
+                    const duplicateCount = fiscalYears.length - uniqueFiscalYears.length;
                     
                     // Sortiere nach Jahr (neueste zuerst), dann nach is_active
                     const sortedFiscalYears = [...uniqueFiscalYears].sort((a, b) => {
@@ -417,12 +429,12 @@ export default function ClientSelection() {
                     
                     return (
                       <>
-                        {(duplicateIds.length > 0 || duplicateYears.length > 0) && (
+                        {duplicateCount > 0 && (
                           <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                             <div className="flex items-start gap-2">
                               <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
                               <div className="text-sm text-yellow-800">
-                                <strong>Hinweis:</strong> Es wurden {fiscalYears.length - uniqueFiscalYears.length} doppelte Geschäftsjahre gefunden und entfernt.
+                                <strong>Hinweis:</strong> Es wurden {duplicateCount} doppelte Geschäftsjahre gefunden und entfernt. Pro Jahr wird nur das aktivste/neueste Geschäftsjahr angezeigt.
                               </div>
                             </div>
                           </div>
