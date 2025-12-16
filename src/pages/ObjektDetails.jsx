@@ -974,14 +974,6 @@ export default function ObjektDetails() {
                 placeholder="z.B. 456/78"
               />
             </div>
-            {/* Debug: Zeige aktuelle Werte */}
-            {process.env.NODE_ENV === 'development' && (
-              <div className="mt-4 p-2 bg-gray-100 text-xs rounded">
-                <strong>Debug:</strong> unit_value_file_number={String(objekt?.unit_value_file_number ?? 'null')}, 
-                cadastral_district={String(objekt?.cadastral_district ?? 'null')}, 
-                cadastral_parcel={String(objekt?.cadastral_parcel ?? 'null')}
-              </div>
-            )}
             <div className="flex justify-end mt-6">
               <Button type="submit">Speichern</Button>
             </div>
@@ -1134,14 +1126,6 @@ export default function ObjektDetails() {
                   placeholder="z.B. 200"
                 />
               </div>
-              {/* Debug: Zeige aktuelle Werte */}
-              {process.env.NODE_ENV === 'development' && (
-                <div className="mt-4 p-2 bg-gray-100 text-xs rounded">
-                  <strong>Debug:</strong> heating_type={String(objekt?.heating_type ?? 'null')}, 
-                  energy_rating_value={String(objekt?.energy_rating_value ?? 'null')}, 
-                  total_residential_area={String(objekt?.total_residential_area ?? 'null')}
-                </div>
-              )}
             </div>
             <div className="flex justify-end mt-6">
               <Button type="submit">Speichern</Button>
