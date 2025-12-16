@@ -7,5 +7,12 @@ export const statsApi = {
       params: { month, year, client_id, fiscal_year_id },
     });
   },
+
+  getReports: (params = {}) => {
+    const { start_date, end_date, client_id, fiscal_year_id } = params;
+    return axiosInstance.get("/api/stats/reports", {
+      params: { start_date, end_date, client_id, fiscal_year_id },
+    });
+  },
 };
 

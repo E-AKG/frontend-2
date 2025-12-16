@@ -44,5 +44,14 @@ export const reminderApi = {
     const response = await axiosInstance.post(`/api/reminders/${reminderId}/mark-sent`);
     return response;
   },
+
+  // Test-PDF generieren (mit echten Daten aus dem Tool)
+  testPdf: async (templateName = null, clientId = null) => {
+    const params = {};
+    if (templateName) params.template_name = templateName;
+    if (clientId) params.client_id = clientId;
+    const response = await axiosInstance.post("/api/reminders/test-pdf", null, { params });
+    return response;
+  },
 };
 
