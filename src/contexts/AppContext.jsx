@@ -56,7 +56,14 @@ export function AppProvider({ children }) {
   const loadFiscalYears = async (clientId) => {
     try {
       const response = await clientApi.listFiscalYears(clientId);
-      setFiscalYears(response.data || []);
+      const fiscalYearsData = response.data || [];
+      
+      // Entferne Duplikate: Behalte nur das erste Vorkommen jeder ID
+      const uniqueFiscalYears = fiscalYearsData.filter(
+        (fy, index, self) => index === self.findIndex((f) => f.id === fy.id)
+      );
+      
+      setFiscalYears(uniqueFiscalYears);
     } catch (error) {
       console.error("Fehler beim Laden der Geschäftsjahre:", error);
       setFiscalYears([]);
