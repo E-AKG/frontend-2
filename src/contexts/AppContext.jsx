@@ -58,10 +58,29 @@ export function AppProvider({ children }) {
       const response = await clientApi.listFiscalYears(clientId);
       const fiscalYearsData = response.data || [];
       
-      // Entferne Duplikate: Behalte nur das erste Vorkommen jeder ID
-      const uniqueFiscalYears = fiscalYearsData.filter(
-        (fy, index, self) => index === self.findIndex((f) => f.id === fy.id)
-      );
+      // Entferne Duplikate nach Jahr: Pro Jahr nur ein Geschäftsjahr behalten
+      // Bevorzuge: 1. Aktive, 2. Neueste (nach created_at)
+      const yearMap = new Map();
+      
+      fiscalYearsData.forEach((fy) => {
+        const existing = yearMap.get(fy.year);
+        if (!existing) {
+          yearMap.set(fy.year, fy);
+        } else {
+          // Entscheide welches behalten werden soll
+          // Priorität: 1. Aktiv, 2. Neueres created_at
+          const keepExisting = 
+            (existing.is_active && !fy.is_active) ||
+            (existing.is_active === fy.is_active && 
+             new Date(existing.created_at || 0) > new Date(fy.created_at || 0));
+          
+          if (!keepExisting) {
+            yearMap.set(fy.year, fy);
+          }
+        }
+      });
+      
+      const uniqueFiscalYears = Array.from(yearMap.values());
       
       setFiscalYears(uniqueFiscalYears);
     } catch (error) {
