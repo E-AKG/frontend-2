@@ -122,6 +122,7 @@ export default function App() {
           >
             <Route path="dashboard" element={<DashboardPro />} />
             <Route path="verwaltung" element={<Objekte />} />
+            <Route path="verwaltung/einheiten" element={<Einheiten />} />
             <Route path="verwaltung/:id" element={<ObjektDetails />} />
             <Route path="personen" element={<Mieter />} />
             <Route path="personen/:id" element={<PersonenCRM />} />
