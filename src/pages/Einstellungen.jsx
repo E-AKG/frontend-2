@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Formularfeld from "../components/Formularfeld";
 import Button from "../components/Button";
 import Auswahl from "../components/Auswahl";
-import { Settings, User, FileText, Bell, Mail, Lock, CreditCard, CheckCircle, XCircle, AlertCircle, HelpCircle, ExternalLink, Building2, Upload, X, Euro, Calendar, Image } from "lucide-react";
+import { Settings, User, FileText, Bell, Mail, Lock, CreditCard, CheckCircle, XCircle, AlertCircle, HelpCircle, ExternalLink, Building2, Upload, X, Euro, Calendar, Image, LogOut } from "lucide-react";
 import { subscriptionApi } from "../api/subscriptionApi";
 import { clientSettingsApi } from "../api/clientSettingsApi";
 import { useApp } from "../contexts";
@@ -52,7 +52,100 @@ export default function Einstellungen() {
     },
   });
 
+  // Upgrade/Manage subscription mutation
+  const upgradeMutation = useMutation({
+    mutationFn: async () => {
+      const frontendUrl = window.location.origin;
+      const response = await subscriptionApi.createCheckout({
+        plan_name: "Basic",
+        price_per_month: 1000, // 10 EUR in cents
+        success_url: `${frontendUrl}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${frontendUrl}/einstellungen?tab=subscription`,
+      });
+      return response;
+    },
+    onSuccess: (response) => {
+      // Redirect to Stripe Checkout
+      if (response.data.url) {
+        window.location.href = response.data.url;
+      } else {
+        alert("Keine Checkout-URL erhalten. Bitte kontaktieren Sie den Support.");
+      }
+    },
+    onError: (error) => {
+      console.error("Error creating checkout:", error);
+      const errorMessage = error.response?.data?.detail || error.message || "Unbekannter Fehler";
+      
+      if (error.response?.status === 503) {
+        alert(
+          "Zahlungsservice ist nicht konfiguriert.\n\n" +
+          "Bitte kontaktieren Sie den Support unter kontakt@izenic.com\n\n" +
+          "Fehler: " + errorMessage
+        );
+      } else {
+        alert(
+          "Fehler beim Erstellen der Checkout-Session.\n\n" +
+          "Bitte versuchen Sie es erneut oder kontaktieren Sie den Support.\n\n" +
+          "Fehler: " + errorMessage
+        );
+      }
+    },
+  });
+
+  const handleUpgrade = () => {
+    upgradeMutation.mutate();
+  };
+
+  // Fetch client settings
+  const { data: clientSettings, isLoading: settingsLoading } = useQuery({
+    queryKey: ["client-settings", selectedClient?.id],
+    queryFn: () => clientSettingsApi.get(selectedClient?.id),
+    enabled: !!selectedClient && activeTab === "reminders",
+  });
+
+  // Update settings mutation
+  const updateSettingsMutation = useMutation({
+    mutationFn: (data) => clientSettingsApi.update(selectedClient?.id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["client-settings", selectedClient?.id] });
+      zeigeBenachrichtigung("Einstellungen erfolgreich gespeichert", "success");
+    },
+  });
+
+  // Upload logo mutation
+  const uploadLogoMutation = useMutation({
+    mutationFn: (file) => clientSettingsApi.uploadLogo(selectedClient?.id, file),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["client-settings", selectedClient?.id] });
+      zeigeBenachrichtigung("Logo erfolgreich hochgeladen", "success");
+    },
+  });
+
+  // Initialize settings form
+  const [settingsForm, setSettingsForm] = useState({
+    reminder_enabled: {},
+    reminder_days: {},
+    reminder_fees: {},
+    text_templates: {},
+  });
+
+  // Update form when settings are loaded
+  useEffect(() => {
+    if (clientSettings?.data) {
+      setSettingsForm({
+        reminder_enabled: clientSettings.data.reminder_enabled || {},
+        reminder_days: clientSettings.data.reminder_days || {},
+        reminder_fees: clientSettings.data.reminder_fees || {},
+        text_templates: clientSettings.data.text_templates || {},
+      });
+    }
+  }, [clientSettings]);
+
   const handleSaveSettings = () => {
+    if (!selectedClient) {
+      alert("Bitte wählen Sie zuerst einen Mandanten aus.");
+      return;
+    }
     updateSettingsMutation.mutate(settingsForm);
   };
 
@@ -211,44 +304,65 @@ export default function Einstellungen() {
                       </div>
 
                       {/* Actions */}
-                      {subscription.data.status === "active" && !subscription.data.cancel_at_period_end && (
-                        <div className="flex gap-4">
+                      <div className="flex flex-col sm:flex-row gap-3">
+                        {subscription.data.status === "active" && !subscription.data.cancel_at_period_end && (
+                          <>
+                            <Button
+                              onClick={handleUpgrade}
+                              disabled={upgradeMutation.isPending}
+                              className="bg-primary-600 hover:bg-primary-700 text-white flex-1"
+                            >
+                              {upgradeMutation.isPending ? "Wird geladen..." : "Abo upgraden / Verwalten"}
+                            </Button>
+                            <Button
+                              variant="danger"
+                              onClick={() => {
+                                if (confirm("Möchten Sie Ihr Abonnement wirklich kündigen? Es läuft bis zum Ende der Abrechnungsperiode weiter.")) {
+                                  cancelMutation.mutate();
+                                }
+                              }}
+                              disabled={cancelMutation.isPending}
+                              className="flex-1"
+                            >
+                              {cancelMutation.isPending ? "Wird gekündigt..." : "Abonnement kündigen"}
+                            </Button>
+                          </>
+                        )}
+                        {subscription.data.cancel_at_period_end && (
+                          <>
+                            <Button
+                              onClick={() => reactivateMutation.mutate()}
+                              disabled={reactivateMutation.isPending}
+                              className="bg-green-600 hover:bg-green-700 text-white flex-1"
+                            >
+                              {reactivateMutation.isPending ? "Wird reaktiviert..." : "Abonnement reaktivieren"}
+                            </Button>
+                            <Button
+                              onClick={handleUpgrade}
+                              disabled={upgradeMutation.isPending}
+                              className="bg-primary-600 hover:bg-primary-700 text-white flex-1"
+                            >
+                              {upgradeMutation.isPending ? "Wird geladen..." : "Abo verwalten (Stripe)"}
+                            </Button>
+                          </>
+                        )}
+                        {subscription.data.status !== "active" && !subscription.data.cancel_at_period_end && (
                           <Button
-                            variant="danger"
-                            onClick={() => {
-                              if (confirm("Möchten Sie Ihr Abonnement wirklich kündigen? Es läuft bis zum Ende der Abrechnungsperiode weiter.")) {
-                                cancelMutation.mutate();
-                              }
-                            }}
-                            disabled={cancelMutation.isPending}
+                            onClick={handleUpgrade}
+                            disabled={upgradeMutation.isPending}
+                            className="bg-blue-600 hover:bg-blue-700 text-white w-full"
                           >
-                            {cancelMutation.isPending ? "Wird gekündigt..." : "Abonnement kündigen"}
+                            {upgradeMutation.isPending ? "Wird geladen..." : "Abonnement abschließen"}
                           </Button>
-                        </div>
-                      )}
-                      {subscription.data.cancel_at_period_end && (
-                        <div className="flex gap-4">
-                          <Button
-                            onClick={() => reactivateMutation.mutate()}
-                            disabled={reactivateMutation.isPending}
-                          >
-                            {reactivateMutation.isPending ? "Wird reaktiviert..." : "Abonnement reaktivieren"}
-                          </Button>
-                        </div>
-                      )}
-                      {subscription.data.status !== "active" && !subscription.data.cancel_at_period_end && (
-                        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                          <p className="text-sm text-blue-800 mb-3">
-                            Sie nutzen derzeit die Testversion. Um alle Features freizuschalten, können Sie ein Abonnement abschließen.
-                          </p>
-                          <Button
-                            onClick={() => navigate("/pricing")}
-                            className="bg-blue-600 hover:bg-blue-700 text-white"
-                          >
-                            Abonnement abschließen
-                          </Button>
-                        </div>
-                      )}
+                        )}
+                      </div>
+                      
+                      {/* Info Box */}
+                      <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                        <p className="text-sm text-blue-800">
+                          <strong>Hinweis:</strong> Die Zahlung erfolgt sicher über Stripe. Sie werden zu einer externen Zahlungsseite weitergeleitet.
+                        </p>
+                      </div>
                     </>
                   ) : (
                     <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl border-2 border-gray-200 p-8">
@@ -264,10 +378,11 @@ export default function Einstellungen() {
                           Möchten Sie alle Premium-Features freischalten?
                         </p>
                         <Button
-                          onClick={() => navigate("/pricing")}
+                          onClick={handleUpgrade}
+                          disabled={upgradeMutation.isPending}
                           className="bg-blue-600 hover:bg-blue-700 text-white w-full"
                         >
-                          Abonnement abschließen
+                          {upgradeMutation.isPending ? "Wird geladen..." : "Abonnement abschließen (Stripe)"}
                         </Button>
                       </div>
                     </div>
@@ -314,6 +429,23 @@ export default function Einstellungen() {
                     placeholder="Neues Passwort wiederholen"
                     icon={<Lock className="w-6 h-6 sm:w-7 sm:h-7" />}
                   />
+                </div>
+
+                <div className="border-t border-gray-200 pt-4 mt-4">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-3">Konto</h3>
+                  <Button
+                    onClick={() => {
+                      if (confirm("Möchten Sie sich wirklich abmelden?")) {
+                        localStorage.removeItem("access_token");
+                        localStorage.removeItem("user_email");
+                        navigate("/login");
+                      }
+                    }}
+                    className="bg-red-600 hover:bg-red-700 text-white"
+                  >
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Abmelden
+                  </Button>
                 </div>
               </div>
             </div>
