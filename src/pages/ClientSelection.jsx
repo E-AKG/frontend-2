@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { useApp } from "../contexts/AppContext";
 import { clientApi } from "../api/clientApi";
 import { Building2, Calendar, Plus, ArrowRight, Loader2, Edit, X, AlertCircle } from "lucide-react";
@@ -12,6 +12,7 @@ import Benachrichtigung, { useBenachrichtigung } from "../components/Benachricht
 export default function ClientSelection() {
   const navigate = useNavigate();
   const location = useLocation();
+  const params = useParams();
   const { clients, fiscalYears, loading, loadClients, loadFiscalYears, updateClient, updateFiscalYear } = useApp();
   const { benachrichtigung, zeigeBenachrichtigung } = useBenachrichtigung();
   const [selectedClientId, setSelectedClientId] = useState(null);
@@ -71,6 +72,22 @@ export default function ClientSelection() {
       navigate("/client-selection", { replace: true });
     }
   }, [location.pathname, showClientModal, loading, navigate]);
+
+  // Wenn über /clients/:clientId/fiscal-years/new aufgerufen, öffne automatisch das Geschäftsjahr-Modal
+  useEffect(() => {
+    if (params.clientId && location.pathname.includes('/fiscal-years/new') && !showNewYearModal && !loading) {
+      const clientId = params.clientId;
+      setSelectedClientId(clientId);
+      loadFiscalYears(clientId);
+      
+      // Öffne das Modal für neues Geschäftsjahr nach kurzer Verzögerung
+      setTimeout(() => {
+        setShowNewYearModal(true);
+        // Entferne /fiscal-years/new aus der URL
+        navigate("/client-selection", { replace: true });
+      }, 500);
+    }
+  }, [params.clientId, location.pathname, showNewYearModal, loading, navigate, loadFiscalYears]);
 
   const handleClientSelect = (clientId) => {
     setSelectedClientId(clientId);
