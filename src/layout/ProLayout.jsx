@@ -36,6 +36,7 @@ export default function ProLayout() {
   const [searchResults, setSearchResults] = useState([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [selectedResultIndex, setSelectedResultIndex] = useState(0);
+  const [showUserMenu, setShowUserMenu] = useState(false);
   const searchInputRef = useRef(null);
   const searchTimeoutRef = useRef(null);
 
@@ -389,9 +390,50 @@ export default function ProLayout() {
 
               {/* User Menu */}
               <div className="relative">
-                <button className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                <button
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center text-white text-sm font-bold hover:ring-2 hover:ring-primary-300 transition-all"
+                >
                   {localStorage.getItem("user_email")?.charAt(0).toUpperCase() || "U"}
                 </button>
+
+                {showUserMenu && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-10"
+                      onClick={() => setShowUserMenu(false)}
+                    />
+                    <div className="absolute top-full right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-20">
+                      <div className="p-2">
+                        <div className="px-3 py-2 border-b border-gray-200 dark:border-gray-700 mb-2">
+                          <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                            {localStorage.getItem("user_email") || "Benutzer"}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => {
+                            navigate("/einstellungen");
+                            setShowUserMenu(false);
+                          }}
+                          className="w-full text-left px-4 py-2 rounded-lg text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+                        >
+                          <Settings className="w-4 h-4" />
+                          Einstellungen
+                        </button>
+                        <button
+                          onClick={() => {
+                            handleLogout();
+                            setShowUserMenu(false);
+                          }}
+                          className="w-full text-left px-4 py-2 rounded-lg text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 mt-1"
+                        >
+                          <LogOut className="w-4 h-4" />
+                          Abmelden
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
