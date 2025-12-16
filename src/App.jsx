@@ -25,11 +25,15 @@ import Kassenbuch from "./pages/Kassenbuch";
 import Tickets from "./pages/Tickets";
 import Dokumente from "./pages/Dokumente";
 import OffenePosten from "./pages/OffenePosten";
-import Zahlungsabgleich from "./pages/Zahlungsabgleich";
+import ManuelleBuchungen from "./pages/ManuelleBuchungen";
 import Berichte from "./pages/Berichte";
 import Einstellungen from "./pages/Einstellungen";
 import ProLayout from "./layout/ProLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
+import PortalProtectedRoute from "./components/PortalProtectedRoute";
+import PortalLogin from "./pages/PortalLogin";
+import PortalDashboard from "./pages/PortalDashboard";
+import AdminBKVerwaltung from "./pages/AdminBKVerwaltung";
 
 // Component to redirect authenticated users away from landing page
 function LandingRoute() {
@@ -70,9 +74,36 @@ export default function App() {
           <Route path="/payment-success" element={<PaymentSuccess />} />
           <Route path="/upgrade" element={<UpgradeRequired />} />
 
+          {/* Portal Routes (Mieter) */}
+          <Route path="/portal/login" element={<PortalLogin />} />
+          <Route
+            path="/portal/dashboard"
+            element={
+              <PortalProtectedRoute>
+                <PortalDashboard />
+              </PortalProtectedRoute>
+            }
+          />
+          <Route
+            path="/portal/bk/:year"
+            element={
+              <PortalProtectedRoute>
+                <PortalDashboard />
+              </PortalProtectedRoute>
+            }
+          />
+
           {/* Client Selection - Protected but without Layout */}
           <Route
             path="/client-selection"
+            element={
+              <ProtectedRoute>
+                <ClientSelection />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/clients/new"
             element={
               <ProtectedRoute>
                 <ClientSelection />
@@ -106,8 +137,9 @@ export default function App() {
             <Route path="tickets" element={<Tickets />} />
             <Route path="dokumente" element={<Dokumente />} />
             <Route path="offene-posten" element={<OffenePosten />} />
-            <Route path="zahlungsabgleich" element={<Zahlungsabgleich />} />
+            <Route path="manuelle-buchungen" element={<ManuelleBuchungen />} />
             <Route path="berichte" element={<Berichte />} />
+            <Route path="bk-verwaltung" element={<AdminBKVerwaltung />} />
             {/* Legacy routes for backward compatibility */}
             <Route path="objekte" element={<Objekte />} />
             <Route path="objekte/:id" element={<ObjektDetails />} />
