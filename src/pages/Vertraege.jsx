@@ -36,6 +36,7 @@ export default function Vertraege() {
   const [showModal, setShowModal] = useState(false);
   const [showKomponentenModal, setShowKomponentenModal] = useState(false);
   const [ausgewaehlterVertrag, setAusgewaehlterVertrag] = useState(null);
+  const [bearbeitung, setBearbeitung] = useState(null);
   const { benachrichtigung, zeigeBenachrichtigung } = useBenachrichtigung();
 
   const [formDaten, setFormDaten] = useState({
@@ -117,6 +118,20 @@ export default function Vertraege() {
       return response.data;
     },
     enabled: !!ausgewaehlterVertrag?.id,
+    onError: () => {
+      zeigeBenachrichtigung("Fehler beim Laden der Komponenten", "fehler");
+    },
+  });
+
+  // React Query: Fetch Lease Components for editing
+  const { data: bearbeitungsKomponenten = [] } = useQuery({
+    queryKey: ['leaseComponents', bearbeitung?.id],
+    queryFn: async () => {
+      if (!bearbeitung?.id) return [];
+      const response = await leaseApi.getComponents(bearbeitung.id);
+      return response.data;
+    },
+    enabled: !!bearbeitung?.id,
     onError: () => {
       zeigeBenachrichtigung("Fehler beim Laden der Komponenten", "fehler");
     },
@@ -210,6 +225,93 @@ export default function Vertraege() {
     }
   });
 
+  const updateLeaseMutation = useMutation({
+    mutationFn: async ({ leaseId, daten }) => {
+      // Aktualisiere zuerst den Vertrag
+      const payload = {
+        unit_id: daten.unit_id,
+        tenant_id: daten.tenant_id,
+        start_date: daten.start_date,
+        end_date: daten.end_date || null,
+        status: daten.status,
+        due_day: parseInt(daten.due_day),
+      };
+      
+      await leaseApi.update(leaseId, payload);
+      
+      // Lade aktuelle Komponenten
+      const currentComponents = await leaseApi.getComponents(leaseId);
+      const existingComponents = currentComponents.data || [];
+      
+      // Lösche alle bestehenden Komponenten
+      for (const comp of existingComponents) {
+        await leaseApi.removeComponent(comp.id);
+      }
+      
+      // Erstelle neue Komponenten
+      const componentPromises = [];
+      if (daten.components.cold_rent.amount) {
+        componentPromises.push(
+          leaseApi.createComponent(leaseId, {
+            type: "cold_rent",
+            amount: parseFloat(daten.components.cold_rent.amount),
+            description: daten.components.cold_rent.description || "Kaltmiete",
+          })
+        );
+      }
+      if (daten.components.operating_costs.amount) {
+        componentPromises.push(
+          leaseApi.createComponent(leaseId, {
+            type: "operating_costs",
+            amount: parseFloat(daten.components.operating_costs.amount),
+            description: daten.components.operating_costs.description || "Nebenkosten",
+          })
+        );
+      }
+      if (daten.components.heating_costs.amount) {
+        componentPromises.push(
+          leaseApi.createComponent(leaseId, {
+            type: "heating_costs",
+            amount: parseFloat(daten.components.heating_costs.amount),
+            description: daten.components.heating_costs.description || "Heizkosten",
+          })
+        );
+      }
+      if (daten.components.other && daten.components.other.length > 0) {
+        for (const otherItem of daten.components.other) {
+          if (otherItem.amount) {
+            componentPromises.push(
+              leaseApi.createComponent(leaseId, {
+                type: "other",
+                amount: parseFloat(otherItem.amount),
+                description: otherItem.description || "",
+              })
+            );
+          }
+        }
+      }
+      
+      if (componentPromises.length > 0) {
+        await Promise.all(componentPromises);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['leases'] });
+      queryClient.invalidateQueries({ queryKey: ['leaseComponents'] });
+      invalidateSollstellungen();
+      zeigeBenachrichtigung("Vertrag erfolgreich aktualisiert");
+      setShowModal(false);
+      setBearbeitung(null);
+      formZuruecksetzen();
+    },
+    onError: (error) => {
+      zeigeBenachrichtigung(
+        error.response?.data?.detail || "Fehler beim Aktualisieren",
+        "fehler"
+      );
+    }
+  });
+
   const deleteLeaseMutation = useMutation({
     mutationFn: async (leaseId) => {
       return await leaseApi.remove(leaseId);
@@ -278,8 +380,58 @@ export default function Vertraege() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    createLeaseMutation.mutate(formDaten);
+    if (bearbeitung) {
+      updateLeaseMutation.mutate({ leaseId: bearbeitung.id, daten: formDaten });
+    } else {
+      createLeaseMutation.mutate(formDaten);
+    }
   };
+
+  const handleBearbeiten = (vertrag) => {
+    setBearbeitung(vertrag);
+    // Lade Vertragsdaten in Formular
+    setFormDaten({
+      unit_id: vertrag.unit_id || "",
+      tenant_id: vertrag.tenant_id || "",
+      start_date: vertrag.start_date ? vertrag.start_date.split('T')[0] : "",
+      end_date: vertrag.end_date ? vertrag.end_date.split('T')[0] : "",
+      status: vertrag.status || "pending",
+      due_day: vertrag.due_day?.toString() || "1",
+      components: {
+        cold_rent: { amount: "", description: "Kaltmiete" },
+        operating_costs: { amount: "", description: "Nebenkosten" },
+        heating_costs: { amount: "", description: "Heizkosten" },
+        other: [],
+      },
+    });
+    setShowModal(true);
+  };
+
+  // Lade Komponenten in Formular, wenn Bearbeitung aktiv ist
+  useEffect(() => {
+    if (bearbeitung && bearbeitungsKomponenten.length > 0) {
+      const components = {
+        cold_rent: { amount: "", description: "Kaltmiete" },
+        operating_costs: { amount: "", description: "Nebenkosten" },
+        heating_costs: { amount: "", description: "Heizkosten" },
+        other: [],
+      };
+      
+      bearbeitungsKomponenten.forEach(comp => {
+        if (comp.type === "cold_rent") {
+          components.cold_rent = { amount: comp.amount.toString(), description: comp.description || "Kaltmiete" };
+        } else if (comp.type === "operating_costs") {
+          components.operating_costs = { amount: comp.amount.toString(), description: comp.description || "Nebenkosten" };
+        } else if (comp.type === "heating_costs") {
+          components.heating_costs = { amount: comp.amount.toString(), description: comp.description || "Heizkosten" };
+        } else if (comp.type === "other") {
+          components.other.push({ amount: comp.amount.toString(), description: comp.description || "" });
+        }
+      });
+      
+      setFormDaten(prev => ({ ...prev, components }));
+    }
+  }, [bearbeitung, bearbeitungsKomponenten]);
 
   const handleKomponenteHinzufuegen = (e) => {
     e.preventDefault();
@@ -400,12 +552,12 @@ export default function Vertraege() {
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                handleKomponentenAnzeigen(zeile);
+                handleBearbeiten(zeile);
               }}
-              className="p-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-all duration-200"
-              title="Komponenten anzeigen"
+              className="p-2 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-all duration-200"
+              title="Bearbeiten"
             >
-              <Layers className="w-4 h-4" />
+              <Edit className="w-4 h-4" />
             </button>
             <button
               onClick={(e) => {
@@ -438,6 +590,7 @@ export default function Vertraege() {
         <div className="flex justify-end">
           <Button
             onClick={() => {
+              setBearbeitung(null);
               formZuruecksetzen();
               setShowModal(true);
             }}
@@ -455,9 +608,10 @@ export default function Vertraege() {
         isOpen={showModal}
         onClose={() => {
           setShowModal(false);
+          setBearbeitung(null);
           formZuruecksetzen();
         }}
-        titel="Neuen Vertrag anlegen"
+        titel={bearbeitung ? "Vertrag bearbeiten" : "Neuen Vertrag anlegen"}
       >
         <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4 pb-2">
           <Auswahl
@@ -767,10 +921,26 @@ export default function Vertraege() {
           </div>
           
           <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 pt-3 sm:pt-4 border-t border-gray-200 mt-4 sm:mt-0">
-            <Button type="button" variant="secondary" onClick={() => setShowModal(false)} className="w-full sm:w-auto">
+            <Button 
+              type="button" 
+              variant="secondary" 
+              onClick={() => {
+                setShowModal(false);
+                setBearbeitung(null);
+                formZuruecksetzen();
+              }} 
+              className="w-full sm:w-auto"
+            >
               Abbrechen
             </Button>
-            <Button type="submit" icon={<Plus className="w-5 h-5" />} className="w-full sm:w-auto">Vertrag erstellen</Button>
+            <Button 
+              type="submit" 
+              icon={bearbeitung ? <Edit className="w-5 h-5" /> : <Plus className="w-5 h-5" />} 
+              className="w-full sm:w-auto"
+              disabled={bearbeitung ? updateLeaseMutation.isPending : createLeaseMutation.isPending}
+            >
+              {bearbeitung ? "Vertrag aktualisieren" : "Vertrag erstellen"}
+            </Button>
           </div>
         </form>
       </Modal>
