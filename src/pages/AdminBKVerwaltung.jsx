@@ -16,6 +16,7 @@ export default function AdminBKVerwaltung() {
   const queryClient = useQueryClient();
   const { selectedClient } = useApp();
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [activeTab, setActiveTab] = useState("draft"); // "draft" oder "published"
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [linkModalOpen, setLinkModalOpen] = useState(false);
   const [publishModalOpen, setPublishModalOpen] = useState(false);
@@ -47,10 +48,8 @@ export default function AdminBKVerwaltung() {
 
   // Hole DRAFT Dokumente (Statements und Receipts)
   const { data: draftStatements = [], isLoading: statementsLoading } = useQuery({
-    queryKey: ["admin-draft-statements", selectedYear],
+    queryKey: ["admin-draft-statements", selectedYear, selectedClient?.id],
     queryFn: async () => {
-      // TODO: Endpoint für DRAFT Statements erstellen
-      // Für jetzt verwenden wir documentApi
       const response = await documentApi.list({
         client_id: selectedClient?.id,
         document_type: "bk_statement",
@@ -59,10 +58,26 @@ export default function AdminBKVerwaltung() {
       });
       return response.data?.items || response.data || [];
     },
+    enabled: !!selectedClient,
+  });
+
+  // Hole PUBLISHED Dokumente (Statements)
+  const { data: publishedStatements = [], isLoading: publishedStatementsLoading } = useQuery({
+    queryKey: ["admin-published-statements", selectedYear, selectedClient?.id],
+    queryFn: async () => {
+      const response = await documentApi.list({
+        client_id: selectedClient?.id,
+        document_type: "bk_statement",
+        status: "published",
+        billing_year: selectedYear,
+      });
+      return response.data?.items || response.data || [];
+    },
+    enabled: !!selectedClient,
   });
 
   const { data: draftReceipts = [], isLoading: receiptsLoading } = useQuery({
-    queryKey: ["admin-draft-receipts", selectedYear],
+    queryKey: ["admin-draft-receipts", selectedYear, selectedClient?.id],
     queryFn: async () => {
       const response = await documentApi.list({
         client_id: selectedClient?.id,
@@ -72,6 +87,7 @@ export default function AdminBKVerwaltung() {
       });
       return response.data?.items || response.data || [];
     },
+    enabled: !!selectedClient,
   });
 
   // Upload Mutation
@@ -81,6 +97,7 @@ export default function AdminBKVerwaltung() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-draft-statements"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-published-statements"] });
       queryClient.invalidateQueries({ queryKey: ["admin-draft-receipts"] });
       setUploadModalOpen(false);
       setUploadForm({
@@ -101,6 +118,7 @@ export default function AdminBKVerwaltung() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-draft-statements"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-published-statements"] });
       setLinkModalOpen(false);
       setSelectedStatement(null);
       setSelectedReceipts([]);
@@ -114,10 +132,12 @@ export default function AdminBKVerwaltung() {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["admin-draft-statements"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-published-statements"] });
       queryClient.invalidateQueries({ queryKey: ["admin-draft-receipts"] });
       setPublishModalOpen(false);
       setSelectedStatement(null);
       setSelectedReceipts([]);
+      setActiveTab("published"); // Wechsle zu "Versendete" Tab nach Veröffentlichung
       alert(`Erfolgreich veröffentlicht! ${data.notifications?.sent || 0} Benachrichtigungen gesendet.`);
     },
   });
@@ -129,6 +149,7 @@ export default function AdminBKVerwaltung() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-draft-statements"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-published-statements"] });
       queryClient.invalidateQueries({ queryKey: ["admin-draft-receipts"] });
       setEditModalOpen(false);
       setSelectedStatement(null);
@@ -166,6 +187,7 @@ export default function AdminBKVerwaltung() {
     try {
       await adminPortalApi.uploadDocument(formData);
       queryClient.invalidateQueries({ queryKey: ["admin-draft-statements"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-published-statements"] });
       queryClient.invalidateQueries({ queryKey: ["admin-draft-receipts"] });
       setUploadModalOpen(false);
       setUploadForm({
@@ -235,79 +257,177 @@ export default function AdminBKVerwaltung() {
         </div>
       </div>
 
-      {/* Statements */}
+      {/* Statements mit Tabs */}
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-        <h2 className="text-lg font-semibold text-slate-900 mb-4">
-          Abrechnungen ({selectedYear})
-        </h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-slate-900">
+            Abrechnungen ({selectedYear})
+          </h2>
+        </div>
 
-        {statementsLoading ? (
-          <div className="text-center py-8">
-            <div className="w-8 h-8 border-4 border-cyan-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          </div>
-        ) : draftStatements.length === 0 ? (
-          <div className="text-center py-8 text-slate-500">
-            <FileText className="w-12 h-12 mx-auto mb-2 text-slate-300" />
-            <p>Keine Abrechnungen für {selectedYear}</p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {draftStatements.map((statement) => (
-              <div
-                key={statement.id}
-                className="border border-slate-200 rounded-lg p-4 hover:shadow-md transition-shadow"
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <FileText className="w-5 h-5 text-cyan-600" />
-                      <h3 className="font-semibold text-slate-900">
-                        {statement.title || statement.filename}
-                      </h3>
-                      <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded">
-                        Entwurf
-                      </span>
-                    </div>
-                    <p className="text-sm text-slate-600">
-                      {statement.billing_year} • {statement.filename}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => {
-                        setSelectedStatement(statement);
-                        setEditModalOpen(true);
-                      }}
-                      className="px-3 py-1.5 text-sm bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg transition-colors flex items-center gap-2"
-                    >
-                      <Edit className="w-4 h-4" />
-                      Bearbeiten
-                    </button>
-                    <button
-                      onClick={() => {
-                        setSelectedStatement(statement);
-                        setLinkModalOpen(true);
-                      }}
-                      className="px-3 py-1.5 text-sm bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors flex items-center gap-2"
-                    >
-                      <Link2 className="w-4 h-4" />
-                      Belege verknüpfen
-                    </button>
-                    <button
-                      onClick={() => {
-                        setSelectedStatement(statement);
-                        setPublishModalOpen(true);
-                      }}
-                      className="px-3 py-1.5 text-sm bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors flex items-center gap-2"
-                    >
-                      <Send className="w-4 h-4" />
-                      Veröffentlichen
-                    </button>
-                  </div>
-                </div>
+        {/* Tabs */}
+        <div className="border-b border-slate-200 mb-4">
+          <nav className="flex space-x-8">
+            <button
+              onClick={() => setActiveTab("draft")}
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                activeTab === "draft"
+                  ? "border-cyan-500 text-cyan-600"
+                  : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
+              }`}
+            >
+              Offene ({draftStatements.length})
+            </button>
+            <button
+              onClick={() => setActiveTab("published")}
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                activeTab === "published"
+                  ? "border-cyan-500 text-cyan-600"
+                  : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
+              }`}
+            >
+              Versendete ({publishedStatements.length})
+            </button>
+          </nav>
+        </div>
+
+        {/* Tab Content - Offene */}
+        {activeTab === "draft" && (
+          <>
+            {statementsLoading ? (
+              <div className="text-center py-8">
+                <div className="w-8 h-8 border-4 border-cyan-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
               </div>
-            ))}
-          </div>
+            ) : draftStatements.length === 0 ? (
+              <div className="text-center py-8 text-slate-500">
+                <FileText className="w-12 h-12 mx-auto mb-2 text-slate-300" />
+                <p>Keine offenen Abrechnungen für {selectedYear}</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {draftStatements.map((statement) => (
+                  <div
+                    key={statement.id}
+                    className="border border-slate-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <FileText className="w-5 h-5 text-cyan-600" />
+                          <h3 className="font-semibold text-slate-900">
+                            {statement.title || statement.filename}
+                          </h3>
+                          <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded">
+                            Entwurf
+                          </span>
+                        </div>
+                        <p className="text-sm text-slate-600">
+                          {statement.billing_year} • {statement.filename}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => {
+                            setSelectedStatement(statement);
+                            setEditModalOpen(true);
+                          }}
+                          className="px-3 py-1.5 text-sm bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg transition-colors flex items-center gap-2"
+                        >
+                          <Edit className="w-4 h-4" />
+                          Bearbeiten
+                        </button>
+                        <button
+                          onClick={() => {
+                            setSelectedStatement(statement);
+                            setLinkModalOpen(true);
+                          }}
+                          className="px-3 py-1.5 text-sm bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors flex items-center gap-2"
+                        >
+                          <Link2 className="w-4 h-4" />
+                          Belege verknüpfen
+                        </button>
+                        <button
+                          onClick={() => {
+                            setSelectedStatement(statement);
+                            setPublishModalOpen(true);
+                          }}
+                          className="px-3 py-1.5 text-sm bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors flex items-center gap-2"
+                        >
+                          <Send className="w-4 h-4" />
+                          Veröffentlichen
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+
+        {/* Tab Content - Versendete */}
+        {activeTab === "published" && (
+          <>
+            {publishedStatementsLoading ? (
+              <div className="text-center py-8">
+                <div className="w-8 h-8 border-4 border-cyan-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+              </div>
+            ) : publishedStatements.length === 0 ? (
+              <div className="text-center py-8 text-slate-500">
+                <FileText className="w-12 h-12 mx-auto mb-2 text-slate-300" />
+                <p>Keine versendeten Abrechnungen für {selectedYear}</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {publishedStatements.map((statement) => (
+                  <div
+                    key={statement.id}
+                    className="border border-slate-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <FileText className="w-5 h-5 text-green-600" />
+                          <h3 className="font-semibold text-slate-900">
+                            {statement.title || statement.filename}
+                          </h3>
+                          <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded">
+                            Versendet
+                          </span>
+                        </div>
+                        <p className="text-sm text-slate-600">
+                          {statement.billing_year} • {statement.filename}
+                        </p>
+                        {statement.published_at && (
+                          <p className="text-xs text-slate-500 mt-1">
+                            Versendet am: {new Date(statement.published_at).toLocaleDateString("de-DE", {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit"
+                            })}
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => {
+                            setSelectedStatement(statement);
+                            setEditModalOpen(true);
+                          }}
+                          className="px-3 py-1.5 text-sm bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg transition-colors flex items-center gap-2"
+                        >
+                          <Edit className="w-4 h-4" />
+                          Details ansehen
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
         )}
       </div>
 
