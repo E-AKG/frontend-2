@@ -1,14 +1,16 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApp } from "../contexts/AppContext";
 import { tenantApi } from "../api/tenantApi";
 import { adminPortalApi } from "../api/adminPortalApi";
+import { leaseApi } from "../api/leaseApi";
 import Tabelle from "../components/Tabelle";
 import Modal from "../components/Modal";
 import Formularfeld from "../components/Formularfeld";
 import Button from "../components/Button";
 import Benachrichtigung, { useBenachrichtigung } from "../components/Benachrichtigung";
+import { formatCurrency } from "../utils/formatting";
 import { 
   Search, 
   Plus, 
@@ -22,7 +24,8 @@ import {
   Trash2,
   CheckCircle2,
   Building2,
-  Wrench
+  Wrench,
+  Euro
 } from "lucide-react";
 import RiskBadge from "../components/RiskBadge";
 import Eigentuemer from "./Eigentuemer";
@@ -72,6 +75,77 @@ export default function Mieter() {
       zeigeBenachrichtigung("Fehler beim Laden der Mieter", "fehler");
     },
   });
+
+  // React Query: Fetch active leases for all tenants
+  const { data: activeLeases = [], isLoading: loadingLeases } = useQuery({
+    queryKey: ['leases', 'active', selectedClient?.id],
+    queryFn: async () => {
+      const response = await leaseApi.list({ 
+        status: 'active',
+        client_id: selectedClient?.id,
+        page_size: 1000 // Lade alle aktiven Verträge
+      });
+      return response.data.items || [];
+    },
+    enabled: !!selectedClient,
+  });
+
+  // React Query: Fetch lease components for all active leases
+  const { data: leaseComponentsMap = {} } = useQuery({
+    queryKey: ['leaseComponents', activeLeases.map(l => l.id).join(',')],
+    queryFn: async () => {
+      const componentsMap = {};
+      // Lade Komponenten für alle aktiven Verträge parallel
+      const componentPromises = activeLeases.map(async (lease) => {
+        try {
+          const response = await leaseApi.getComponents(lease.id);
+          return { leaseId: lease.id, components: response.data || [] };
+        } catch (error) {
+          console.error(`Fehler beim Laden der Komponenten für Vertrag ${lease.id}:`, error);
+          return { leaseId: lease.id, components: [] };
+        }
+      });
+      
+      const results = await Promise.all(componentPromises);
+      results.forEach(({ leaseId, components }) => {
+        componentsMap[leaseId] = components;
+      });
+      
+      return componentsMap;
+    },
+    enabled: activeLeases.length > 0,
+  });
+
+  // Berechne Gesamtmiete für jeden Mieter
+  const tenantRentMap = useMemo(() => {
+    const rentMap = {};
+    
+    // Gruppiere Verträge nach tenant_id
+    const leasesByTenant = {};
+    activeLeases.forEach(lease => {
+      if (lease.tenant_id) {
+        if (!leasesByTenant[lease.tenant_id]) {
+          leasesByTenant[lease.tenant_id] = [];
+        }
+        leasesByTenant[lease.tenant_id].push(lease);
+      }
+    });
+    
+    // Berechne Gesamtmiete für jeden Mieter
+    Object.keys(leasesByTenant).forEach(tenantId => {
+      let totalRent = 0;
+      leasesByTenant[tenantId].forEach(lease => {
+        const components = leaseComponentsMap[lease.id] || [];
+        const leaseTotal = components.reduce((sum, comp) => {
+          return sum + (parseFloat(comp.amount) || 0);
+        }, 0);
+        totalRent += leaseTotal;
+      });
+      rentMap[tenantId] = totalRent;
+    });
+    
+    return rentMap;
+  }, [activeLeases, leaseComponentsMap]);
 
   // Mutations
   const createMutation = useMutation({
@@ -253,6 +327,21 @@ export default function Mieter() {
           )}
         </button>
       ),
+    },
+    {
+      key: "rent",
+      label: "Monatliche Miete",
+      render: (zeile) => {
+        const totalRent = tenantRentMap[zeile.id] || 0;
+        return (
+          <div className="flex items-center gap-2">
+            <Euro className="w-4 h-4 text-gray-400" />
+            <span className={`font-semibold ${totalRent > 0 ? 'text-gray-900' : 'text-gray-400'}`}>
+              {totalRent > 0 ? formatCurrency(totalRent) : 'Kein Vertrag'}
+            </span>
+          </div>
+        );
+      },
     },
     {
       key: "risk",
