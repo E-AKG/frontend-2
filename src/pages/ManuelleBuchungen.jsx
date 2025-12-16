@@ -179,7 +179,6 @@ export default function ManuelleBuchungen() {
             </div>
           )}
         </div>
-      )}
 
       {/* Manuelle Buchung Modal */}
       {showManualPaymentModal && (
