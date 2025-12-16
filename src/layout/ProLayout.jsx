@@ -180,13 +180,14 @@ export default function ProLayout() {
     { path: "/vertraege", label: "Verträge", icon: FileText },
     { path: "/finanzen", label: "Finanzen", icon: CreditCard },
     { path: "/abrechnung", label: "Abrechnung", icon: Receipt },
+    { path: "/bk-verwaltung", label: "BK-Verwaltung", icon: FileText },
     { path: "/vorgaenge", label: "Vorgänge", icon: Wrench },
     { path: "/dokumente", label: "Dokumente", icon: FolderOpen },
     { path: "/berichte", label: "Berichte", icon: BarChart3 },
   ];
 
   return (
-    <div className={`min-h-screen ${darkMode ? "dark bg-gray-900" : "bg-gray-50"}`}>
+    <div className={`min-h-screen ${darkMode ? "dark bg-gray-900" : "bg-gray-50"}`} data-layout="ProLayout" data-version="2.0">
       {/* Sidebar */}
       <aside
         className={`fixed left-0 top-0 h-full bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-transform duration-300 z-40 ${
