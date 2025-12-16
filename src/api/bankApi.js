@@ -127,5 +127,30 @@ export const bankApi = {
   reconcileCsv: () => {
     return axiosInstance.post('/api/bank/csv-reconcile');
   },
+
+  // Universeller Abgleich (CSV + Kassenbuch + Manuell)
+  universalReconcile: (clientId, fiscalYearId, minConfidence = 0.6, sources = null) => {
+    const params = {
+      client_id: clientId,
+      fiscal_year_id: fiscalYearId,
+      min_confidence: minConfidence,
+    };
+    if (sources) {
+      params.sources = sources;
+    }
+    return axiosInstance.post('/api/bank/universal-reconcile', null, { params });
+  },
+
+  // Manuelle Buchungen
+  getManualTransactions: (params = {}) => {
+    const { page = 1, page_size = 50 } = params;
+    return axiosInstance.get("/api/bank/manual-transactions", {
+      params: { page, page_size },
+    });
+  },
+
+  deleteTransaction: (transactionId) => {
+    return axiosInstance.delete(`/api/bank-transactions/${transactionId}`);
+  },
 };
 

@@ -35,5 +35,17 @@ export const documentApi = {
     const response = await axiosInstance.delete(`/api/documents/${documentId}`);
     return response;
   },
+
+  download: async (documentId) => {
+    const response = await axiosInstance.get(`/api/documents/${documentId}/download`, {
+      responseType: "blob",
+    });
+    return response;
+  },
+
+  update: async (documentId, data) => {
+    const response = await axiosInstance.put(`/api/documents/${documentId}`, data);
+    return response;
+  },
 };
 

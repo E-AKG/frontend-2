@@ -26,9 +26,9 @@ export const billrunApi = {
 
   // Charges
   listCharges: (params = {}) => {
-    const { bill_run_id, status, page = 1, page_size = 50 } = params;
+    const { bill_run_id, status, client_id, fiscal_year_id, page = 1, page_size = 50 } = params;
     return axiosInstance.get("/api/charges", {
-      params: { bill_run_id, status, page, page_size },
+      params: { bill_run_id, status, client_id, fiscal_year_id, page, page_size },
     });
   },
 

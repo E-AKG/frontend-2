@@ -20,5 +20,17 @@ export const cashbookApi = {
     const response = await axiosInstance.delete(`/api/cashbook/${entryId}`);
     return response;
   },
+
+  // Automatischer Abgleich von Kassenbuch-Einträgen
+  autoReconcile: async (clientId, fiscalYearId, minConfidence = 0.6) => {
+    const response = await axiosInstance.post('/api/cashbook/auto-reconcile', null, {
+      params: {
+        client_id: clientId,
+        fiscal_year_id: fiscalYearId,
+        min_confidence: minConfidence,
+      },
+    });
+    return response;
+  },
 };
 

@@ -2,14 +2,17 @@ import axiosInstance from "./axiosInstance";
 
 export const leaseApi = {
   list: (params = {}) => {
-    const { status, tenant_id, unit_id, page = 1, page_size = 20 } = params;
+    const { status, tenant_id, unit_id, client_id, fiscal_year_id, page = 1, page_size = 20 } = params;
     return axiosInstance.get("/api/leases", {
-      params: { status, tenant_id, unit_id, page, page_size },
+      params: { status, tenant_id, unit_id, client_id, fiscal_year_id, page, page_size },
     });
   },
 
-  create: (data) => {
-    return axiosInstance.post("/api/leases", data);
+  create: (data, clientId = null, fiscalYearId = null) => {
+    const params = {};
+    if (clientId) params.client_id = clientId;
+    if (fiscalYearId) params.fiscal_year_id = fiscalYearId;
+    return axiosInstance.post("/api/leases", data, { params });
   },
 
   get: (id) => {

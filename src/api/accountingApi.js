@@ -40,9 +40,35 @@ export const accountingApi = {
     return response;
   },
 
-  generate: async (accountingId) => {
-    const response = await axiosInstance.post(`/api/accounting/${accountingId}/generate`);
+  generate: async (accountingId, templateName = null, generateAllSettlements = true) => {
+    const params = {};
+    if (templateName) params.template_name = templateName;
+    params.generate_all_settlements = generateAllSettlements;
+    const response = await axiosInstance.post(`/api/accounting/${accountingId}/generate`, null, { params });
     return response;
+  },
+
+  downloadPdf: async (accountingId) => {
+    // PDF wird über axiosInstance heruntergeladen (mit automatischer Authentication)
+    try {
+      const response = await axiosInstance.get(`/api/accounting/${accountingId}/download-pdf`, {
+        responseType: 'blob', // Wichtig: Blob für PDF-Download
+      });
+      
+      // Erstelle Blob-URL und trigger Download
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.setAttribute("download", `accounting_${accountingId}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error("Fehler beim Download:", error);
+      throw error;
+    }
   },
 
   deleteItem: async (accountingId, itemId) => {
@@ -52,6 +78,11 @@ export const accountingApi = {
 
   checkMeters: async (accountingId) => {
     const response = await axiosInstance.get(`/api/accounting/${accountingId}/meter-check`);
+    return response;
+  },
+
+  delete: async (accountingId) => {
+    const response = await axiosInstance.delete(`/api/accounting/${accountingId}`);
     return response;
   },
 };
