@@ -16,7 +16,7 @@ import Button from "../components/Button";
 import Benachrichtigung, { useBenachrichtigung } from "../components/Benachrichtigung";
 import { 
   Gauge, Key as KeyIcon, Plus, Edit, Trash2, Calendar, User, History, TrendingUp,
-  FileText, Shield, CreditCard, Calculator, Building2, Thermometer, FileCheck
+  FileText, Shield, CreditCard, Calculator, Building2, Thermometer, FileCheck, X, Save
 } from "lucide-react";
 
 export default function ObjektDetails() {
@@ -42,6 +42,12 @@ export default function ObjektDetails() {
   const [ausgewaehlterZaehler, setAusgewaehlterZaehler] = useState(null);
   const [ausgewaehlterSchluessel, setAusgewaehlterSchluessel] = useState(null);
   const { benachrichtigung, zeigeBenachrichtigung } = useBenachrichtigung();
+  
+  // Bearbeitungsmodus für erweiterte Stammdaten und technische Daten
+  const [editExtendedData, setEditExtendedData] = useState(false);
+  const [editTechnicalData, setEditTechnicalData] = useState(false);
+  const [originalExtendedData, setOriginalExtendedData] = useState(null);
+  const [originalTechnicalData, setOriginalTechnicalData] = useState(null);
 
   // Lade Zähler
   const { data: meters = [], refetch: refetchMeters } = useQuery({
@@ -911,73 +917,136 @@ export default function ObjektDetails() {
             </div>
           )}
           {objekt && (
-          <form onSubmit={async (e) => {
-            e.preventDefault();
-            try {
-              const updateData = {
-                unit_value_file_number: objekt?.unit_value_file_number || null,
-                cadastral_district: objekt?.cadastral_district || null,
-                cadastral_parcel: objekt?.cadastral_parcel || null,
-              };
-              // Entferne leere Strings
-              Object.keys(updateData).forEach(key => {
-                if (updateData[key] === "" || updateData[key] === null) {
-                  updateData[key] = null;
-                }
-              });
-              const response = await propertyApi.update(id, updateData);
-              // Prüfe, ob die Daten tatsächlich zurückgegeben werden
-              const savedData = response.data;
-              console.log("Gespeicherte Daten:", savedData);
-              const hasData = savedData?.unit_value_file_number || savedData?.cadastral_district || savedData?.cadastral_parcel;
-              
-              if (!hasData && (updateData.unit_value_file_number || updateData.cadastral_district || updateData.cadastral_parcel)) {
-                // Daten wurden nicht gespeichert - Migration fehlt
-                zeigeBenachrichtigung("⚠️ Datenbank-Migration erforderlich! Die Daten konnten nicht gespeichert werden. Bitte führen Sie zuerst die Migration durch.", "fehler");
-              } else {
-                // Aktualisiere den State direkt mit den zurückgegebenen Daten
-                if (savedData) {
-                  setObjekt(prev => ({ ...prev, ...savedData }));
-                }
-                zeigeBenachrichtigung("Stammdaten erfolgreich aktualisiert");
-                // Lade auch nochmal neu, um sicherzustellen, dass alles synchron ist
-                setTimeout(() => {
-                  ladeObjekt();
-                }, 300);
-              }
-            } catch (error) {
-              console.error("Fehler beim Speichern:", error);
-              if (error.response?.status === 422) {
-                zeigeBenachrichtigung("⚠️ Diese Felder sind noch nicht verfügbar. Bitte führen Sie zuerst die Datenbank-Migration durch.", "fehler");
-              } else {
-                zeigeBenachrichtigung("Fehler beim Speichern: " + (error.response?.data?.detail || error.message), "fehler");
-              }
-            }
-          }}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Formularfeld
-                label="Einheitswert-Aktenzeichen"
-                value={objekt?.unit_value_file_number ?? ""}
-                onChange={(e) => setObjekt({ ...objekt, unit_value_file_number: e.target.value })}
-                placeholder="z.B. EW-12345/2023"
-              />
-              <Formularfeld
-                label="Flur"
-                value={objekt?.cadastral_district ?? ""}
-                onChange={(e) => setObjekt({ ...objekt, cadastral_district: e.target.value })}
-                placeholder="z.B. 123"
-              />
-              <Formularfeld
-                label="Flurstück"
-                value={objekt?.cadastral_parcel ?? ""}
-                onChange={(e) => setObjekt({ ...objekt, cadastral_parcel: e.target.value })}
-                placeholder="z.B. 456/78"
-              />
-            </div>
-            <div className="flex justify-end mt-6">
-              <Button type="submit">Speichern</Button>
-            </div>
-          </form>
+            <>
+              {!editExtendedData ? (
+                // Ansichtsmodus
+                <div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Einheitswert-Aktenzeichen</label>
+                      <div className="p-3 bg-gray-50 rounded-lg border border-gray-200 text-gray-900">
+                        {objekt?.unit_value_file_number || <span className="text-gray-400">Nicht angegeben</span>}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Flur</label>
+                      <div className="p-3 bg-gray-50 rounded-lg border border-gray-200 text-gray-900">
+                        {objekt?.cadastral_district || <span className="text-gray-400">Nicht angegeben</span>}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Flurstück</label>
+                      <div className="p-3 bg-gray-50 rounded-lg border border-gray-200 text-gray-900">
+                        {objekt?.cadastral_parcel || <span className="text-gray-400">Nicht angegeben</span>}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex justify-end mt-6">
+                    <Button
+                      onClick={() => {
+                        setOriginalExtendedData({
+                          unit_value_file_number: objekt?.unit_value_file_number,
+                          cadastral_district: objekt?.cadastral_district,
+                          cadastral_parcel: objekt?.cadastral_parcel,
+                        });
+                        setEditExtendedData(true);
+                      }}
+                      icon={<Edit className="w-4 h-4" />}
+                    >
+                      Bearbeiten
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                // Bearbeitungsmodus
+                <form onSubmit={async (e) => {
+                  e.preventDefault();
+                  try {
+                    const updateData = {
+                      unit_value_file_number: objekt?.unit_value_file_number || null,
+                      cadastral_district: objekt?.cadastral_district || null,
+                      cadastral_parcel: objekt?.cadastral_parcel || null,
+                    };
+                    // Entferne leere Strings
+                    Object.keys(updateData).forEach(key => {
+                      if (updateData[key] === "" || updateData[key] === null) {
+                        updateData[key] = null;
+                      }
+                    });
+                    const response = await propertyApi.update(id, updateData);
+                    const savedData = response.data;
+                    const hasData = savedData?.unit_value_file_number || savedData?.cadastral_district || savedData?.cadastral_parcel;
+                    
+                    if (!hasData && (updateData.unit_value_file_number || updateData.cadastral_district || updateData.cadastral_parcel)) {
+                      zeigeBenachrichtigung("⚠️ Datenbank-Migration erforderlich! Die Daten konnten nicht gespeichert werden. Bitte führen Sie zuerst die Migration durch.", "fehler");
+                    } else {
+                      if (savedData) {
+                        setObjekt(prev => ({ ...prev, ...savedData }));
+                      }
+                      zeigeBenachrichtigung("Stammdaten erfolgreich aktualisiert");
+                      setEditExtendedData(false);
+                      setOriginalExtendedData(null);
+                      setTimeout(() => {
+                        ladeObjekt();
+                      }, 300);
+                    }
+                  } catch (error) {
+                    console.error("Fehler beim Speichern:", error);
+                    if (error.response?.status === 422) {
+                      zeigeBenachrichtigung("⚠️ Diese Felder sind noch nicht verfügbar. Bitte führen Sie zuerst die Datenbank-Migration durch.", "fehler");
+                    } else {
+                      zeigeBenachrichtigung("Fehler beim Speichern: " + (error.response?.data?.detail || error.message), "fehler");
+                    }
+                  }
+                }}>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Formularfeld
+                      label="Einheitswert-Aktenzeichen"
+                      value={objekt?.unit_value_file_number ?? ""}
+                      onChange={(e) => setObjekt({ ...objekt, unit_value_file_number: e.target.value })}
+                      placeholder="z.B. EW-12345/2023"
+                    />
+                    <Formularfeld
+                      label="Flur"
+                      value={objekt?.cadastral_district ?? ""}
+                      onChange={(e) => setObjekt({ ...objekt, cadastral_district: e.target.value })}
+                      placeholder="z.B. 123"
+                    />
+                    <Formularfeld
+                      label="Flurstück"
+                      value={objekt?.cadastral_parcel ?? ""}
+                      onChange={(e) => setObjekt({ ...objekt, cadastral_parcel: e.target.value })}
+                      placeholder="z.B. 456/78"
+                    />
+                  </div>
+                  <div className="flex justify-end gap-3 mt-6">
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      onClick={() => {
+                        // Stelle ursprüngliche Werte wieder her
+                        if (originalExtendedData) {
+                          setObjekt(prev => ({
+                            ...prev,
+                            unit_value_file_number: originalExtendedData.unit_value_file_number,
+                            cadastral_district: originalExtendedData.cadastral_district,
+                            cadastral_parcel: originalExtendedData.cadastral_parcel,
+                          }));
+                        }
+                        setEditExtendedData(false);
+                        setOriginalExtendedData(null);
+                      }}
+                      icon={<X className="w-4 h-4" />}
+                    >
+                      Abbrechen
+                    </Button>
+                    <Button type="submit" icon={<Save className="w-4 h-4" />}>
+                      Speichern
+                    </Button>
+                  </div>
+                </form>
+              )}
+            </>
           )}
         </div>
       )}
@@ -996,141 +1065,243 @@ export default function ObjektDetails() {
               Gesamtflächen für Betriebskosten-Umlage, Energieklasse für Portfolio-Analyse und Sanierungsplanung.
             </div>
           </div>
-          <form onSubmit={async (e) => {
-            e.preventDefault();
-            try {
-              const updateData = {
-                heating_type: objekt?.heating_type || null,
-                energy_certificate_valid_until: objekt?.energy_certificate_valid_until || null,
-                energy_rating_value: objekt?.energy_rating_value || null,
-                energy_rating_class: objekt?.energy_rating_class || null,
-                total_residential_area: objekt?.total_residential_area || null,
-                total_commercial_area: objekt?.total_commercial_area || null,
-              };
-              // Entferne leere Strings und konvertiere Zahlen
-              Object.keys(updateData).forEach(key => {
-                if (updateData[key] === "" || updateData[key] === null) {
-                  updateData[key] = null;
-                } else if (key === "energy_rating_value" && updateData[key]) {
-                  updateData[key] = parseFloat(updateData[key]);
-                } else if ((key === "total_residential_area" || key === "total_commercial_area") && updateData[key]) {
-                  updateData[key] = parseInt(updateData[key]);
-                }
-              });
-              const response = await propertyApi.update(id, updateData);
-              // Prüfe, ob die Daten tatsächlich zurückgegeben werden
-              const savedData = response.data;
-              console.log("Gespeicherte Daten:", savedData);
-              const hasData = savedData?.heating_type || savedData?.energy_rating_value || savedData?.total_residential_area;
-              
-              if (!hasData && (updateData.heating_type || updateData.energy_rating_value || updateData.total_residential_area)) {
-                // Daten wurden nicht gespeichert - Migration fehlt
-                zeigeBenachrichtigung("⚠️ Datenbank-Migration erforderlich! Die Daten konnten nicht gespeichert werden. Bitte führen Sie zuerst die Migration durch.", "fehler");
-              } else {
-                // Aktualisiere den State direkt mit den zurückgegebenen Daten
-                if (savedData) {
-                  setObjekt(prev => ({ ...prev, ...savedData }));
-                }
-                zeigeBenachrichtigung("✅ Technische Daten erfolgreich gespeichert! Die Daten werden in Abrechnungen, Energieberichten und für GEG-Compliance verwendet.", "erfolg");
-                // Lade auch nochmal neu, um sicherzustellen, dass alles synchron ist
-                setTimeout(() => {
-                  ladeObjekt();
-                }, 300);
-              }
-            } catch (error) {
-              console.error("Fehler beim Speichern:", error);
-              if (error.response?.status === 422) {
-                zeigeBenachrichtigung("⚠️ Diese Felder sind noch nicht verfügbar. Bitte führen Sie zuerst die Datenbank-Migration durch.", "fehler");
-              } else {
-                zeigeBenachrichtigung("Fehler beim Speichern: " + (error.response?.data?.detail || error.message), "fehler");
-              }
-            }
-          }}>
-            <div className="space-y-4">
-              <div>
-                <Auswahl
-                  label="Heizungsart"
-                  value={objekt?.heating_type || ""}
-                  onChange={(e) => {
-                    const newHeatingType = e.target.value;
-                    // Warnung anzeigen, wenn Heizungsart geändert wird und bereits Daten vorhanden sind
-                    if (objekt?.heating_type && objekt.heating_type !== newHeatingType && 
-                        (objekt.energy_rating_value || objekt.energy_rating_class || objekt.total_residential_area)) {
-                      const oldType = objekt.heating_type === "gas" ? "Gas" : 
-                                     objekt.heating_type === "oil" ? "Öl" : 
-                                     objekt.heating_type === "electric" ? "Strom" : 
-                                     objekt.heating_type === "heat_pump" ? "Wärmepumpe" : 
-                                     objekt.heating_type === "district_heating" ? "Fernwärme" : 
-                                     objekt.heating_type === "pellets" ? "Pellets" : "Sonstige";
-                      if (window.confirm(`⚠️ Achtung: Sie ändern die Heizungsart von "${oldType}" zu einer anderen.\n\nDie aktuellen technischen Daten (Energiekennwert, Energieklasse, Flächen) werden überschrieben, wenn Sie speichern.\n\nMöchten Sie fortfahren?`)) {
-                        setObjekt({ ...objekt, heating_type: newHeatingType });
+          {objekt && (
+            <>
+              {!editTechnicalData ? (
+                // Ansichtsmodus
+                <div>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Heizungsart</label>
+                      <div className="p-3 bg-gray-50 rounded-lg border border-gray-200 text-gray-900">
+                        {objekt?.heating_type ? (
+                          objekt.heating_type === "gas" ? "Gas" :
+                          objekt.heating_type === "oil" ? "Öl" :
+                          objekt.heating_type === "electric" ? "Strom" :
+                          objekt.heating_type === "heat_pump" ? "Wärmepumpe" :
+                          objekt.heating_type === "district_heating" ? "Fernwärme" :
+                          objekt.heating_type === "pellets" ? "Pellets" : "Sonstige"
+                        ) : <span className="text-gray-400">Nicht angegeben</span>}
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Energieausweis gültig bis</label>
+                        <div className="p-3 bg-gray-50 rounded-lg border border-gray-200 text-gray-900">
+                          {objekt?.energy_certificate_valid_until ? 
+                            new Date(objekt.energy_certificate_valid_until).toLocaleDateString("de-DE") : 
+                            <span className="text-gray-400">Nicht angegeben</span>}
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Energiekennwert (kWh/m²a)</label>
+                        <div className="p-3 bg-gray-50 rounded-lg border border-gray-200 text-gray-900">
+                          {objekt?.energy_rating_value ? `${objekt.energy_rating_value} kWh/m²a` : <span className="text-gray-400">Nicht angegeben</span>}
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Energieklasse</label>
+                      <div className="p-3 bg-gray-50 rounded-lg border border-gray-200 text-gray-900">
+                        {objekt?.energy_rating_class || <span className="text-gray-400">Nicht angegeben</span>}
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Wohnfläche (m²)</label>
+                        <div className="p-3 bg-gray-50 rounded-lg border border-gray-200 text-gray-900">
+                          {objekt?.total_residential_area ? `${objekt.total_residential_area} m²` : <span className="text-gray-400">Nicht angegeben</span>}
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Gewerbefläche (m²)</label>
+                        <div className="p-3 bg-gray-50 rounded-lg border border-gray-200 text-gray-900">
+                          {objekt?.total_commercial_area ? `${objekt.total_commercial_area} m²` : <span className="text-gray-400">Nicht angegeben</span>}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex justify-end mt-6">
+                    <Button
+                      onClick={() => {
+                        setOriginalTechnicalData({
+                          heating_type: objekt?.heating_type,
+                          energy_certificate_valid_until: objekt?.energy_certificate_valid_until,
+                          energy_rating_value: objekt?.energy_rating_value,
+                          energy_rating_class: objekt?.energy_rating_class,
+                          total_residential_area: objekt?.total_residential_area,
+                          total_commercial_area: objekt?.total_commercial_area,
+                        });
+                        setEditTechnicalData(true);
+                      }}
+                      icon={<Edit className="w-4 h-4" />}
+                    >
+                      Bearbeiten
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                // Bearbeitungsmodus
+                <form onSubmit={async (e) => {
+                  e.preventDefault();
+                  try {
+                    const updateData = {
+                      heating_type: objekt?.heating_type || null,
+                      energy_certificate_valid_until: objekt?.energy_certificate_valid_until || null,
+                      energy_rating_value: objekt?.energy_rating_value || null,
+                      energy_rating_class: objekt?.energy_rating_class || null,
+                      total_residential_area: objekt?.total_residential_area || null,
+                      total_commercial_area: objekt?.total_commercial_area || null,
+                    };
+                    // Entferne leere Strings und konvertiere Zahlen
+                    Object.keys(updateData).forEach(key => {
+                      if (updateData[key] === "" || updateData[key] === null) {
+                        updateData[key] = null;
+                      } else if (key === "energy_rating_value" && updateData[key]) {
+                        updateData[key] = parseFloat(updateData[key]);
+                      } else if ((key === "total_residential_area" || key === "total_commercial_area") && updateData[key]) {
+                        updateData[key] = parseInt(updateData[key]);
                       }
+                    });
+                    const response = await propertyApi.update(id, updateData);
+                    const savedData = response.data;
+                    const hasData = savedData?.heating_type || savedData?.energy_rating_value || savedData?.total_residential_area;
+                    
+                    if (!hasData && (updateData.heating_type || updateData.energy_rating_value || updateData.total_residential_area)) {
+                      zeigeBenachrichtigung("⚠️ Datenbank-Migration erforderlich! Die Daten konnten nicht gespeichert werden. Bitte führen Sie zuerst die Migration durch.", "fehler");
                     } else {
-                      setObjekt({ ...objekt, heating_type: newHeatingType });
+                      if (savedData) {
+                        setObjekt(prev => ({ ...prev, ...savedData }));
+                      }
+                      zeigeBenachrichtigung("✅ Technische Daten erfolgreich gespeichert! Die Daten werden in Abrechnungen, Energieberichten und für GEG-Compliance verwendet.", "erfolg");
+                      setEditTechnicalData(false);
+                      setOriginalTechnicalData(null);
+                      setTimeout(() => {
+                        ladeObjekt();
+                      }, 300);
                     }
-                  }}
-                  optionen={[
-                    { value: "", label: "Bitte wählen" },
-                    { value: "gas", label: "Gas" },
-                    { value: "oil", label: "Öl" },
-                    { value: "electric", label: "Strom" },
-                    { value: "heat_pump", label: "Wärmepumpe" },
-                    { value: "district_heating", label: "Fernwärme" },
-                    { value: "pellets", label: "Pellets" },
-                    { value: "other", label: "Sonstige" },
-                  ]}
-                />
-                {objekt?.heating_type && (
-                  <p className="text-xs text-amber-600 mt-1">
-                    ⚠️ <strong>Hinweis:</strong> Ein Objekt kann nur einen Satz technischer Daten haben. 
-                    Wenn Sie die Heizungsart ändern, werden die aktuellen Werte überschrieben. 
-                    Die alten Werte werden nicht mehr angezeigt, bleiben aber in der Datenbank gespeichert.
-                  </p>
-                )}
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Formularfeld
-                  label="Energieausweis gültig bis"
-                  type="date"
-                  value={objekt?.energy_certificate_valid_until ? (typeof objekt.energy_certificate_valid_until === 'string' ? objekt.energy_certificate_valid_until.split('T')[0] : new Date(objekt.energy_certificate_valid_until).toISOString().split("T")[0]) : ""}
-                  onChange={(e) => setObjekt({ ...objekt, energy_certificate_valid_until: e.target.value || null })}
-                />
-                <Formularfeld
-                  label="Energiekennwert (kWh/m²a)"
-                  type="number"
-                  step="0.01"
-                  value={objekt?.energy_rating_value ?? ""}
-                  onChange={(e) => setObjekt({ ...objekt, energy_rating_value: e.target.value ? parseFloat(e.target.value) : null })}
-                  placeholder="z.B. 120"
-                />
-              </div>
-              <Formularfeld
-                label="Energieklasse"
-                value={objekt?.energy_rating_class ?? ""}
-                onChange={(e) => setObjekt({ ...objekt, energy_rating_class: e.target.value || null })}
-                placeholder="z.B. A+, A, B, C"
-              />
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Formularfeld
-                  label="Wohnfläche (m²)"
-                  type="number"
-                  value={objekt?.total_residential_area ?? ""}
-                  onChange={(e) => setObjekt({ ...objekt, total_residential_area: e.target.value ? parseInt(e.target.value) : null })}
-                  placeholder="z.B. 500"
-                />
-                <Formularfeld
-                  label="Gewerbefläche (m²)"
-                  type="number"
-                  value={objekt?.total_commercial_area ?? ""}
-                  onChange={(e) => setObjekt({ ...objekt, total_commercial_area: e.target.value ? parseInt(e.target.value) : null })}
-                  placeholder="z.B. 200"
-                />
-              </div>
-            </div>
-            <div className="flex justify-end mt-6">
-              <Button type="submit">Speichern</Button>
-            </div>
-          </form>
+                  } catch (error) {
+                    console.error("Fehler beim Speichern:", error);
+                    if (error.response?.status === 422) {
+                      zeigeBenachrichtigung("⚠️ Diese Felder sind noch nicht verfügbar. Bitte führen Sie zuerst die Datenbank-Migration durch.", "fehler");
+                    } else {
+                      zeigeBenachrichtigung("Fehler beim Speichern: " + (error.response?.data?.detail || error.message), "fehler");
+                    }
+                  }
+                }}>
+                  <div className="space-y-4">
+                    <div>
+                      <Auswahl
+                        label="Heizungsart"
+                        value={objekt?.heating_type || ""}
+                        onChange={(e) => {
+                          const newHeatingType = e.target.value;
+                          // Warnung anzeigen, wenn Heizungsart geändert wird und bereits Daten vorhanden sind
+                          if (objekt?.heating_type && objekt.heating_type !== newHeatingType && 
+                              (objekt.energy_rating_value || objekt.energy_rating_class || objekt.total_residential_area)) {
+                            const oldType = objekt.heating_type === "gas" ? "Gas" : 
+                                           objekt.heating_type === "oil" ? "Öl" : 
+                                           objekt.heating_type === "electric" ? "Strom" : 
+                                           objekt.heating_type === "heat_pump" ? "Wärmepumpe" : 
+                                           objekt.heating_type === "district_heating" ? "Fernwärme" : 
+                                           objekt.heating_type === "pellets" ? "Pellets" : "Sonstige";
+                            if (window.confirm(`⚠️ Achtung: Sie ändern die Heizungsart von "${oldType}" zu einer anderen.\n\nDie aktuellen technischen Daten (Energiekennwert, Energieklasse, Flächen) werden überschrieben, wenn Sie speichern.\n\nMöchten Sie fortfahren?`)) {
+                              setObjekt({ ...objekt, heating_type: newHeatingType });
+                            }
+                          } else {
+                            setObjekt({ ...objekt, heating_type: newHeatingType });
+                          }
+                        }}
+                        optionen={[
+                          { value: "", label: "Bitte wählen" },
+                          { value: "gas", label: "Gas" },
+                          { value: "oil", label: "Öl" },
+                          { value: "electric", label: "Strom" },
+                          { value: "heat_pump", label: "Wärmepumpe" },
+                          { value: "district_heating", label: "Fernwärme" },
+                          { value: "pellets", label: "Pellets" },
+                          { value: "other", label: "Sonstige" },
+                        ]}
+                      />
+                      {objekt?.heating_type && (
+                        <p className="text-xs text-amber-600 mt-1">
+                          ⚠️ <strong>Hinweis:</strong> Ein Objekt kann nur einen Satz technischer Daten haben. 
+                          Wenn Sie die Heizungsart ändern, werden die aktuellen Werte überschrieben. 
+                          Die alten Werte werden nicht mehr angezeigt, bleiben aber in der Datenbank gespeichert.
+                        </p>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <Formularfeld
+                        label="Energieausweis gültig bis"
+                        type="date"
+                        value={objekt?.energy_certificate_valid_until ? (typeof objekt.energy_certificate_valid_until === 'string' ? objekt.energy_certificate_valid_until.split('T')[0] : new Date(objekt.energy_certificate_valid_until).toISOString().split("T")[0]) : ""}
+                        onChange={(e) => setObjekt({ ...objekt, energy_certificate_valid_until: e.target.value || null })}
+                      />
+                      <Formularfeld
+                        label="Energiekennwert (kWh/m²a)"
+                        type="number"
+                        step="0.01"
+                        value={objekt?.energy_rating_value ?? ""}
+                        onChange={(e) => setObjekt({ ...objekt, energy_rating_value: e.target.value ? parseFloat(e.target.value) : null })}
+                        placeholder="z.B. 120"
+                      />
+                    </div>
+                    <Formularfeld
+                      label="Energieklasse"
+                      value={objekt?.energy_rating_class ?? ""}
+                      onChange={(e) => setObjekt({ ...objekt, energy_rating_class: e.target.value || null })}
+                      placeholder="z.B. A+, A, B, C"
+                    />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <Formularfeld
+                        label="Wohnfläche (m²)"
+                        type="number"
+                        value={objekt?.total_residential_area ?? ""}
+                        onChange={(e) => setObjekt({ ...objekt, total_residential_area: e.target.value ? parseInt(e.target.value) : null })}
+                        placeholder="z.B. 500"
+                      />
+                      <Formularfeld
+                        label="Gewerbefläche (m²)"
+                        type="number"
+                        value={objekt?.total_commercial_area ?? ""}
+                        onChange={(e) => setObjekt({ ...objekt, total_commercial_area: e.target.value ? parseInt(e.target.value) : null })}
+                        placeholder="z.B. 200"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex justify-end gap-3 mt-6">
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      onClick={() => {
+                        // Stelle ursprüngliche Werte wieder her
+                        if (originalTechnicalData) {
+                          setObjekt(prev => ({
+                            ...prev,
+                            heating_type: originalTechnicalData.heating_type,
+                            energy_certificate_valid_until: originalTechnicalData.energy_certificate_valid_until,
+                            energy_rating_value: originalTechnicalData.energy_rating_value,
+                            energy_rating_class: originalTechnicalData.energy_rating_class,
+                            total_residential_area: originalTechnicalData.total_residential_area,
+                            total_commercial_area: originalTechnicalData.total_commercial_area,
+                          }));
+                        }
+                        setEditTechnicalData(false);
+                        setOriginalTechnicalData(null);
+                      }}
+                      icon={<X className="w-4 h-4" />}
+                    >
+                      Abbrechen
+                    </Button>
+                    <Button type="submit" icon={<Save className="w-4 h-4" />}>
+                      Speichern
+                    </Button>
+                  </div>
+                </form>
+              )}
+            </>
+          )}
         </div>
       )}
 
