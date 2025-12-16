@@ -29,7 +29,7 @@ export default function DashboardPro() {
 
   // Lade Dashboard-Daten
   const { data: dashboardData, isLoading: dashboardLoading } = useQuery({
-    queryKey: ["dashboard", selectedMonth.getMonth() + 1, selectedMonth.getFullYear(), selectedClient?.id],
+    queryKey: ["dashboard", selectedMonth.getMonth() + 1, selectedMonth.getFullYear(), selectedClient?.id, selectedFiscalYear?.id],
     queryFn: async () => {
       const response = await statsApi.getDashboard({
         month: selectedMonth.getMonth() + 1,

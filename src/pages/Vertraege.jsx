@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useApp } from "../contexts/AppContext";
 import { leaseApi } from "../api/leaseApi";
 import { unitApi } from "../api/unitApi";
 import { tenantApi } from "../api/tenantApi";
@@ -29,6 +30,7 @@ import {
 } from "lucide-react";
 
 export default function Vertraege() {
+  const { selectedClient, selectedFiscalYear } = useApp();
   const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
   const [showModal, setShowModal] = useState(false);
@@ -43,6 +45,13 @@ export default function Vertraege() {
     end_date: "",
     status: "pending",
     due_day: "1",
+    // Mietkomponenten - alle auf einmal
+    components: {
+      cold_rent: { amount: "", description: "Kaltmiete" },
+      operating_costs: { amount: "", description: "Nebenkosten" },
+      heating_costs: { amount: "", description: "Heizkosten" },
+      other: [], // Array für mehrere "Sonstiges"-Einträge
+    },
   });
 
   const [komponentenForm, setKomponentenForm] = useState({
@@ -65,11 +74,15 @@ export default function Vertraege() {
 
   // React Query: Fetch Leases
   const { data: vertraege = [], isLoading: loading } = useQuery({
-    queryKey: ['leases'],
+    queryKey: ['leases', selectedClient?.id, selectedFiscalYear?.id],
     queryFn: async () => {
-      const response = await leaseApi.list({});
+      const response = await leaseApi.list({ 
+        client_id: selectedClient?.id,
+        fiscal_year_id: selectedFiscalYear?.id
+      });
       return response.data.items;
     },
+    enabled: !!selectedClient,
     onError: () => {
       zeigeBenachrichtigung("Fehler beim Laden der Verträge", "fehler");
     },
@@ -77,20 +90,22 @@ export default function Vertraege() {
 
   // React Query: Fetch Units
   const { data: einheiten = [] } = useQuery({
-    queryKey: ['units'],
+    queryKey: ['units', selectedClient?.id],
     queryFn: async () => {
-      const response = await unitApi.list({ page_size: 100 });
+      const response = await unitApi.list({ page_size: 100, client_id: selectedClient?.id });
       return response.data.items;
     },
+    enabled: !!selectedClient,
   });
 
   // React Query: Fetch Tenants
   const { data: mieter = [] } = useQuery({
-    queryKey: ['tenants'],
+    queryKey: ['tenants', selectedClient?.id],
     queryFn: async () => {
-      const response = await tenantApi.list({ page_size: 100 });
+      const response = await tenantApi.list({ page_size: 100, client_id: selectedClient?.id });
       return response.data.items;
     },
+    enabled: !!selectedClient,
   });
 
   // React Query: Fetch Lease Components
@@ -117,17 +132,73 @@ export default function Vertraege() {
   // Mutations
   const createLeaseMutation = useMutation({
     mutationFn: async (daten) => {
+      if (!selectedClient) {
+        throw new Error("Bitte wählen Sie zuerst einen Mandanten aus");
+      }
+      
+      // Erstelle zuerst den Vertrag
       const payload = {
-        ...daten,
-        due_day: parseInt(daten.due_day),
+        unit_id: daten.unit_id,
+        tenant_id: daten.tenant_id,
+        start_date: daten.start_date,
         end_date: daten.end_date || null,
+        status: daten.status,
+        due_day: parseInt(daten.due_day),
       };
-      return await leaseApi.create(payload);
+      
+      const leaseResponse = await leaseApi.create(
+        payload, 
+        selectedClient.id, 
+        selectedFiscalYear?.id
+      );
+      const leaseId = leaseResponse.data.id;
+      
+      // Erstelle dann alle Komponenten
+      const components = daten.components || {};
+      const componentPromises = [];
+      
+      // Standard-Komponenten (cold_rent, operating_costs, heating_costs)
+      for (const [type, component] of Object.entries(components)) {
+        if (type === 'other') continue; // Wird separat behandelt
+        
+        if (component.amount && parseFloat(component.amount) > 0) {
+          componentPromises.push(
+            leaseApi.createComponent(leaseId, {
+              type: type,
+              amount: parseFloat(component.amount),
+              description: component.description || "",
+            })
+          );
+        }
+      }
+      
+      // "Sonstiges"-Komponenten (Array)
+      if (components.other && Array.isArray(components.other)) {
+        for (const otherItem of components.other) {
+          if (otherItem.amount && parseFloat(otherItem.amount) > 0) {
+            componentPromises.push(
+              leaseApi.createComponent(leaseId, {
+                type: "other",
+                amount: parseFloat(otherItem.amount),
+                description: otherItem.description || "",
+              })
+            );
+          }
+        }
+      }
+      
+      // Warte auf alle Komponenten
+      if (componentPromises.length > 0) {
+        await Promise.all(componentPromises);
+      }
+      
+      return leaseResponse;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['leases'] });
+      queryClient.invalidateQueries({ queryKey: ['leaseComponents'] });
       invalidateSollstellungen();
-      zeigeBenachrichtigung("Vertrag erfolgreich erstellt");
+      zeigeBenachrichtigung("Vertrag mit allen Komponenten erfolgreich erstellt");
       setShowModal(false);
       formZuruecksetzen();
     },
@@ -243,20 +314,19 @@ export default function Vertraege() {
       end_date: "",
       status: "pending",
       due_day: "1",
+      components: {
+        cold_rent: { amount: "", description: "Kaltmiete" },
+        operating_costs: { amount: "", description: "Nebenkosten" },
+        heating_costs: { amount: "", description: "Heizkosten" },
+        other: [],
+      },
     });
   };
 
   // Prüfe Query-Parameter für automatisches Öffnen des Modals
   useEffect(() => {
     if (searchParams.get('create') === 'true') {
-      setFormDaten({
-        unit_id: "",
-        tenant_id: "",
-        start_date: "",
-        end_date: "",
-        status: "pending",
-        due_day: "1",
-      });
+      formZuruecksetzen();
       setShowModal(true);
       // Entferne Query-Parameter aus URL
       setSearchParams({}, { replace: true });
@@ -454,11 +524,253 @@ export default function Vertraege() {
               icon={<Calendar className="w-5 h-5" />}
             />
           </div>
+          
+          {/* Mietkomponenten - alle auf einmal */}
+          <div className="border-t border-gray-200 pt-4 mt-4">
+            <h3 className="text-base font-semibold text-gray-900 mb-2 flex items-center gap-2">
+              <Layers className="w-5 h-5 text-primary-600" />
+              Mietkomponenten
+            </h3>
+            <p className="text-xs text-gray-500 mb-4">Geben Sie alle Mietkomponenten auf einmal ein:</p>
+            
+            <div className="space-y-4">
+              {/* Kaltmiete */}
+              <div className="bg-gray-50 rounded-lg p-3 sm:p-4 border border-gray-200">
+                <label className="block text-sm font-semibold text-gray-900 mb-2">
+                  Kaltmiete
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <Formularfeld
+                    label="Betrag"
+                    name="cold_rent_amount"
+                    type="number"
+                    step="0.01"
+                    placeholder="0.00"
+                    value={formDaten.components.cold_rent.amount}
+                    onChange={(e) => setFormDaten({
+                      ...formDaten,
+                      components: {
+                        ...formDaten.components,
+                        cold_rent: { ...formDaten.components.cold_rent, amount: e.target.value }
+                      }
+                    })}
+                    icon={<Euro className="w-4 h-4" />}
+                  />
+                  <Formularfeld
+                    label="Beschreibung (optional)"
+                    name="cold_rent_description"
+                    placeholder="z.B. Grundmiete"
+                    value={formDaten.components.cold_rent.description}
+                    onChange={(e) => setFormDaten({
+                      ...formDaten,
+                      components: {
+                        ...formDaten.components,
+                        cold_rent: { ...formDaten.components.cold_rent, description: e.target.value }
+                      }
+                    })}
+                  />
+                </div>
+              </div>
+              
+              {/* Nebenkosten */}
+              <div className="bg-gray-50 rounded-lg p-3 sm:p-4 border border-gray-200">
+                <label className="block text-sm font-semibold text-gray-900 mb-2">
+                  Nebenkosten
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <Formularfeld
+                    label="Betrag"
+                    name="operating_costs_amount"
+                    type="number"
+                    step="0.01"
+                    placeholder="0.00"
+                    value={formDaten.components.operating_costs.amount}
+                    onChange={(e) => setFormDaten({
+                      ...formDaten,
+                      components: {
+                        ...formDaten.components,
+                        operating_costs: { ...formDaten.components.operating_costs, amount: e.target.value }
+                      }
+                    })}
+                    icon={<Euro className="w-4 h-4" />}
+                  />
+                  <Formularfeld
+                    label="Beschreibung (optional)"
+                    name="operating_costs_description"
+                    placeholder="z.B. Betriebskostenvorauszahlung"
+                    value={formDaten.components.operating_costs.description}
+                    onChange={(e) => setFormDaten({
+                      ...formDaten,
+                      components: {
+                        ...formDaten.components,
+                        operating_costs: { ...formDaten.components.operating_costs, description: e.target.value }
+                      }
+                    })}
+                  />
+                </div>
+              </div>
+              
+              {/* Heizkosten */}
+              <div className="bg-gray-50 rounded-lg p-3 sm:p-4 border border-gray-200">
+                <label className="block text-sm font-semibold text-gray-900 mb-2">
+                  Heizkosten
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <Formularfeld
+                    label="Betrag"
+                    name="heating_costs_amount"
+                    type="number"
+                    step="0.01"
+                    placeholder="0.00"
+                    value={formDaten.components.heating_costs.amount}
+                    onChange={(e) => setFormDaten({
+                      ...formDaten,
+                      components: {
+                        ...formDaten.components,
+                        heating_costs: { ...formDaten.components.heating_costs, amount: e.target.value }
+                      }
+                    })}
+                    icon={<Euro className="w-4 h-4" />}
+                  />
+                  <Formularfeld
+                    label="Beschreibung (optional)"
+                    name="heating_costs_description"
+                    placeholder="z.B. Heizkostenvorauszahlung"
+                    value={formDaten.components.heating_costs.description}
+                    onChange={(e) => setFormDaten({
+                      ...formDaten,
+                      components: {
+                        ...formDaten.components,
+                        heating_costs: { ...formDaten.components.heating_costs, description: e.target.value }
+                      }
+                    })}
+                  />
+                </div>
+              </div>
+              
+              {/* Sonstiges - Mehrfach */}
+              <div className="bg-gray-50 rounded-lg p-3 sm:p-4 border border-gray-200">
+                <div className="flex items-center justify-between mb-3">
+                  <label className="block text-sm font-semibold text-gray-900">
+                    Sonstiges
+                  </label>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => {
+                      setFormDaten({
+                        ...formDaten,
+                        components: {
+                          ...formDaten.components,
+                          other: [...formDaten.components.other, { amount: "", description: "" }]
+                        }
+                      });
+                    }}
+                    icon={<Plus className="w-4 h-4" />}
+                  >
+                    Hinzufügen
+                  </Button>
+                </div>
+                
+                {formDaten.components.other.length === 0 ? (
+                  <p className="text-xs text-gray-400 italic py-2">Keine Sonstiges-Komponenten hinzugefügt</p>
+                ) : (
+                  <div className="space-y-3">
+                    {formDaten.components.other.map((item, index) => (
+                      <div key={index} className="bg-white rounded-lg p-3 border border-gray-300">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-start">
+                          <Formularfeld
+                            label="Betrag"
+                            name={`other_${index}_amount`}
+                            type="number"
+                            step="0.01"
+                            placeholder="0.00"
+                            value={item.amount}
+                            onChange={(e) => {
+                              const newOther = [...formDaten.components.other];
+                              newOther[index] = { ...newOther[index], amount: e.target.value };
+                              setFormDaten({
+                                ...formDaten,
+                                components: {
+                                  ...formDaten.components,
+                                  other: newOther
+                                }
+                              });
+                            }}
+                            icon={<Euro className="w-4 h-4" />}
+                          />
+                          <Formularfeld
+                            label="Beschreibung"
+                            name={`other_${index}_description`}
+                            placeholder="z.B. Garage, Stellplatz, Keller"
+                            value={item.description}
+                            onChange={(e) => {
+                              const newOther = [...formDaten.components.other];
+                              newOther[index] = { ...newOther[index], description: e.target.value };
+                              setFormDaten({
+                                ...formDaten,
+                                components: {
+                                  ...formDaten.components,
+                                  other: newOther
+                                }
+                              });
+                            }}
+                            className="sm:col-span-1"
+                          />
+                          <div className="flex items-end h-full">
+                            <Button
+                              type="button"
+                              variant="secondary"
+                              size="sm"
+                              onClick={() => {
+                                const newOther = formDaten.components.other.filter((_, i) => i !== index);
+                                setFormDaten({
+                                  ...formDaten,
+                                  components: {
+                                    ...formDaten.components,
+                                    other: newOther
+                                  }
+                                });
+                              }}
+                              className="w-full sm:w-auto text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                            >
+                              <X className="w-4 h-4 mr-1" />
+                              Entfernen
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            {/* Gesamtsumme */}
+            <div className="mt-4 p-4 bg-gradient-to-r from-emerald-50 to-emerald-100 border-2 border-emerald-300 rounded-xl shadow-sm">
+              <div className="flex items-center justify-between">
+                <span className="text-base font-bold text-emerald-900 flex items-center gap-2">
+                  <Calculator className="w-5 h-5" />
+                  Gesamtmiete:
+                </span>
+                <span className="text-2xl font-bold text-emerald-700">
+                  {(
+                    parseFloat(formDaten.components.cold_rent.amount || 0) +
+                    parseFloat(formDaten.components.operating_costs.amount || 0) +
+                    parseFloat(formDaten.components.heating_costs.amount || 0) +
+                    (formDaten.components.other || []).reduce((sum, item) => sum + parseFloat(item.amount || 0), 0)
+                  ).toFixed(2)} €
+                </span>
+              </div>
+            </div>
+          </div>
+          
           <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 pt-3 sm:pt-4 border-t border-gray-200 mt-4 sm:mt-0">
             <Button type="button" variant="secondary" onClick={() => setShowModal(false)} className="w-full sm:w-auto">
               Abbrechen
             </Button>
-            <Button type="submit" icon={<Plus className="w-5 h-5" />} className="w-full sm:w-auto">Erstellen</Button>
+            <Button type="submit" icon={<Plus className="w-5 h-5" />} className="w-full sm:w-auto">Vertrag erstellen</Button>
           </div>
         </form>
       </Modal>

@@ -283,29 +283,38 @@ export default function Einstellungen() {
                 <User className="w-6 h-6 sm:w-7 sm:h-7 text-primary-600 flex-shrink-0" />
                 Benutzerkonto
               </h2>
+              
               <div className="space-y-5 sm:space-y-6">
-                <Formularfeld
-                  label="E-Mail-Adresse"
-                  type="email"
-                  value={localStorage.getItem("user_email") || ""}
-                  disabled
-                  icon={<Mail className="w-6 h-6 sm:w-7 sm:h-7" />}
-                />
-                <Formularfeld
-                  label="Neues Passwort"
-                  type="password"
-                  placeholder="Leer lassen, um nicht zu ändern"
-                  icon={<Lock className="w-6 h-6 sm:w-7 sm:h-7" />}
-                />
-                <Formularfeld
-                  label="Passwort bestätigen"
-                  type="password"
-                  placeholder="Neues Passwort wiederholen"
-                  icon={<Lock className="w-6 h-6 sm:w-7 sm:h-7" />}
-                />
-              </div>
-              <div className="pt-4 sm:pt-6">
-                <Button className="w-full text-lg sm:text-xl px-8 sm:px-10 py-4 sm:py-5 font-bold">Änderungen speichern</Button>
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="flex items-start gap-3">
+                    <Mail className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-semibold text-blue-900 mb-1">E-Mail-Adresse</p>
+                      <p className="text-sm text-blue-700 mb-2">
+                        {localStorage.getItem("user_email") || "Nicht verfügbar"}
+                      </p>
+                      <p className="text-xs text-blue-600">
+                        Diese E-Mail-Adresse wird automatisch als Absender für alle Benachrichtigungen verwendet.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="border-t border-gray-200 pt-4">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-3">Passwort ändern</h3>
+                  <Formularfeld
+                    label="Neues Passwort"
+                    type="password"
+                    placeholder="Leer lassen, um nicht zu ändern"
+                    icon={<Lock className="w-6 h-6 sm:w-7 sm:h-7" />}
+                  />
+                  <Formularfeld
+                    label="Passwort bestätigen"
+                    type="password"
+                    placeholder="Neues Passwort wiederholen"
+                    icon={<Lock className="w-6 h-6 sm:w-7 sm:h-7" />}
+                  />
+                </div>
               </div>
             </div>
           )}

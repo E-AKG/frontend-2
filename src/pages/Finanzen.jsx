@@ -4,39 +4,48 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApp } from "../contexts/AppContext";
 import { reminderApi } from "../api/reminderApi";
 import { statsApi } from "../api/statsApi";
+import Sollstellungen from "./Sollstellungen";
 import {
   AlertCircle,
   FileText,
   Send,
   Plus,
-  Filter,
   Download,
   Euro,
   TrendingUp,
-  Clock,
   CheckCircle,
   X,
   Eye,
+  Upload,
+  Receipt,
+  Wallet,
+  CreditCard,
+  Info,
+  Sparkles,
+  ArrowRight,
 } from "lucide-react";
 import Button from "../components/Button";
+import Modal from "../components/Modal";
 
 export default function Finanzen() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { selectedClient } = useApp();
+  const { selectedClient, selectedFiscalYear } = useApp();
   const [activeTab, setActiveTab] = useState("overview");
   const [showBulkReminderModal, setShowBulkReminderModal] = useState(false);
+  const [showReconcileInfoModal, setShowReconcileInfoModal] = useState(false);
   const [selectedReminder, setSelectedReminder] = useState(null);
   const [showReminderModal, setShowReminderModal] = useState(false);
 
   // Lade Dashboard-Daten für Offene Posten
   const { data: dashboardData } = useQuery({
-    queryKey: ["dashboard", new Date().getMonth() + 1, new Date().getFullYear(), selectedClient?.id],
+    queryKey: ["dashboard", new Date().getMonth() + 1, new Date().getFullYear(), selectedClient?.id, selectedFiscalYear?.id],
     queryFn: async () => {
       const response = await statsApi.getDashboard({
         month: new Date().getMonth() + 1,
         year: new Date().getFullYear(),
         client_id: selectedClient?.id,
+        fiscal_year_id: selectedFiscalYear?.id,
       });
       return response.data;
     },
@@ -72,7 +81,39 @@ export default function Finanzen() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["reminders"] });
       queryClient.invalidateQueries({ queryKey: ["dashboard"] });
-      alert(`Mahnlauf gestartet: ${data.data.created} Mahnungen erstellt`);
+      
+      const result = data.data || data;
+      const created = result.created || 0;
+      const skipped = result.skipped || 0;
+      const totalFound = result.total_found || 0;
+      const message = result.message || "";
+      
+      let alertMessage = `Mahnlauf abgeschlossen:\n\n`;
+      alertMessage += `✅ ${created} Mahnungen erstellt\n`;
+      
+      if (skipped > 0) {
+        alertMessage += `⏭️ ${skipped} übersprungen\n`;
+      }
+      
+      if (totalFound > 0) {
+        alertMessage += `📋 ${totalFound} überfällige Zahlungen gefunden\n`;
+      }
+      
+      if (created === 0 && message) {
+        alertMessage += `\nℹ️ ${message}`;
+      }
+      
+      if (result.details?.reasons_skipped) {
+        const reasons = Object.entries(result.details.reasons_skipped);
+        if (reasons.length > 0) {
+          alertMessage += `\n\nGründe für Überspringen:\n`;
+          reasons.forEach(([reason, count]) => {
+            alertMessage += `• ${reason}: ${count}x\n`;
+          });
+        }
+      }
+      
+      alert(alertMessage);
       setShowBulkReminderModal(false);
     },
     onError: (error) => {
@@ -88,7 +129,6 @@ export default function Finanzen() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["reminders"] });
       alert("PDF wurde generiert");
-      // TODO: PDF Download implementieren
     },
     onError: (error) => {
       alert(`Fehler: ${error.response?.data?.detail || "Unbekannter Fehler"}`);
@@ -161,32 +201,81 @@ export default function Finanzen() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Finanzen</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">Zahlungsabgleich, Offene Posten & Mahnwesen</p>
-          <div className="mt-4">
-            <Button onClick={() => navigate("/zahlungsabgleich")} variant="secondary" size="sm">
-              Zum Zahlungsabgleich →
-            </Button>
-          </div>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">Zahlungsverwaltung & Abrechnung</p>
         </div>
-        <div className="flex items-center gap-2">
+      </div>
+
+      {/* Zahlungsquellen - Klare Bereiche */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        {/* CSV Upload */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-shadow">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <Upload className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-900 dark:text-white">CSV-Import</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Bankauszüge hochladen</p>
+            </div>
+          </div>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+            Laden Sie CSV-Dateien von Ihrem Online-Banking hoch. Die Transaktionen werden automatisch erkannt und können mit Sollbuchungen abgeglichen werden.
+          </p>
           <Button
             onClick={() => navigate("/bank")}
             variant="secondary"
+            className="w-full"
           >
-            CSV-Import
+            <Upload className="w-4 h-4 mr-2" />
+            CSV hochladen
           </Button>
+        </div>
+
+        {/* Kassenbuch */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-shadow">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg">
+              <Wallet className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-900 dark:text-white">Kassenbuch</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Barzahlungen erfassen</p>
+            </div>
+          </div>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+            Erfassen Sie Barzahlungen manuell. Diese können ebenfalls automatisch mit Sollbuchungen abgeglichen werden.
+          </p>
           <Button
             onClick={() => navigate("/kassenbuch")}
             variant="secondary"
+            className="w-full"
           >
-            Kassenbuch
+            <Wallet className="w-4 h-4 mr-2" />
+            Kassenbuch öffnen
           </Button>
+        </div>
+
+        {/* Manuelle Transaktionen */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-shadow">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+              <CreditCard className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-900 dark:text-white">Manuelle Buchung</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Transaktionen manuell eintragen</p>
+            </div>
+          </div>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+            Erfassen Sie einzelne Zahlungen manuell, die nicht über CSV oder Kassenbuch erfasst wurden.
+          </p>
           <Button
-            onClick={() => setShowBulkReminderModal(true)}
-            variant="primary"
+            onClick={() => navigate("/manuelle-buchungen")}
+            variant="secondary"
+            className="w-full"
           >
-            <Send className="w-4 h-4 mr-2" />
-            Mahnlauf starten
+            <Plus className="w-4 h-4 mr-2" />
+            Manuelle Buchung
           </Button>
         </div>
       </div>
@@ -196,6 +285,7 @@ export default function Finanzen() {
         <nav className="flex space-x-8">
           {[
             { id: "overview", label: "Übersicht" },
+            { id: "sollstellungen", label: "Sollstellungen" },
             { id: "charges", label: "Offene Posten" },
             { id: "reminders", label: "Mahnungen" },
           ].map((tab) => (
@@ -218,47 +308,115 @@ export default function Finanzen() {
       <div className="mt-6">
         {/* Overview Tab */}
         {activeTab === "overview" && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">Offene Posten</h3>
-                <AlertCircle className="w-5 h-5 text-amber-500" />
+          <div className="space-y-6">
+            {/* Quick Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">Offene Posten</h3>
+                  <AlertCircle className="w-5 h-5 text-amber-500" />
+                </div>
+                <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                  {openCharges.length}
+                </div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                  {formatCurrency(
+                    openCharges.reduce((sum, c) => sum + (c.offen || 0), 0)
+                  )}
+                </div>
               </div>
-              <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                {openCharges.length}
+
+              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">Mahnungen</h3>
+                  <FileText className="w-5 h-5 text-blue-500" />
+                </div>
+                <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                  {reminders.filter((r) => r.status === "sent").length}
+                </div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                  {reminders.filter((r) => r.status === "draft").length} Entwürfe
+                </div>
               </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">
-                {formatCurrency(
-                  openCharges.reduce((sum, c) => sum + (c.offen || 0), 0)
-                )}
+
+              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">Zahlungsrate</h3>
+                  <TrendingUp className="w-5 h-5 text-emerald-500" />
+                </div>
+                <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                  {dashboardData?.rent_overview?.prozent || 0}%
+                </div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                  {formatCurrency(dashboardData?.rent_overview?.bezahlt || 0)} bezahlt
+                </div>
               </div>
             </div>
 
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">Mahnungen</h3>
-                <FileText className="w-5 h-5 text-blue-500" />
-              </div>
-              <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                {reminders.filter((r) => r.status === "sent").length}
-              </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">
-                {reminders.filter((r) => r.status === "draft").length} Entwürfe
+            {/* Abgleich-Info */}
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-200 dark:border-blue-800 p-6">
+              <div className="flex items-start gap-4">
+                <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                  <Info className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
+                    Wie funktioniert der automatische Abgleich?
+                  </h3>
+                  <p className="text-sm text-gray-700 dark:text-gray-300 mb-3">
+                    Der Abgleich vergleicht Zahlungen (CSV, Kassenbuch, manuell) mit offenen Sollbuchungen anhand mehrerer Kriterien:
+                  </p>
+                  <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1 mb-4">
+                    <li className="flex items-start gap-2">
+                      <span className="text-blue-600 dark:text-blue-400 font-semibold">• IBAN:</span>
+                      <span>Exakter Match = 40 Punkte (höchste Priorität) - nur bei CSV/Bank-Transaktionen</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-blue-600 dark:text-blue-400 font-semibold">• Betrag:</span>
+                      <span>Exakt = 30 Punkte, ±1% = 25 Punkte, ±5% = 20 Punkte</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-blue-600 dark:text-blue-400 font-semibold">• Name:</span>
+                      <span>Nachname gefunden = 15 Punkte, Vorname = 10 Punkte (bei Kassenbuch: nur wenn Mieter zugeordnet)</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-blue-600 dark:text-blue-400 font-semibold">• Verwendungszweck:</span>
+                      <span>Name oder Einheit gefunden = 5-10 Punkte (wichtig für Kassenbuch!)</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-blue-600 dark:text-blue-400 font-semibold">• Datum:</span>
+                      <span>Exakt = 10 Punkte, ±7 Tage = 7 Punkte</span>
+                    </li>
+                  </ul>
+                  <div className="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-3 mb-3 border border-amber-200 dark:border-amber-800">
+                    <p className="text-xs font-semibold text-amber-900 dark:text-amber-100 mb-1">💡 Tipp für Kassenbuch:</p>
+                    <p className="text-xs text-amber-800 dark:text-amber-200">
+                      Geben Sie im Verwendungszweck den Mieter-Namen oder die Einheit an (z.B. "Miete Max Mustermann" oder "Wohnung 1a Dez"). 
+                      So kann der Abgleich auch ohne IBAN funktionieren!
+                    </p>
+                  </div>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">
+                    <strong>Mindest-Confidence:</strong> 60% (60 von 100 Punkten) für automatische Zuordnung
+                  </p>
+                  <Button
+                    onClick={() => setShowReconcileInfoModal(true)}
+                    variant="secondary"
+                    size="sm"
+                    className="mt-3"
+                  >
+                    <Info className="w-4 h-4 mr-2" />
+                    Detaillierte Erklärung
+                  </Button>
+                </div>
               </div>
             </div>
+          </div>
+        )}
 
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">Zahlungsrate</h3>
-                <TrendingUp className="w-5 h-5 text-emerald-500" />
-              </div>
-              <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                {dashboardData?.rent_overview?.prozent || 0}%
-              </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">
-                {formatCurrency(dashboardData?.rent_overview?.bezahlt || 0)} bezahlt
-              </div>
-            </div>
+        {/* Sollstellungen Tab */}
+        {activeTab === "sollstellungen" && (
+          <div className="space-y-4">
+            <Sollstellungen />
           </div>
         )}
 
@@ -410,7 +568,6 @@ export default function Finanzen() {
                             {reminder.document_path && (
                               <button
                                 onClick={() => {
-                                  // TODO: PDF Download
                                   alert("PDF-Download wird implementiert");
                                 }}
                                 className="p-2 text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300"
@@ -436,7 +593,6 @@ export default function Finanzen() {
                         {reminder.status === "sent" && reminder.document_path && (
                           <button
                             onClick={() => {
-                              // TODO: PDF Download
                               alert("PDF-Download wird implementiert");
                             }}
                             className="p-2 text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300"
@@ -458,6 +614,123 @@ export default function Finanzen() {
           </div>
         )}
       </div>
+
+      {/* Abgleich-Info Modal */}
+      {showReconcileInfoModal && (
+        <Modal
+          isOpen={showReconcileInfoModal}
+          titel="Wie funktioniert der automatische Abgleich?"
+          onClose={() => setShowReconcileInfoModal(false)}
+        >
+          <div className="space-y-6">
+            <div>
+              <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Abgleich-Kriterien</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                Der Abgleich vergleicht jede Zahlung (aus CSV, Kassenbuch oder manuell) mit allen offenen Sollbuchungen und berechnet einen Match-Score (0-100 Punkte):
+              </p>
+              
+              <div className="space-y-4">
+                <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="font-semibold text-blue-900 dark:text-blue-100">1. IBAN-Match (40 Punkte)</span>
+                    <span className="text-xs bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200 px-2 py-1 rounded">Höchste Priorität</span>
+                  </div>
+                  <p className="text-sm text-gray-700 dark:text-gray-300">
+                    Wenn die IBAN in der Zahlung exakt mit der beim Mieter hinterlegten IBAN übereinstimmt, gibt es 40 Punkte. Dies ist das zuverlässigste Kriterium.
+                  </p>
+                </div>
+
+                <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-lg p-4 border border-emerald-200 dark:border-emerald-800">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="font-semibold text-emerald-900 dark:text-emerald-100">2. Betrag-Match (30 Punkte)</span>
+                  </div>
+                  <ul className="text-sm text-gray-700 dark:text-gray-300 space-y-1">
+                    <li>• Exakt = 30 Punkte</li>
+                    <li>• ±1% Abweichung = 25 Punkte</li>
+                    <li>• ±5% Abweichung = 20 Punkte</li>
+                    <li>• ±10% Abweichung = 10 Punkte</li>
+                  </ul>
+                </div>
+
+                <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4 border border-purple-200 dark:border-purple-800">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="font-semibold text-purple-900 dark:text-purple-100">3. Name-Match (20 Punkte)</span>
+                  </div>
+                  <p className="text-sm text-gray-700 dark:text-gray-300">
+                    Der Name des Mieters wird im Zahlungsnamen oder Verwendungszweck gesucht:
+                  </p>
+                  <ul className="text-sm text-gray-700 dark:text-gray-300 space-y-1 mt-2">
+                    <li>• Nachname gefunden = 15 Punkte</li>
+                    <li>• Vorname gefunden = 10 Punkte</li>
+                  </ul>
+                </div>
+
+                <div className="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-4 border border-amber-200 dark:border-amber-800">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="font-semibold text-amber-900 dark:text-amber-100">4. Verwendungszweck (10 Punkte)</span>
+                  </div>
+                  <p className="text-sm text-gray-700 dark:text-gray-300">
+                    Im Verwendungszweck wird nach Mieter-Namen oder Einheitsbezeichnung gesucht:
+                  </p>
+                  <ul className="text-sm text-gray-700 dark:text-gray-300 space-y-1 mt-2">
+                    <li>• Nachname im Verwendungszweck = 5 Punkte</li>
+                    <li>• Vorname im Verwendungszweck = 3 Punkte</li>
+                    <li>• Einheit (z.B. "Wohnung 1a") = 2 Punkte</li>
+                  </ul>
+                </div>
+
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="font-semibold text-gray-900 dark:text-gray-100">5. Datum-Match (10 Punkte)</span>
+                  </div>
+                  <ul className="text-sm text-gray-700 dark:text-gray-300 space-y-1">
+                    <li>• Exakt am Fälligkeitsdatum = 10 Punkte</li>
+                    <li>• ±7 Tage = 7 Punkte</li>
+                    <li>• ±30 Tage = 3 Punkte</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-primary-50 dark:bg-primary-900/20 rounded-lg p-4 border border-primary-200 dark:border-primary-800">
+              <h4 className="font-semibold text-primary-900 dark:text-primary-100 mb-2">Automatische Zuordnung</h4>
+              <p className="text-sm text-gray-700 dark:text-gray-300">
+                Wenn eine Zahlung einen Score von <strong>mindestens 60 Punkten</strong> (60% Confidence) erreicht, wird sie automatisch der passenden Sollbuchung zugeordnet. Die Sollstellung wird dann automatisch aktualisiert (bezahlt/teilweise bezahlt).
+              </p>
+            </div>
+
+            <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+              <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">Beispiel 1: CSV/Bank-Transaktion</h4>
+              <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">
+                <strong>Sollbuchung:</strong> Max Mustermann, Wohnung 1a, 500€ fällig am 01.12.2025
+              </p>
+              <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">
+                <strong>Zahlung (CSV):</strong> 500€, IBAN: DE89..., Name: "Max Mustermann", Verwendungszweck: "Miete Wohnung 1a Dez"
+              </p>
+              <p className="text-sm text-gray-700 dark:text-gray-300">
+                <strong>Score:</strong> IBAN (40) + Betrag (30) + Name (15) + Verwendungszweck (7) + Datum (7) = <strong>99 Punkte</strong> → Automatische Zuordnung ✅
+              </p>
+            </div>
+
+            <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-lg p-4 border border-emerald-200 dark:border-emerald-800">
+              <h4 className="font-semibold text-emerald-900 dark:text-emerald-100 mb-2">Beispiel 2: Kassenbuch (Barzahlung)</h4>
+              <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">
+                <strong>Sollbuchung:</strong> Max Mustermann, Wohnung 1a, 500€ fällig am 01.12.2025
+              </p>
+              <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">
+                <strong>Kassenbuch-Eintrag:</strong> 500€, Datum: 01.12.2025, Verwendungszweck: "Miete Max Mustermann Wohnung 1a"
+              </p>
+              <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">
+                <strong>Score:</strong> IBAN (0, da keine) + Betrag (30) + Name (0, da kein Mieter zugeordnet) + Verwendungszweck (10: Nachname + Vorname + Einheit) + Datum (10) = <strong>50 Punkte</strong>
+              </p>
+              <p className="text-xs text-emerald-800 dark:text-emerald-200 mt-2">
+                ⚠️ <strong>Hinweis:</strong> 50 Punkte reichen nicht für automatische Zuordnung (60% erforderlich). 
+                <br />💡 <strong>Tipp:</strong> Geben Sie im Verwendungszweck den vollständigen Namen und die Einheit an, oder ordnen Sie beim Erstellen des Kassenbuch-Eintrags einen Mieter zu, um bessere Matches zu erzielen.
+              </p>
+            </div>
+          </div>
+        </Modal>
+      )}
 
       {/* Bulk Reminder Modal */}
       {showBulkReminderModal && (
@@ -629,7 +902,6 @@ export default function Finanzen() {
                     {selectedReminder.document_path && (
                       <Button
                         onClick={() => {
-                          // TODO: PDF Download
                           alert("PDF-Download wird implementiert");
                         }}
                         variant="primary"
@@ -656,7 +928,6 @@ export default function Finanzen() {
                 {selectedReminder.status === "sent" && selectedReminder.document_path && (
                   <Button
                     onClick={() => {
-                      // TODO: PDF Download
                       alert("PDF-Download wird implementiert");
                     }}
                     variant="primary"
@@ -673,4 +944,3 @@ export default function Finanzen() {
     </div>
   );
 }
-

@@ -6,6 +6,7 @@ import { useApp } from "../contexts";
 import Tabelle from "../components/Tabelle";
 import Modal from "../components/Modal";
 import Formularfeld from "../components/Formularfeld";
+import Auswahl from "../components/Auswahl";
 import Button from "../components/Button";
 import Benachrichtigung, { useBenachrichtigung } from "../components/Benachrichtigung";
 import { 
@@ -39,9 +40,16 @@ export default function Eigentuemer() {
     email: "",
     phone: "",
     address: "",
+    // Steuerliche Daten
+    tax_id: "",
+    // Eigentumsanteile
     ownership_percentage: "",
+    // Zahlungsverkehr
     iban: "",
     bank_name: "",
+    // Status
+    status: "",
+    // Zusätzliche Infos
     notes: "",
   });
 
@@ -119,6 +127,14 @@ export default function Eigentuemer() {
     const data = {
       ...formDaten,
       ownership_percentage: formDaten.ownership_percentage ? parseFloat(formDaten.ownership_percentage) : null,
+      tax_id: formDaten.tax_id?.trim() || null,
+      iban: formDaten.iban?.trim() || null,
+      bank_name: formDaten.bank_name?.trim() || null,
+      status: formDaten.status || null,
+      email: formDaten.email?.trim() || null,
+      phone: formDaten.phone?.trim() || null,
+      address: formDaten.address?.trim() || null,
+      notes: formDaten.notes?.trim() || null,
     };
     
     if (bearbeitung) {
@@ -140,9 +156,11 @@ export default function Eigentuemer() {
       email: "",
       phone: "",
       address: "",
+      tax_id: "",
       ownership_percentage: "",
       iban: "",
       bank_name: "",
+      status: "",
       notes: "",
     });
   };
@@ -192,9 +210,11 @@ export default function Eigentuemer() {
                 email: zeile.email || "",
                 phone: zeile.phone || "",
                 address: zeile.address || "",
+                tax_id: zeile.tax_id || "",
                 ownership_percentage: zeile.ownership_percentage || "",
                 iban: zeile.iban || "",
                 bank_name: zeile.bank_name || "",
+                status: zeile.status || "",
                 notes: zeile.notes || "",
               });
               setShowModal(true);

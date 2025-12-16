@@ -99,9 +99,45 @@ export default function Dokumente() {
     uploadMutation.mutate(uploadData);
   };
 
-  const handleDownload = (document) => {
-    // In Produktion: Download-Link generieren
-    window.open(`/api/documents/${document.id}/download`, "_blank");
+  const handleDownload = async (doc) => {
+    try {
+      const response = await documentApi.download(doc.id);
+      
+      // Bestimme MIME-Type basierend auf Dateierweiterung
+      const fileExtension = doc.filename?.split('.').pop()?.toLowerCase() || '';
+      let mimeType = 'application/octet-stream';
+      
+      const mimeTypes = {
+        'pdf': 'application/pdf',
+        'doc': 'application/msword',
+        'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'xls': 'application/vnd.ms-excel',
+        'xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'jpg': 'image/jpeg',
+        'jpeg': 'image/jpeg',
+        'png': 'image/png',
+        'txt': 'text/plain',
+      };
+      
+      if (mimeTypes[fileExtension]) {
+        mimeType = mimeTypes[fileExtension];
+      }
+      
+      // Erstelle Blob-URL und trigger Download
+      const blob = new Blob([response.data], { type: mimeType });
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.setAttribute("download", doc.filename || doc.title || "document");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error("Fehler beim Download:", error);
+      const errorMessage = error.response?.data?.detail || error.message || "Fehler beim Herunterladen des Dokuments";
+      alert(errorMessage);
+    }
   };
 
   const getDocumentTypeLabel = (type) => {

@@ -132,6 +132,20 @@ export default function Abrechnung() {
     },
   });
 
+  // Delete Accounting Mutation
+  const deleteAccountingMutation = useMutation({
+    mutationFn: async (accountingId) => {
+      return await accountingApi.delete(accountingId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["accountings"] });
+      alert("Abrechnung erfolgreich gelöscht");
+    },
+    onError: (error) => {
+      alert(`Fehler beim Löschen: ${error.response?.data?.detail || error.message}`);
+    },
+  });
+
   // Create Accounting Mutation
   const createMutation = useMutation({
     mutationFn: async (data) => {
@@ -295,15 +309,15 @@ export default function Abrechnung() {
         {accountings.map((accounting) => (
           <div
             key={accounting.id}
-            className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 cursor-pointer hover:shadow-lg transition-shadow"
+            className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-shadow relative"
             onClick={() => {
               setCurrentAccountingId(accounting.id);
               setShowWizard(true);
               setWizardStep(3);
             }}
           >
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-center gap-2 flex-1">
                 <FileText className="w-5 h-5 text-primary-600" />
                 <span className="font-medium text-gray-900 dark:text-white">
                   {accounting.accounting_type === "operating_costs"
@@ -311,25 +325,41 @@ export default function Abrechnung() {
                     : "Hausgeld"}
                 </span>
               </div>
-              <span
-                className={`px-2 py-1 rounded-full text-xs ${
-                  accounting.status === "generated" || accounting.status === "sent"
-                    ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
+              <div className="flex items-center gap-2 ml-2">
+                <span
+                  className={`px-2 py-1 rounded-full text-xs whitespace-nowrap ${
+                    accounting.status === "generated" || accounting.status === "sent"
+                      ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
+                      : accounting.status === "calculated"
+                      ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+                      : "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+                  }`}
+                >
+                  {accounting.status === "draft"
+                    ? "Entwurf"
                     : accounting.status === "calculated"
-                    ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
-                    : "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
-                }`}
-              >
-                {accounting.status === "draft"
-                  ? "Entwurf"
-                  : accounting.status === "calculated"
-                  ? "Berechnet"
-                  : accounting.status === "generated"
-                  ? "Generiert"
-                  : accounting.status === "sent"
-                  ? "Versendet"
-                  : "Abgeschlossen"}
-              </span>
+                    ? "Berechnet"
+                    : accounting.status === "generated"
+                    ? "Generiert"
+                    : accounting.status === "sent"
+                    ? "Versendet"
+                    : "Abgeschlossen"}
+                </span>
+                {/* Delete Button */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (confirm("Möchten Sie diese Abrechnung wirklich löschen?")) {
+                      deleteAccountingMutation.mutate(accounting.id);
+                    }
+                  }}
+                  className="p-1.5 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors flex-shrink-0"
+                  title="Abrechnung löschen"
+                  disabled={deleteAccountingMutation.isPending}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
             </div>
             <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
               {formatDate(accounting.period_start)} - {formatDate(accounting.period_end)}
@@ -847,17 +877,27 @@ export default function Abrechnung() {
                   <p className="text-gray-600 dark:text-gray-400 mb-6">
                     Die Abrechnung wurde erfolgreich generiert.
                   </p>
-                  {currentAccounting?.document_path && (
+                  {currentAccounting?.status === "generated" && currentAccounting?.document_path ? (
                     <Button
-                      onClick={() => {
-                        // TODO: PDF Download
-                        alert("PDF-Download wird implementiert");
+                      onClick={async () => {
+                        try {
+                          await accountingApi.downloadPdf(currentAccountingId);
+                        } catch (error) {
+                          const errorMessage = error.response?.data?.detail || error.message || "Unbekannter Fehler";
+                          alert(`Fehler beim Herunterladen: ${errorMessage}\n\nBitte generieren Sie die PDF erneut.`);
+                        }
                       }}
                       variant="primary"
                     >
                       <Download className="w-4 h-4 mr-2" />
                       PDF herunterladen
                     </Button>
+                  ) : (
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      {currentAccounting?.status === "calculated" 
+                        ? "Bitte generieren Sie zuerst die PDF."
+                        : "PDF noch nicht verfügbar."}
+                    </p>
                   )}
                 </div>
               )}

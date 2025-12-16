@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { useApp } from "../contexts/AppContext";
 import { propertyApi } from "../api/propertyApi";
 import Tabelle from "../components/Tabelle";
 import Modal from "../components/Modal";
@@ -21,6 +22,7 @@ import {
 
 export default function Objekte() {
   const navigate = useNavigate();
+  const { selectedClient } = useApp();
   const [searchParams, setSearchParams] = useSearchParams();
   const [objekte, setObjekte] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -38,8 +40,13 @@ export default function Objekte() {
   });
 
   useEffect(() => {
-    ladeObjekte();
-  }, [suche]);
+    if (selectedClient) {
+      ladeObjekte();
+    } else {
+      setObjekte([]);
+      setLoading(false);
+    }
+  }, [suche, selectedClient]);
 
   // Prüfe Query-Parameter für automatisches Öffnen des Modals
   useEffect(() => {
@@ -59,9 +66,17 @@ export default function Objekte() {
   }, [searchParams, setSearchParams]);
 
   const ladeObjekte = async () => {
+    if (!selectedClient) {
+      setObjekte([]);
+      return;
+    }
+    
     try {
       setLoading(true);
-      const response = await propertyApi.list({ search: suche });
+      const response = await propertyApi.list({ 
+        search: suche,
+        client_id: selectedClient.id 
+      });
       setObjekte(response.data.items);
     } catch (error) {
       zeigeBenachrichtigung("Fehler beim Laden der Objekte", "fehler");
@@ -74,9 +89,15 @@ export default function Objekte() {
     e.preventDefault();
     try {
       const daten = {
-        ...formDaten,
-        year_built: formDaten.year_built ? parseInt(formDaten.year_built) : null,
-        size_sqm: formDaten.size_sqm ? parseInt(formDaten.size_sqm) : null,
+        name: formDaten.name.trim(),
+        address: formDaten.address.trim(),
+        year_built: formDaten.year_built && formDaten.year_built.trim() !== "" 
+          ? parseInt(formDaten.year_built) 
+          : null,
+        size_sqm: formDaten.size_sqm && formDaten.size_sqm.trim() !== "" 
+          ? parseInt(formDaten.size_sqm) 
+          : null,
+        notes: formDaten.notes?.trim() || null,
         features: {},
       };
 
@@ -88,7 +109,11 @@ export default function Objekte() {
         formZuruecksetzen();
         ladeObjekte();
       } else {
-        const response = await propertyApi.create(daten);
+        if (!selectedClient) {
+          zeigeBenachrichtigung("Bitte wählen Sie zuerst einen Mandanten aus", "fehler");
+          return;
+        }
+        const response = await propertyApi.create(daten, selectedClient.id);
         zeigeBenachrichtigung("Objekt erfolgreich erstellt");
         setShowModal(false);
         formZuruecksetzen();
@@ -123,10 +148,9 @@ export default function Objekte() {
       zeigeBenachrichtigung("Objekt erfolgreich gelöscht");
       ladeObjekte();
     } catch (error) {
-      zeigeBenachrichtigung(
-        error.response?.data?.detail || "Fehler beim Löschen",
-        "fehler"
-      );
+      const errorMessage = error.response?.data?.detail || error.message || "Fehler beim Löschen";
+      console.error("Lösch-Fehler:", error);
+      zeigeBenachrichtigung(errorMessage, "fehler");
     }
   };
 

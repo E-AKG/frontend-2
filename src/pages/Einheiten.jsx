@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { useApp } from "../contexts/AppContext";
 import { unitApi } from "../api/unitApi";
 import { propertyApi } from "../api/propertyApi";
 import { leaseApi } from "../api/leaseApi";
@@ -27,6 +28,7 @@ import {
 } from "lucide-react";
 
 export default function Einheiten() {
+  const { selectedClient } = useApp();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [einheiten, setEinheiten] = useState([]);
@@ -55,6 +57,20 @@ export default function Einheiten() {
     floor: "",
     size_sqm: "",
     status: "vacant",
+    // Basisdaten
+    location: "",
+    unit_number: "",
+    // Flächen & Anteile
+    living_area_sqm: "",
+    mea_numerator: "",
+    mea_denominator: "",
+    // Nutzungsart
+    usage_type: "",
+    // Ausstattung
+    rooms: "",
+    bathroom_type: "",
+    has_balcony: false,
+    floor_covering: "",
   });
 
   useEffect(() => {
@@ -78,13 +94,22 @@ export default function Einheiten() {
   }, [searchParams, setSearchParams, unitLimit]);
 
   const ladeAlles = async () => {
+    if (!selectedClient) {
+      setEinheiten([]);
+      setObjekte([]);
+      setVertraege([]);
+      setMieter([]);
+      setLoading(false);
+      return;
+    }
+    
     try {
       setLoading(true);
       const [einheitenRes, objekteRes, vertraegeRes, mieterRes] = await Promise.all([
-        unitApi.list({ page_size: 1000 }),
-        propertyApi.list({ page_size: 1000 }),
-        leaseApi.list({ page_size: 1000, status: "active" }),
-        tenantApi.list({ page_size: 1000 }),
+        unitApi.list({ page_size: 1000, client_id: selectedClient.id }),
+        propertyApi.list({ page_size: 1000, client_id: selectedClient.id }),
+        leaseApi.list({ page_size: 1000, status: "active", client_id: selectedClient.id }),
+        tenantApi.list({ page_size: 1000, client_id: selectedClient.id }),
       ]);
       
       console.log("📊 Geladene Daten:");
@@ -114,18 +139,31 @@ export default function Einheiten() {
         floor: formDaten.floor ? parseInt(formDaten.floor) : null,
         size_sqm: formDaten.size_sqm ? parseInt(formDaten.size_sqm) : null,
         status: formDaten.status,
+        // Basisdaten
+        location: formDaten.location || null,
+        unit_number: formDaten.unit_number || null,
+        // Flächen & Anteile
+        living_area_sqm: formDaten.living_area_sqm ? parseFloat(formDaten.living_area_sqm) : null,
+        mea_numerator: formDaten.mea_numerator ? parseInt(formDaten.mea_numerator) : null,
+        mea_denominator: formDaten.mea_denominator ? parseInt(formDaten.mea_denominator) : null,
+        // Nutzungsart
+        usage_type: formDaten.usage_type || null,
+        // Ausstattung
+        rooms: formDaten.rooms ? parseInt(formDaten.rooms) : null,
+        bathroom_type: formDaten.bathroom_type || null,
+        has_balcony: formDaten.has_balcony || false,
+        floor_covering: formDaten.floor_covering || null,
       };
 
       if (bearbeitung) {
-        await unitApi.update(bearbeitung.id, {
-          unit_label: daten.unit_label,
-          floor: daten.floor,
-          size_sqm: daten.size_sqm,
-          status: daten.status,
-        });
+        await unitApi.update(bearbeitung.id, daten);
         zeigeBenachrichtigung("Einheit erfolgreich aktualisiert");
       } else {
-        await unitApi.create(daten);
+        if (!selectedClient) {
+          zeigeBenachrichtigung("Bitte wählen Sie zuerst einen Mandanten aus", "fehler");
+          return;
+        }
+        await unitApi.create(daten, selectedClient.id);
         zeigeBenachrichtigung("Einheit erfolgreich erstellt");
       }
 
@@ -169,6 +207,20 @@ export default function Einheiten() {
       floor: "",
       size_sqm: "",
       status: "vacant",
+      // Basisdaten
+      location: "",
+      unit_number: "",
+      // Flächen & Anteile
+      living_area_sqm: "",
+      mea_numerator: "",
+      mea_denominator: "",
+      // Nutzungsart
+      usage_type: "",
+      // Ausstattung
+      rooms: "",
+      bathroom_type: "",
+      has_balcony: false,
+      floor_covering: "",
     });
   };
 
@@ -259,6 +311,20 @@ export default function Einheiten() {
                   floor: zeile.floor || "",
                   size_sqm: zeile.size_sqm || "",
                   status: zeile.status,
+                  // Basisdaten
+                  location: zeile.location || "",
+                  unit_number: zeile.unit_number || "",
+                  // Flächen & Anteile
+                  living_area_sqm: zeile.living_area_sqm || "",
+                  mea_numerator: zeile.mea_numerator || "",
+                  mea_denominator: zeile.mea_denominator || "",
+                  // Nutzungsart
+                  usage_type: zeile.usage_type || "",
+                  // Ausstattung
+                  rooms: zeile.rooms || "",
+                  bathroom_type: zeile.bathroom_type || "",
+                  has_balcony: zeile.has_balcony || false,
+                  floor_covering: zeile.floor_covering || "",
                 });
                 setShowModal(true);
               }}
@@ -417,35 +483,162 @@ export default function Einheiten() {
             placeholder="z.B. Wohnung 1A"
             required
           />
-          <div className="grid grid-cols-2 gap-2 sm:gap-3">
-            <Formularfeld
-              label="Etage"
-              name="floor"
-              type="number"
-              value={formDaten.floor}
-              onChange={(e) => setFormDaten({ ...formDaten, floor: e.target.value })}
-              placeholder="z.B. 2"
-            />
-            <Formularfeld
-              label="Fläche (m²)"
-              name="size_sqm"
-              type="number"
-              value={formDaten.size_sqm}
-              onChange={(e) => setFormDaten({ ...formDaten, size_sqm: e.target.value })}
-              placeholder="z.B. 65"
+          {/* Basisdaten */}
+          <div className="border-t border-gray-200 pt-3 sm:pt-4">
+            <h3 className="text-sm font-semibold text-gray-700 mb-3">Basisdaten</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+              <Formularfeld
+                label="Lage"
+                name="location"
+                value={formDaten.location}
+                onChange={(e) => setFormDaten({ ...formDaten, location: e.target.value })}
+                placeholder="z.B. EG links, 1. OG"
+              />
+              <Formularfeld
+                label="Einheitsnummer"
+                name="unit_number"
+                value={formDaten.unit_number}
+                onChange={(e) => setFormDaten({ ...formDaten, unit_number: e.target.value })}
+                placeholder="z.B. 001"
+              />
+            </div>
+          </div>
+
+          {/* Flächen & Anteile */}
+          <div className="border-t border-gray-200 pt-3 sm:pt-4">
+            <h3 className="text-sm font-semibold text-gray-700 mb-3">Flächen & Anteile</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+              <Formularfeld
+                label="Etage"
+                name="floor"
+                type="number"
+                value={formDaten.floor}
+                onChange={(e) => setFormDaten({ ...formDaten, floor: e.target.value })}
+                placeholder="z.B. 2"
+              />
+              <Formularfeld
+                label="Gesamtfläche (m²)"
+                name="size_sqm"
+                type="number"
+                value={formDaten.size_sqm}
+                onChange={(e) => setFormDaten({ ...formDaten, size_sqm: e.target.value })}
+                placeholder="z.B. 65"
+              />
+              <Formularfeld
+                label="Wohnfläche (m²) - DIN 277/WoFlV"
+                name="living_area_sqm"
+                type="number"
+                step="0.01"
+                value={formDaten.living_area_sqm}
+                onChange={(e) => setFormDaten({ ...formDaten, living_area_sqm: e.target.value })}
+                placeholder="z.B. 60.5"
+              />
+              <div className="grid grid-cols-2 gap-2">
+                <Formularfeld
+                  label="MEA Zähler"
+                  name="mea_numerator"
+                  type="number"
+                  value={formDaten.mea_numerator}
+                  onChange={(e) => setFormDaten({ ...formDaten, mea_numerator: e.target.value })}
+                  placeholder="z.B. 125"
+                />
+                <Formularfeld
+                  label="MEA Nenner"
+                  name="mea_denominator"
+                  type="number"
+                  value={formDaten.mea_denominator}
+                  onChange={(e) => setFormDaten({ ...formDaten, mea_denominator: e.target.value })}
+                  placeholder="z.B. 1000"
+                />
+              </div>
+            </div>
+            {formDaten.mea_numerator && formDaten.mea_denominator && (
+              <p className="text-xs text-gray-500 mt-1">
+                MEA: {formDaten.mea_numerator}/{formDaten.mea_denominator} = {((parseInt(formDaten.mea_numerator) / parseInt(formDaten.mea_denominator)) * 100).toFixed(2)}%
+              </p>
+            )}
+          </div>
+
+          {/* Nutzungsart */}
+          <div className="border-t border-gray-200 pt-3 sm:pt-4">
+            <h3 className="text-sm font-semibold text-gray-700 mb-3">Nutzungsart</h3>
+            <Auswahl
+              label="Nutzungsart"
+              name="usage_type"
+              value={formDaten.usage_type}
+              onChange={(e) => setFormDaten({ ...formDaten, usage_type: e.target.value })}
+              optionen={[
+                { value: "", label: "Bitte wählen" },
+                { value: "residential", label: "Wohnen" },
+                { value: "commercial", label: "Gewerbe" },
+                { value: "parking", label: "Stellplatz/Garage" },
+                { value: "basement", label: "Kellerraum" },
+                { value: "other", label: "Sonstige" },
+              ]}
             />
           </div>
-          <Auswahl
-            label="Status"
-            name="status"
-            value={formDaten.status}
-            onChange={(e) => setFormDaten({ ...formDaten, status: e.target.value })}
-            optionen={[
-              { value: "vacant", label: "Leer" },
-              { value: "occupied", label: "Vermietet" },
-            ]}
-            required
-          />
+
+          {/* Ausstattung */}
+          <div className="border-t border-gray-200 pt-3 sm:pt-4">
+            <h3 className="text-sm font-semibold text-gray-700 mb-3">Ausstattung</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+              <Formularfeld
+                label="Anzahl Zimmer"
+                name="rooms"
+                type="number"
+                value={formDaten.rooms}
+                onChange={(e) => setFormDaten({ ...formDaten, rooms: e.target.value })}
+                placeholder="z.B. 3"
+              />
+              <Auswahl
+                label="Bad"
+                name="bathroom_type"
+                value={formDaten.bathroom_type}
+                onChange={(e) => setFormDaten({ ...formDaten, bathroom_type: e.target.value })}
+                optionen={[
+                  { value: "", label: "Bitte wählen" },
+                  { value: "bath", label: "Wanne" },
+                  { value: "shower", label: "Dusche" },
+                  { value: "both", label: "Wanne und Dusche" },
+                  { value: "none", label: "Kein Bad" },
+                ]}
+              />
+              <Formularfeld
+                label="Bodenbelag"
+                name="floor_covering"
+                value={formDaten.floor_covering}
+                onChange={(e) => setFormDaten({ ...formDaten, floor_covering: e.target.value })}
+                placeholder="z.B. Parkett, Laminat, Fliesen"
+              />
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="has_balcony"
+                  checked={formDaten.has_balcony}
+                  onChange={(e) => setFormDaten({ ...formDaten, has_balcony: e.target.checked })}
+                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                />
+                <label htmlFor="has_balcony" className="text-sm text-gray-700">
+                  Balkon vorhanden
+                </label>
+              </div>
+            </div>
+          </div>
+
+          {/* Status */}
+          <div className="border-t border-gray-200 pt-3 sm:pt-4">
+            <Auswahl
+              label="Status"
+              name="status"
+              value={formDaten.status}
+              onChange={(e) => setFormDaten({ ...formDaten, status: e.target.value })}
+              optionen={[
+                { value: "vacant", label: "Leer" },
+                { value: "occupied", label: "Vermietet" },
+              ]}
+              required
+            />
+          </div>
           <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 pt-3 sm:pt-4 border-t border-gray-200 mt-4 sm:mt-0">
             <Button
               type="button"

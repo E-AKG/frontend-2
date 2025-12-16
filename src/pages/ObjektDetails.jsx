@@ -6,6 +6,7 @@ import { unitApi } from "../api/unitApi";
 import { meterApi } from "../api/meterApi";
 import { keyApi } from "../api/keyApi";
 import { tenantApi } from "../api/tenantApi";
+import { insuranceApi, propertyBankAccountApi, allocationKeyApi } from "../api/propertyExtendedApi";
 import { useApp } from "../contexts/AppContext";
 import Tabelle from "../components/Tabelle";
 import Modal from "../components/Modal";
@@ -13,7 +14,10 @@ import Formularfeld from "../components/Formularfeld";
 import Auswahl from "../components/Auswahl";
 import Button from "../components/Button";
 import Benachrichtigung, { useBenachrichtigung } from "../components/Benachrichtigung";
-import { Gauge, Key as KeyIcon, Plus, Edit, Trash2, Calendar, User, History, TrendingUp } from "lucide-react";
+import { 
+  Gauge, Key as KeyIcon, Plus, Edit, Trash2, Calendar, User, History, TrendingUp,
+  FileText, Shield, CreditCard, Calculator, Building2, Thermometer, FileCheck
+} from "lucide-react";
 
 export default function ObjektDetails() {
   const { id } = useParams();
@@ -29,6 +33,9 @@ export default function ObjektDetails() {
   const [showKeyModal, setShowKeyModal] = useState(false);
   const [showMeterReadingsModal, setShowMeterReadingsModal] = useState(false);
   const [showKeyHistoryModal, setShowKeyHistoryModal] = useState(false);
+  const [showInsuranceModal, setShowInsuranceModal] = useState(false);
+  const [showBankAccountModal, setShowBankAccountModal] = useState(false);
+  const [showAllocationKeyModal, setShowAllocationKeyModal] = useState(false);
   const [bearbeitung, setBearbeitung] = useState(null);
   const [bearbeiteterZaehler, setBearbeiteterZaehler] = useState(null);
   const [bearbeiteterSchluessel, setBearbeiteterSchluessel] = useState(null);
@@ -55,12 +62,56 @@ export default function ObjektDetails() {
     },
     enabled: !!id,
   });
+  
+  // Lade Versicherungen
+  const { data: insurances = [], refetch: refetchInsurances } = useQuery({
+    queryKey: ["insurances", id],
+    queryFn: async () => {
+      const response = await insuranceApi.list(id);
+      return response.data || [];
+    },
+    enabled: !!id,
+  });
+  
+  // Lade Bankkonten
+  const { data: bankAccounts = [], refetch: refetchBankAccounts } = useQuery({
+    queryKey: ["propertyBankAccounts", id],
+    queryFn: async () => {
+      const response = await propertyBankAccountApi.list(id);
+      return response.data || [];
+    },
+    enabled: !!id,
+  });
+  
+  // Lade Verteilerschlüssel
+  const { data: allocationKeys = [], refetch: refetchAllocationKeys } = useQuery({
+    queryKey: ["allocationKeys", id],
+    queryFn: async () => {
+      const response = await allocationKeyApi.list(id);
+      return response.data || [];
+    },
+    enabled: !!id,
+  });
 
   const [formDaten, setFormDaten] = useState({
     unit_label: "",
     floor: "",
     size_sqm: "",
     status: "vacant",
+    // Basisdaten
+    location: "",
+    unit_number: "",
+    // Flächen & Anteile
+    living_area_sqm: "",
+    mea_numerator: "",
+    mea_denominator: "",
+    // Nutzungsart
+    usage_type: "",
+    // Ausstattung
+    rooms: "",
+    bathroom_type: "",
+    has_balcony: false,
+    floor_covering: "",
   });
 
   // Meter Form State
@@ -94,6 +145,42 @@ export default function ObjektDetails() {
     notes: "",
   });
 
+  // Insurance Form State
+  const [insuranceForm, setInsuranceForm] = useState({
+    insurance_type: "building",
+    insurer_name: "",
+    policy_number: "",
+    coverage_description: "",
+    start_date: "",
+    end_date: "",
+    annual_premium: "",
+    notes: "",
+  });
+
+  // Bank Account Form State
+  const [bankAccountForm, setBankAccountForm] = useState({
+    account_type: "rent",
+    account_name: "",
+    iban: "",
+    bank_name: "",
+    account_holder: "",
+    notes: "",
+  });
+
+  // Allocation Key Form State
+  const [allocationKeyForm, setAllocationKeyForm] = useState({
+    name: "",
+    allocation_method: "area",
+    default_factor: "1.0",
+    is_active: true,
+    notes: "",
+  });
+
+  // Bearbeitungs-States für neue Entities
+  const [bearbeiteteVersicherung, setBearbeiteteVersicherung] = useState(null);
+  const [bearbeitetesBankkonto, setBearbeitetesBankkonto] = useState(null);
+  const [bearbeiteterVerteilerschluessel, setBearbeiteterVerteilerschluessel] = useState(null);
+
   // Lade Tenants für Schlüssel-Zuweisung
   const { data: tenants = [] } = useQuery({
     queryKey: ["tenants"],
@@ -104,15 +191,20 @@ export default function ObjektDetails() {
   });
 
   useEffect(() => {
-    ladeObjekt();
-    ladeEinheiten();
+    if (id) {
+      ladeObjekt();
+      ladeEinheiten();
+    }
   }, [id]);
 
   const ladeObjekt = async () => {
     try {
       const response = await propertyApi.get(id);
-      setObjekt(response.data);
+      const data = response.data;
+      console.log("Geladene Objekt-Daten:", data);
+      setObjekt(data);
     } catch (error) {
+      console.error("Fehler beim Laden:", error);
       zeigeBenachrichtigung("Fehler beim Laden des Objekts", "fehler");
     }
   };
@@ -138,15 +230,24 @@ export default function ObjektDetails() {
         floor: formDaten.floor ? parseInt(formDaten.floor) : null,
         size_sqm: formDaten.size_sqm ? parseInt(formDaten.size_sqm) : null,
         status: formDaten.status,
+        // Basisdaten
+        location: formDaten.location || null,
+        unit_number: formDaten.unit_number || null,
+        // Flächen & Anteile
+        living_area_sqm: formDaten.living_area_sqm ? parseFloat(formDaten.living_area_sqm) : null,
+        mea_numerator: formDaten.mea_numerator ? parseInt(formDaten.mea_numerator) : null,
+        mea_denominator: formDaten.mea_denominator ? parseInt(formDaten.mea_denominator) : null,
+        // Nutzungsart
+        usage_type: formDaten.usage_type || null,
+        // Ausstattung
+        rooms: formDaten.rooms ? parseInt(formDaten.rooms) : null,
+        bathroom_type: formDaten.bathroom_type || null,
+        has_balcony: formDaten.has_balcony || false,
+        floor_covering: formDaten.floor_covering || null,
       };
 
       if (bearbeitung) {
-        await unitApi.update(bearbeitung.id, {
-          unit_label: daten.unit_label,
-          floor: daten.floor,
-          size_sqm: daten.size_sqm,
-          status: daten.status,
-        });
+        await unitApi.update(bearbeitung.id, daten);
         zeigeBenachrichtigung("Einheit erfolgreich aktualisiert");
       } else {
         await unitApi.create(daten);
@@ -186,6 +287,20 @@ export default function ObjektDetails() {
       floor: "",
       size_sqm: "",
       status: "vacant",
+      // Basisdaten
+      location: "",
+      unit_number: "",
+      // Flächen & Anteile
+      living_area_sqm: "",
+      mea_numerator: "",
+      mea_denominator: "",
+      // Nutzungsart
+      usage_type: "",
+      // Ausstattung
+      rooms: "",
+      bathroom_type: "",
+      has_balcony: false,
+      floor_covering: "",
     });
   };
 
@@ -378,6 +493,20 @@ export default function ObjektDetails() {
                 floor: zeile.floor || "",
                 size_sqm: zeile.size_sqm || "",
                 status: zeile.status,
+                // Basisdaten
+                location: zeile.location || "",
+                unit_number: zeile.unit_number || "",
+                // Flächen & Anteile
+                living_area_sqm: zeile.living_area_sqm || "",
+                mea_numerator: zeile.mea_numerator || "",
+                mea_denominator: zeile.mea_denominator || "",
+                // Nutzungsart
+                usage_type: zeile.usage_type || "",
+                // Ausstattung
+                rooms: zeile.rooms || "",
+                bathroom_type: zeile.bathroom_type || "",
+                has_balcony: zeile.has_balcony || false,
+                floor_covering: zeile.floor_covering || "",
               });
               setShowModal(true);
             }}
@@ -467,6 +596,11 @@ export default function ObjektDetails() {
             { id: "units", label: "Einheiten", count: einheiten.length },
             { id: "meters", label: "Zähler", count: meters.length, icon: Gauge },
             { id: "keys", label: "Schlüssel", count: keys.length, icon: KeyIcon },
+            { id: "stammdaten", label: "Stammdaten", icon: FileText },
+            { id: "technische-daten", label: "Technische Daten", icon: Thermometer },
+            { id: "versicherungen", label: "Versicherungen", count: insurances.length, icon: Shield },
+            { id: "bankkonten", label: "Bankkonten", count: bankAccounts.length, icon: CreditCard },
+            { id: "verteilerschluessel", label: "Verteilerschlüssel", count: allocationKeys.length, icon: Calculator },
           ].map((tab) => {
             const Icon = tab.icon;
             return (
@@ -757,6 +891,548 @@ export default function ObjektDetails() {
         </div>
       )}
 
+      {/* Stammdaten Tab */}
+      {activeTab === "stammdaten" && (
+        <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 p-4 sm:p-6">
+          <div className="mb-6">
+            <h2 className="text-base sm:text-lg font-semibold text-slate-900 mb-2">Erweiterte Stammdaten</h2>
+            <p className="text-sm text-gray-600">
+              Diese Daten werden für <strong>Grundsteuer-Abrechnungen</strong>, <strong>Steuerberater</strong> und <strong>Katasterdaten</strong> benötigt. 
+              Sie werden in Berichten und Exporten verwendet.
+            </p>
+            <div className="mt-2 text-xs text-gray-500">
+              💡 <strong>Praktischer Nutzen:</strong> Einheitswert-Aktenzeichen für Grundsteuer-Erklärung, 
+              Katasterdaten für Steuerberater-Export, rechtliche Dokumentation bei Objektverkauf/Erbschaft.
+            </div>
+          </div>
+          {!objekt && (
+            <div className="text-center py-8 text-gray-500">
+              Lade Objekt-Daten...
+            </div>
+          )}
+          {objekt && (
+          <form onSubmit={async (e) => {
+            e.preventDefault();
+            try {
+              const updateData = {
+                unit_value_file_number: objekt?.unit_value_file_number || null,
+                cadastral_district: objekt?.cadastral_district || null,
+                cadastral_parcel: objekt?.cadastral_parcel || null,
+              };
+              // Entferne leere Strings
+              Object.keys(updateData).forEach(key => {
+                if (updateData[key] === "" || updateData[key] === null) {
+                  updateData[key] = null;
+                }
+              });
+              const response = await propertyApi.update(id, updateData);
+              // Prüfe, ob die Daten tatsächlich zurückgegeben werden
+              const savedData = response.data;
+              console.log("Gespeicherte Daten:", savedData);
+              const hasData = savedData?.unit_value_file_number || savedData?.cadastral_district || savedData?.cadastral_parcel;
+              
+              if (!hasData && (updateData.unit_value_file_number || updateData.cadastral_district || updateData.cadastral_parcel)) {
+                // Daten wurden nicht gespeichert - Migration fehlt
+                zeigeBenachrichtigung("⚠️ Datenbank-Migration erforderlich! Die Daten konnten nicht gespeichert werden. Bitte führen Sie zuerst die Migration durch.", "fehler");
+              } else {
+                // Aktualisiere den State direkt mit den zurückgegebenen Daten
+                if (savedData) {
+                  setObjekt(prev => ({ ...prev, ...savedData }));
+                }
+                zeigeBenachrichtigung("Stammdaten erfolgreich aktualisiert");
+                // Lade auch nochmal neu, um sicherzustellen, dass alles synchron ist
+                setTimeout(() => {
+                  ladeObjekt();
+                }, 300);
+              }
+            } catch (error) {
+              console.error("Fehler beim Speichern:", error);
+              if (error.response?.status === 422) {
+                zeigeBenachrichtigung("⚠️ Diese Felder sind noch nicht verfügbar. Bitte führen Sie zuerst die Datenbank-Migration durch.", "fehler");
+              } else {
+                zeigeBenachrichtigung("Fehler beim Speichern: " + (error.response?.data?.detail || error.message), "fehler");
+              }
+            }
+          }}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Formularfeld
+                label="Einheitswert-Aktenzeichen"
+                value={objekt?.unit_value_file_number ?? ""}
+                onChange={(e) => setObjekt({ ...objekt, unit_value_file_number: e.target.value })}
+                placeholder="z.B. EW-12345/2023"
+              />
+              <Formularfeld
+                label="Flur"
+                value={objekt?.cadastral_district ?? ""}
+                onChange={(e) => setObjekt({ ...objekt, cadastral_district: e.target.value })}
+                placeholder="z.B. 123"
+              />
+              <Formularfeld
+                label="Flurstück"
+                value={objekt?.cadastral_parcel ?? ""}
+                onChange={(e) => setObjekt({ ...objekt, cadastral_parcel: e.target.value })}
+                placeholder="z.B. 456/78"
+              />
+            </div>
+            {/* Debug: Zeige aktuelle Werte */}
+            {process.env.NODE_ENV === 'development' && (
+              <div className="mt-4 p-2 bg-gray-100 text-xs rounded">
+                <strong>Debug:</strong> unit_value_file_number={String(objekt?.unit_value_file_number ?? 'null')}, 
+                cadastral_district={String(objekt?.cadastral_district ?? 'null')}, 
+                cadastral_parcel={String(objekt?.cadastral_parcel ?? 'null')}
+              </div>
+            )}
+            <div className="flex justify-end mt-6">
+              <Button type="submit">Speichern</Button>
+            </div>
+          </form>
+          )}
+        </div>
+      )}
+
+      {/* Technische Daten Tab */}
+      {activeTab === "technische-daten" && (
+        <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 p-4 sm:p-6">
+          <div className="mb-6">
+            <h2 className="text-base sm:text-lg font-semibold text-slate-900 mb-2">Technische Daten</h2>
+            <p className="text-sm text-gray-600">
+              Diese Daten sind wichtig für <strong>GEG-Compliance</strong> (Gebäudeenergiegesetz), <strong>Energieausweis-Verwaltung</strong>, 
+              <strong>Heizkosten-Abrechnungen</strong> und <strong>Energieberichte</strong>. Sie werden automatisch in Abrechnungen und Berichten verwendet.
+            </p>
+            <div className="mt-2 text-xs text-gray-500">
+              💡 <strong>Praktischer Nutzen:</strong> Heizungsart bestimmt Abrechnungsmethode, Energieausweis-Daten für Vermietung/Verkauf, 
+              Gesamtflächen für Betriebskosten-Umlage, Energieklasse für Portfolio-Analyse und Sanierungsplanung.
+            </div>
+          </div>
+          <form onSubmit={async (e) => {
+            e.preventDefault();
+            try {
+              const updateData = {
+                heating_type: objekt?.heating_type || null,
+                energy_certificate_valid_until: objekt?.energy_certificate_valid_until || null,
+                energy_rating_value: objekt?.energy_rating_value || null,
+                energy_rating_class: objekt?.energy_rating_class || null,
+                total_residential_area: objekt?.total_residential_area || null,
+                total_commercial_area: objekt?.total_commercial_area || null,
+              };
+              // Entferne leere Strings und konvertiere Zahlen
+              Object.keys(updateData).forEach(key => {
+                if (updateData[key] === "" || updateData[key] === null) {
+                  updateData[key] = null;
+                } else if (key === "energy_rating_value" && updateData[key]) {
+                  updateData[key] = parseFloat(updateData[key]);
+                } else if ((key === "total_residential_area" || key === "total_commercial_area") && updateData[key]) {
+                  updateData[key] = parseInt(updateData[key]);
+                }
+              });
+              const response = await propertyApi.update(id, updateData);
+              // Prüfe, ob die Daten tatsächlich zurückgegeben werden
+              const savedData = response.data;
+              console.log("Gespeicherte Daten:", savedData);
+              const hasData = savedData?.heating_type || savedData?.energy_rating_value || savedData?.total_residential_area;
+              
+              if (!hasData && (updateData.heating_type || updateData.energy_rating_value || updateData.total_residential_area)) {
+                // Daten wurden nicht gespeichert - Migration fehlt
+                zeigeBenachrichtigung("⚠️ Datenbank-Migration erforderlich! Die Daten konnten nicht gespeichert werden. Bitte führen Sie zuerst die Migration durch.", "fehler");
+              } else {
+                // Aktualisiere den State direkt mit den zurückgegebenen Daten
+                if (savedData) {
+                  setObjekt(prev => ({ ...prev, ...savedData }));
+                }
+                zeigeBenachrichtigung("✅ Technische Daten erfolgreich gespeichert! Die Daten werden in Abrechnungen, Energieberichten und für GEG-Compliance verwendet.", "erfolg");
+                // Lade auch nochmal neu, um sicherzustellen, dass alles synchron ist
+                setTimeout(() => {
+                  ladeObjekt();
+                }, 300);
+              }
+            } catch (error) {
+              console.error("Fehler beim Speichern:", error);
+              if (error.response?.status === 422) {
+                zeigeBenachrichtigung("⚠️ Diese Felder sind noch nicht verfügbar. Bitte führen Sie zuerst die Datenbank-Migration durch.", "fehler");
+              } else {
+                zeigeBenachrichtigung("Fehler beim Speichern: " + (error.response?.data?.detail || error.message), "fehler");
+              }
+            }
+          }}>
+            <div className="space-y-4">
+              <div>
+                <Auswahl
+                  label="Heizungsart"
+                  value={objekt?.heating_type || ""}
+                  onChange={(e) => {
+                    const newHeatingType = e.target.value;
+                    // Warnung anzeigen, wenn Heizungsart geändert wird und bereits Daten vorhanden sind
+                    if (objekt?.heating_type && objekt.heating_type !== newHeatingType && 
+                        (objekt.energy_rating_value || objekt.energy_rating_class || objekt.total_residential_area)) {
+                      const oldType = objekt.heating_type === "gas" ? "Gas" : 
+                                     objekt.heating_type === "oil" ? "Öl" : 
+                                     objekt.heating_type === "electric" ? "Strom" : 
+                                     objekt.heating_type === "heat_pump" ? "Wärmepumpe" : 
+                                     objekt.heating_type === "district_heating" ? "Fernwärme" : 
+                                     objekt.heating_type === "pellets" ? "Pellets" : "Sonstige";
+                      if (window.confirm(`⚠️ Achtung: Sie ändern die Heizungsart von "${oldType}" zu einer anderen.\n\nDie aktuellen technischen Daten (Energiekennwert, Energieklasse, Flächen) werden überschrieben, wenn Sie speichern.\n\nMöchten Sie fortfahren?`)) {
+                        setObjekt({ ...objekt, heating_type: newHeatingType });
+                      }
+                    } else {
+                      setObjekt({ ...objekt, heating_type: newHeatingType });
+                    }
+                  }}
+                  optionen={[
+                    { value: "", label: "Bitte wählen" },
+                    { value: "gas", label: "Gas" },
+                    { value: "oil", label: "Öl" },
+                    { value: "electric", label: "Strom" },
+                    { value: "heat_pump", label: "Wärmepumpe" },
+                    { value: "district_heating", label: "Fernwärme" },
+                    { value: "pellets", label: "Pellets" },
+                    { value: "other", label: "Sonstige" },
+                  ]}
+                />
+                {objekt?.heating_type && (
+                  <p className="text-xs text-amber-600 mt-1">
+                    ⚠️ <strong>Hinweis:</strong> Ein Objekt kann nur einen Satz technischer Daten haben. 
+                    Wenn Sie die Heizungsart ändern, werden die aktuellen Werte überschrieben. 
+                    Die alten Werte werden nicht mehr angezeigt, bleiben aber in der Datenbank gespeichert.
+                  </p>
+                )}
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Formularfeld
+                  label="Energieausweis gültig bis"
+                  type="date"
+                  value={objekt?.energy_certificate_valid_until ? (typeof objekt.energy_certificate_valid_until === 'string' ? objekt.energy_certificate_valid_until.split('T')[0] : new Date(objekt.energy_certificate_valid_until).toISOString().split("T")[0]) : ""}
+                  onChange={(e) => setObjekt({ ...objekt, energy_certificate_valid_until: e.target.value || null })}
+                />
+                <Formularfeld
+                  label="Energiekennwert (kWh/m²a)"
+                  type="number"
+                  step="0.01"
+                  value={objekt?.energy_rating_value ?? ""}
+                  onChange={(e) => setObjekt({ ...objekt, energy_rating_value: e.target.value ? parseFloat(e.target.value) : null })}
+                  placeholder="z.B. 120"
+                />
+              </div>
+              <Formularfeld
+                label="Energieklasse"
+                value={objekt?.energy_rating_class ?? ""}
+                onChange={(e) => setObjekt({ ...objekt, energy_rating_class: e.target.value || null })}
+                placeholder="z.B. A+, A, B, C"
+              />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Formularfeld
+                  label="Wohnfläche (m²)"
+                  type="number"
+                  value={objekt?.total_residential_area ?? ""}
+                  onChange={(e) => setObjekt({ ...objekt, total_residential_area: e.target.value ? parseInt(e.target.value) : null })}
+                  placeholder="z.B. 500"
+                />
+                <Formularfeld
+                  label="Gewerbefläche (m²)"
+                  type="number"
+                  value={objekt?.total_commercial_area ?? ""}
+                  onChange={(e) => setObjekt({ ...objekt, total_commercial_area: e.target.value ? parseInt(e.target.value) : null })}
+                  placeholder="z.B. 200"
+                />
+              </div>
+              {/* Debug: Zeige aktuelle Werte */}
+              {process.env.NODE_ENV === 'development' && (
+                <div className="mt-4 p-2 bg-gray-100 text-xs rounded">
+                  <strong>Debug:</strong> heating_type={String(objekt?.heating_type ?? 'null')}, 
+                  energy_rating_value={String(objekt?.energy_rating_value ?? 'null')}, 
+                  total_residential_area={String(objekt?.total_residential_area ?? 'null')}
+                </div>
+              )}
+            </div>
+            <div className="flex justify-end mt-6">
+              <Button type="submit">Speichern</Button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* Versicherungen Tab */}
+      {activeTab === "versicherungen" && (
+        <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
+            <h2 className="text-base sm:text-lg font-semibold text-slate-900">Versicherungen</h2>
+            <Button
+              onClick={() => {
+                setBearbeiteteVersicherung(null);
+                setInsuranceForm({
+                  insurance_type: "building",
+                  insurer_name: "",
+                  policy_number: "",
+                  coverage_description: "",
+                  start_date: "",
+                  end_date: "",
+                  annual_premium: "",
+                  notes: "",
+                });
+                setShowInsuranceModal(true);
+              }}
+              size="sm"
+              className="w-full sm:w-auto"
+              icon={<Plus className="w-4 h-4" />}
+            >
+              Neue Versicherung
+            </Button>
+          </div>
+          {insurances.length > 0 ? (
+            <div className="space-y-3">
+              {insurances.map((insurance) => (
+                <div
+                  key={insurance.id}
+                  className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="font-medium text-gray-900 dark:text-white">
+                        {insurance.insurance_type === "building" ? "Gebäudeversicherung" : insurance.insurance_type === "liability" ? "Haftpflichtversicherung" : "Sonstige"}
+                      </div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                        {insurance.insurer_name}
+                        {insurance.policy_number && ` - Police: ${insurance.policy_number}`}
+                      </div>
+                      {insurance.coverage_description && (
+                        <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                          {insurance.coverage_description}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 ml-4">
+                      <button
+                        onClick={() => {
+                          setBearbeiteteVersicherung(insurance);
+                          setInsuranceForm({
+                            insurance_type: insurance.insurance_type,
+                            insurer_name: insurance.insurer_name || "",
+                            policy_number: insurance.policy_number || "",
+                            coverage_description: insurance.coverage_description || "",
+                            start_date: insurance.start_date || "",
+                            end_date: insurance.end_date || "",
+                            annual_premium: insurance.annual_premium || "",
+                            notes: insurance.notes || "",
+                          });
+                          setShowInsuranceModal(true);
+                        }}
+                        className="p-2 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={async () => {
+                          if (confirm("Versicherung wirklich löschen?")) {
+                            try {
+                              await insuranceApi.delete(insurance.id);
+                              refetchInsurances();
+                              zeigeBenachrichtigung("Versicherung gelöscht");
+                            } catch (error) {
+                              zeigeBenachrichtigung("Fehler beim Löschen", "fehler");
+                            }
+                          }
+                        }}
+                        className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+              Keine Versicherungen vorhanden
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Bankkonten Tab */}
+      {activeTab === "bankkonten" && (
+        <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
+            <h2 className="text-base sm:text-lg font-semibold text-slate-900">Bankkonten</h2>
+            <Button
+              onClick={() => {
+                setBearbeitetesBankkonto(null);
+                setBankAccountForm({
+                  account_type: "rent",
+                  account_name: "",
+                  iban: "",
+                  bank_name: "",
+                  account_holder: "",
+                  notes: "",
+                });
+                setShowBankAccountModal(true);
+              }}
+              size="sm"
+              className="w-full sm:w-auto"
+              icon={<Plus className="w-4 h-4" />}
+            >
+              Neues Bankkonto
+            </Button>
+          </div>
+          {bankAccounts.length > 0 ? (
+            <div className="space-y-3">
+              {bankAccounts.map((account) => (
+                <div
+                  key={account.id}
+                  className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="font-medium text-gray-900 dark:text-white">
+                        {account.account_type === "rent" ? "Mietkonto" : account.account_type === "reserves" ? "Rücklagenkonto" : account.account_type === "deposit" ? "Kautionskonto" : "Sonstiges"}
+                      </div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                        {account.account_name}
+                        {account.iban && ` - IBAN: ${account.iban}`}
+                      </div>
+                      {account.bank_name && (
+                        <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                          {account.bank_name}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 ml-4">
+                      <button
+                        onClick={() => {
+                          setBearbeitetesBankkonto(account);
+                          setBankAccountForm({
+                            account_type: account.account_type,
+                            account_name: account.account_name || "",
+                            iban: account.iban || "",
+                            bank_name: account.bank_name || "",
+                            account_holder: account.account_holder || "",
+                            notes: account.notes || "",
+                          });
+                          setShowBankAccountModal(true);
+                        }}
+                        className="p-2 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={async () => {
+                          if (confirm("Bankkonto wirklich löschen?")) {
+                            try {
+                              await propertyBankAccountApi.delete(account.id);
+                              refetchBankAccounts();
+                              zeigeBenachrichtigung("Bankkonto gelöscht");
+                            } catch (error) {
+                              zeigeBenachrichtigung("Fehler beim Löschen", "fehler");
+                            }
+                          }
+                        }}
+                        className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+              Keine Bankkonten vorhanden
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Verteilerschlüssel Tab */}
+      {activeTab === "verteilerschluessel" && (
+        <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
+            <h2 className="text-base sm:text-lg font-semibold text-slate-900">Verteilerschlüssel</h2>
+            <Button
+              onClick={() => {
+                setBearbeiteterVerteilerschluessel(null);
+                setAllocationKeyForm({
+                  name: "",
+                  allocation_method: "area",
+                  default_factor: "1.0",
+                  is_active: true,
+                  notes: "",
+                });
+                setShowAllocationKeyModal(true);
+              }}
+              size="sm"
+              className="w-full sm:w-auto"
+              icon={<Plus className="w-4 h-4" />}
+            >
+              Neuer Verteilerschlüssel
+            </Button>
+          </div>
+          {allocationKeys.length > 0 ? (
+            <div className="space-y-3">
+              {allocationKeys.map((key) => (
+                <div
+                  key={key.id}
+                  className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="font-medium text-gray-900 dark:text-white flex items-center gap-2">
+                        {key.name}
+                        {key.is_active ? (
+                          <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full text-xs">Aktiv</span>
+                        ) : (
+                          <span className="px-2 py-0.5 bg-gray-100 text-gray-700 rounded-full text-xs">Inaktiv</span>
+                        )}
+                      </div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                        {key.allocation_method === "area" ? "Nach m²" : key.allocation_method === "units" ? "Nach Wohneinheiten" : key.allocation_method === "persons" ? "Nach Personen" : key.allocation_method === "consumption" ? "Nach Verbrauch" : "Individuell"}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 ml-4">
+                      <button
+                        onClick={() => {
+                          setBearbeiteterVerteilerschluessel(key);
+                          setAllocationKeyForm({
+                            name: key.name || "",
+                            allocation_method: key.allocation_method,
+                            default_factor: key.default_factor?.toString() || "1.0",
+                            is_active: key.is_active,
+                            notes: key.notes || "",
+                          });
+                          setShowAllocationKeyModal(true);
+                        }}
+                        className="p-2 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={async () => {
+                          if (confirm("Verteilerschlüssel wirklich löschen?")) {
+                            try {
+                              await allocationKeyApi.delete(key.id);
+                              refetchAllocationKeys();
+                              zeigeBenachrichtigung("Verteilerschlüssel gelöscht");
+                            } catch (error) {
+                              zeigeBenachrichtigung("Fehler beim Löschen", "fehler");
+                            }
+                          }
+                        }}
+                        className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+              Keine Verteilerschlüssel vorhanden
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Modal */}
       <Modal
         isOpen={showModal}
@@ -776,36 +1452,162 @@ export default function ObjektDetails() {
             placeholder="z.B. Wohnung 1A"
             required
           />
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-            <Formularfeld
-              label="Etage"
-              name="floor"
-              type="number"
-              value={formDaten.floor}
-              onChange={(e) => setFormDaten({ ...formDaten, floor: e.target.value })}
-              placeholder="z.B. 2"
-            />
-            <Formularfeld
-              label="Fläche (m²)"
-              name="size_sqm"
-              type="number"
-              value={formDaten.size_sqm}
-              onChange={(e) => setFormDaten({ ...formDaten, size_sqm: e.target.value })}
-              placeholder="z.B. 65"
+          {/* Basisdaten */}
+          <div className="border-t border-gray-200 pt-4 mt-4">
+            <h3 className="text-sm font-semibold text-gray-700 mb-3">Basisdaten</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Formularfeld
+                label="Lage"
+                name="location"
+                value={formDaten.location}
+                onChange={(e) => setFormDaten({ ...formDaten, location: e.target.value })}
+                placeholder="z.B. EG links, 1. OG"
+              />
+              <Formularfeld
+                label="Einheitsnummer"
+                name="unit_number"
+                value={formDaten.unit_number}
+                onChange={(e) => setFormDaten({ ...formDaten, unit_number: e.target.value })}
+                placeholder="z.B. 001"
+              />
+            </div>
+          </div>
+
+          {/* Flächen & Anteile */}
+          <div className="border-t border-gray-200 pt-4 mt-4">
+            <h3 className="text-sm font-semibold text-gray-700 mb-3">Flächen & Anteile</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Formularfeld
+                label="Etage"
+                name="floor"
+                type="number"
+                value={formDaten.floor}
+                onChange={(e) => setFormDaten({ ...formDaten, floor: e.target.value })}
+                placeholder="z.B. 2"
+              />
+              <Formularfeld
+                label="Gesamtfläche (m²)"
+                name="size_sqm"
+                type="number"
+                value={formDaten.size_sqm}
+                onChange={(e) => setFormDaten({ ...formDaten, size_sqm: e.target.value })}
+                placeholder="z.B. 65"
+              />
+              <Formularfeld
+                label="Wohnfläche (m²) - DIN 277/WoFlV"
+                name="living_area_sqm"
+                type="number"
+                step="0.01"
+                value={formDaten.living_area_sqm}
+                onChange={(e) => setFormDaten({ ...formDaten, living_area_sqm: e.target.value })}
+                placeholder="z.B. 60.5"
+              />
+              <div className="grid grid-cols-2 gap-2">
+                <Formularfeld
+                  label="MEA Zähler"
+                  name="mea_numerator"
+                  type="number"
+                  value={formDaten.mea_numerator}
+                  onChange={(e) => setFormDaten({ ...formDaten, mea_numerator: e.target.value })}
+                  placeholder="z.B. 125"
+                />
+                <Formularfeld
+                  label="MEA Nenner"
+                  name="mea_denominator"
+                  type="number"
+                  value={formDaten.mea_denominator}
+                  onChange={(e) => setFormDaten({ ...formDaten, mea_denominator: e.target.value })}
+                  placeholder="z.B. 1000"
+                />
+              </div>
+            </div>
+            {formDaten.mea_numerator && formDaten.mea_denominator && (
+              <p className="text-xs text-gray-500 mt-1">
+                MEA: {formDaten.mea_numerator}/{formDaten.mea_denominator} = {((parseInt(formDaten.mea_numerator) / parseInt(formDaten.mea_denominator)) * 100).toFixed(2)}%
+              </p>
+            )}
+          </div>
+
+          {/* Nutzungsart */}
+          <div className="border-t border-gray-200 pt-4 mt-4">
+            <h3 className="text-sm font-semibold text-gray-700 mb-3">Nutzungsart</h3>
+            <Auswahl
+              label="Nutzungsart"
+              name="usage_type"
+              value={formDaten.usage_type}
+              onChange={(e) => setFormDaten({ ...formDaten, usage_type: e.target.value })}
+              optionen={[
+                { value: "", label: "Bitte wählen" },
+                { value: "residential", label: "Wohnen" },
+                { value: "commercial", label: "Gewerbe" },
+                { value: "parking", label: "Stellplatz/Garage" },
+                { value: "basement", label: "Kellerraum" },
+                { value: "other", label: "Sonstige" },
+              ]}
             />
           </div>
-          <Auswahl
-            label="Status"
-            name="status"
-            value={formDaten.status}
-            onChange={(e) => setFormDaten({ ...formDaten, status: e.target.value })}
-            optionen={[
-              { value: "vacant", label: "Leer" },
-              { value: "occupied", label: "Vermietet" },
-            ]}
-            required
-            className="mt-4"
-          />
+
+          {/* Ausstattung */}
+          <div className="border-t border-gray-200 pt-4 mt-4">
+            <h3 className="text-sm font-semibold text-gray-700 mb-3">Ausstattung</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Formularfeld
+                label="Anzahl Zimmer"
+                name="rooms"
+                type="number"
+                value={formDaten.rooms}
+                onChange={(e) => setFormDaten({ ...formDaten, rooms: e.target.value })}
+                placeholder="z.B. 3"
+              />
+              <Auswahl
+                label="Bad"
+                name="bathroom_type"
+                value={formDaten.bathroom_type}
+                onChange={(e) => setFormDaten({ ...formDaten, bathroom_type: e.target.value })}
+                optionen={[
+                  { value: "", label: "Bitte wählen" },
+                  { value: "bath", label: "Wanne" },
+                  { value: "shower", label: "Dusche" },
+                  { value: "both", label: "Wanne und Dusche" },
+                  { value: "none", label: "Kein Bad" },
+                ]}
+              />
+              <Formularfeld
+                label="Bodenbelag"
+                name="floor_covering"
+                value={formDaten.floor_covering}
+                onChange={(e) => setFormDaten({ ...formDaten, floor_covering: e.target.value })}
+                placeholder="z.B. Parkett, Laminat, Fliesen"
+              />
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="has_balcony"
+                  checked={formDaten.has_balcony}
+                  onChange={(e) => setFormDaten({ ...formDaten, has_balcony: e.target.checked })}
+                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                />
+                <label htmlFor="has_balcony" className="text-sm text-gray-700">
+                  Balkon vorhanden
+                </label>
+              </div>
+            </div>
+          </div>
+
+          {/* Status */}
+          <div className="border-t border-gray-200 pt-4 mt-4">
+            <Auswahl
+              label="Status"
+              name="status"
+              value={formDaten.status}
+              onChange={(e) => setFormDaten({ ...formDaten, status: e.target.value })}
+              optionen={[
+                { value: "vacant", label: "Leer" },
+                { value: "occupied", label: "Vermietet" },
+              ]}
+              required
+            />
+          </div>
           <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 mt-6">
             <Button
               type="button"
@@ -1192,6 +1994,299 @@ export default function ObjektDetails() {
             </p>
           )}
         </div>
+      </Modal>
+
+      {/* Versicherung Modal */}
+      <Modal
+        isOpen={showInsuranceModal}
+        onClose={() => {
+          setShowInsuranceModal(false);
+          setBearbeiteteVersicherung(null);
+        }}
+        titel={bearbeiteteVersicherung ? "Versicherung bearbeiten" : "Neue Versicherung"}
+        groesse="lg"
+      >
+        <form onSubmit={async (e) => {
+          e.preventDefault();
+          try {
+            // Konvertiere leere Strings zu null für optionale Felder
+            const formData = {
+              insurance_type: insuranceForm.insurance_type,
+              insurer_name: insuranceForm.insurer_name.trim(),
+              policy_number: insuranceForm.policy_number?.trim() || null,
+              coverage_description: insuranceForm.coverage_description?.trim() || null,
+              start_date: insuranceForm.start_date || null,
+              end_date: insuranceForm.end_date || null,
+              annual_premium: insuranceForm.annual_premium?.trim() || null,
+              notes: insuranceForm.notes?.trim() || null,
+            };
+            
+            if (bearbeiteteVersicherung) {
+              await insuranceApi.update(bearbeiteteVersicherung.id, formData);
+              zeigeBenachrichtigung("Versicherung aktualisiert");
+            } else {
+              await insuranceApi.create(id, formData);
+              zeigeBenachrichtigung("Versicherung erstellt");
+            }
+            setShowInsuranceModal(false);
+            refetchInsurances();
+          } catch (error) {
+            console.error("Fehler beim Speichern:", error);
+            const errorMessage = error.response?.data?.detail || "Fehler beim Speichern";
+            zeigeBenachrichtigung(errorMessage, "fehler");
+          }
+        }}>
+          <Auswahl
+            label="Versicherungstyp"
+            value={insuranceForm.insurance_type}
+            onChange={(e) => setInsuranceForm({ ...insuranceForm, insurance_type: e.target.value })}
+            optionen={[
+              { value: "building", label: "Gebäudeversicherung" },
+              { value: "liability", label: "Haftpflichtversicherung" },
+              { value: "other", label: "Sonstige" },
+            ]}
+            required
+          />
+          <Formularfeld
+            label="Versicherer"
+            value={insuranceForm.insurer_name}
+            onChange={(e) => setInsuranceForm({ ...insuranceForm, insurer_name: e.target.value })}
+            required
+          />
+          <Formularfeld
+            label="Police-Nr."
+            value={insuranceForm.policy_number}
+            onChange={(e) => setInsuranceForm({ ...insuranceForm, policy_number: e.target.value })}
+          />
+          <Formularfeld
+            label="Abdeckung"
+            type="textarea"
+            value={insuranceForm.coverage_description}
+            onChange={(e) => setInsuranceForm({ ...insuranceForm, coverage_description: e.target.value })}
+            placeholder="Was ist abgedeckt?"
+          />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Formularfeld
+              label="Startdatum"
+              type="date"
+              value={insuranceForm.start_date}
+              onChange={(e) => setInsuranceForm({ ...insuranceForm, start_date: e.target.value })}
+            />
+            <Formularfeld
+              label="Enddatum"
+              type="date"
+              value={insuranceForm.end_date}
+              onChange={(e) => setInsuranceForm({ ...insuranceForm, end_date: e.target.value })}
+            />
+          </div>
+          <Formularfeld
+            label="Jahresprämie"
+            value={insuranceForm.annual_premium}
+            onChange={(e) => setInsuranceForm({ ...insuranceForm, annual_premium: e.target.value })}
+            placeholder="z.B. 1.200,00 €"
+          />
+          <Formularfeld
+            label="Notizen"
+            type="textarea"
+            value={insuranceForm.notes}
+            onChange={(e) => setInsuranceForm({ ...insuranceForm, notes: e.target.value })}
+          />
+          <div className="flex justify-end gap-2 pt-4">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => {
+                setShowInsuranceModal(false);
+                setBearbeiteteVersicherung(null);
+              }}
+            >
+              Abbrechen
+            </Button>
+            <Button type="submit">
+              {bearbeiteteVersicherung ? "Aktualisieren" : "Erstellen"}
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Bankkonto Modal */}
+      <Modal
+        isOpen={showBankAccountModal}
+        onClose={() => {
+          setShowBankAccountModal(false);
+          setBearbeitetesBankkonto(null);
+        }}
+        titel={bearbeitetesBankkonto ? "Bankkonto bearbeiten" : "Neues Bankkonto"}
+        groesse="lg"
+      >
+        <form onSubmit={async (e) => {
+          e.preventDefault();
+          try {
+            if (bearbeitetesBankkonto) {
+              await propertyBankAccountApi.update(bearbeitetesBankkonto.id, bankAccountForm);
+              zeigeBenachrichtigung("Bankkonto aktualisiert");
+            } else {
+              await propertyBankAccountApi.create(id, bankAccountForm);
+              zeigeBenachrichtigung("Bankkonto erstellt");
+            }
+            setShowBankAccountModal(false);
+            refetchBankAccounts();
+          } catch (error) {
+            zeigeBenachrichtigung("Fehler beim Speichern", "fehler");
+          }
+        }}>
+          <Auswahl
+            label="Kontotyp"
+            value={bankAccountForm.account_type}
+            onChange={(e) => setBankAccountForm({ ...bankAccountForm, account_type: e.target.value })}
+            optionen={[
+              { value: "rent", label: "Mietkonto" },
+              { value: "reserves", label: "Rücklagenkonto" },
+              { value: "deposit", label: "Kautionskonto" },
+              { value: "other", label: "Sonstiges" },
+            ]}
+            required
+          />
+          <Formularfeld
+            label="Kontoname"
+            value={bankAccountForm.account_name}
+            onChange={(e) => setBankAccountForm({ ...bankAccountForm, account_name: e.target.value })}
+            required
+          />
+          <Formularfeld
+            label="IBAN"
+            value={bankAccountForm.iban}
+            onChange={(e) => setBankAccountForm({ ...bankAccountForm, iban: e.target.value })}
+            placeholder="DE89 3704 0044 0532 0130 00"
+          />
+          <Formularfeld
+            label="Bankname"
+            value={bankAccountForm.bank_name}
+            onChange={(e) => setBankAccountForm({ ...bankAccountForm, bank_name: e.target.value })}
+          />
+          <Formularfeld
+            label="Kontoinhaber"
+            value={bankAccountForm.account_holder}
+            onChange={(e) => setBankAccountForm({ ...bankAccountForm, account_holder: e.target.value })}
+          />
+          <Formularfeld
+            label="Notizen"
+            type="textarea"
+            value={bankAccountForm.notes}
+            onChange={(e) => setBankAccountForm({ ...bankAccountForm, notes: e.target.value })}
+          />
+          <div className="flex justify-end gap-2 pt-4">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => {
+                setShowBankAccountModal(false);
+                setBearbeitetesBankkonto(null);
+              }}
+            >
+              Abbrechen
+            </Button>
+            <Button type="submit">
+              {bearbeitetesBankkonto ? "Aktualisieren" : "Erstellen"}
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Verteilerschlüssel Modal */}
+      <Modal
+        isOpen={showAllocationKeyModal}
+        onClose={() => {
+          setShowAllocationKeyModal(false);
+          setBearbeiteterVerteilerschluessel(null);
+        }}
+        titel={bearbeiteterVerteilerschluessel ? "Verteilerschlüssel bearbeiten" : "Neuer Verteilerschlüssel"}
+        groesse="lg"
+      >
+        <form onSubmit={async (e) => {
+          e.preventDefault();
+          try {
+            const data = {
+              ...allocationKeyForm,
+              default_factor: allocationKeyForm.default_factor ? parseFloat(allocationKeyForm.default_factor) : 1.0,
+            };
+            if (bearbeiteterVerteilerschluessel) {
+              await allocationKeyApi.update(bearbeiteterVerteilerschluessel.id, data);
+              zeigeBenachrichtigung("Verteilerschlüssel aktualisiert");
+            } else {
+              await allocationKeyApi.create(id, data);
+              zeigeBenachrichtigung("Verteilerschlüssel erstellt");
+            }
+            setShowAllocationKeyModal(false);
+            refetchAllocationKeys();
+          } catch (error) {
+            zeigeBenachrichtigung("Fehler beim Speichern", "fehler");
+          }
+        }}>
+          <Formularfeld
+            label="Name"
+            value={allocationKeyForm.name}
+            onChange={(e) => setAllocationKeyForm({ ...allocationKeyForm, name: e.target.value })}
+            placeholder="z.B. Heizung, Wasser, Hausmeister"
+            required
+          />
+          <Auswahl
+            label="Verteilungsmethode"
+            value={allocationKeyForm.allocation_method}
+            onChange={(e) => setAllocationKeyForm({ ...allocationKeyForm, allocation_method: e.target.value })}
+            optionen={[
+              { value: "area", label: "Nach m²" },
+              { value: "units", label: "Nach Wohneinheiten" },
+              { value: "persons", label: "Nach Personen" },
+              { value: "consumption", label: "Nach Verbrauch" },
+              { value: "custom", label: "Individuell" },
+            ]}
+            required
+          />
+          {allocationKeyForm.allocation_method !== "custom" && (
+            <Formularfeld
+              label="Standard-Faktor"
+              type="number"
+              step="0.0001"
+              value={allocationKeyForm.default_factor}
+              onChange={(e) => setAllocationKeyForm({ ...allocationKeyForm, default_factor: e.target.value })}
+              placeholder="1.0"
+            />
+          )}
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="is_active"
+              checked={allocationKeyForm.is_active}
+              onChange={(e) => setAllocationKeyForm({ ...allocationKeyForm, is_active: e.target.checked })}
+              className="w-4 h-4"
+            />
+            <label htmlFor="is_active" className="text-sm text-gray-700 dark:text-gray-300">
+              Aktiv
+            </label>
+          </div>
+          <Formularfeld
+            label="Notizen"
+            type="textarea"
+            value={allocationKeyForm.notes}
+            onChange={(e) => setAllocationKeyForm({ ...allocationKeyForm, notes: e.target.value })}
+          />
+          <div className="flex justify-end gap-2 pt-4">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => {
+                setShowAllocationKeyModal(false);
+                setBearbeiteterVerteilerschluessel(null);
+              }}
+            >
+              Abbrechen
+            </Button>
+            <Button type="submit">
+              {bearbeiteterVerteilerschluessel ? "Aktualisieren" : "Erstellen"}
+            </Button>
+          </div>
+        </form>
       </Modal>
     </div>
   );

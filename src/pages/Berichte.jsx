@@ -28,14 +28,33 @@ export default function Berichte() {
       : `${new Date().getFullYear()}-12-31`,
   });
 
-  // Lade Dashboard-Stats für Berichte
-  const { data: statsData, isLoading } = useQuery({
+  // Lade Berichtsdaten für den gewählten Zeitraum
+  const { data: reportData, isLoading } = useQuery({
     queryKey: [
       "reports",
       selectedClient?.id,
       selectedFiscalYear?.id,
       dateRange.start,
       dateRange.end,
+    ],
+    queryFn: async () => {
+      const response = await statsApi.getReports({
+        start_date: dateRange.start,
+        end_date: dateRange.end,
+        client_id: selectedClient?.id,
+        fiscal_year_id: selectedFiscalYear?.id,
+      });
+      return response.data;
+    },
+    enabled: !!selectedClient,
+  });
+
+  // Lade auch Dashboard-Stats für zusätzliche Daten (Leerstand, offene Posten)
+  const { data: statsData } = useQuery({
+    queryKey: [
+      "dashboard-stats",
+      selectedClient?.id,
+      selectedFiscalYear?.id,
     ],
     queryFn: async () => {
       const endDate = new Date(dateRange.end);
@@ -141,7 +160,7 @@ export default function Berichte() {
       ) : (
         <div className="space-y-6">
           {/* Einnahmen-Überschuss */}
-          {reportType === "income_expense" && statsData && (
+          {reportType === "income_expense" && reportData && (
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
               <div className="p-6 border-b border-gray-200 dark:border-gray-700">
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white">
@@ -163,21 +182,19 @@ export default function Berichte() {
                       <div className="flex justify-between items-center p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg">
                         <span className="text-gray-700 dark:text-gray-300">Mieteinnahmen</span>
                         <span className="font-bold text-emerald-600 dark:text-emerald-400">
-                          {formatCurrency(statsData.total_rent || 0)}
+                          {formatCurrency(reportData.income?.rent || 0)}
                         </span>
                       </div>
                       <div className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                         <span className="text-gray-700 dark:text-gray-300">Nebenkosten</span>
                         <span className="font-medium text-gray-900 dark:text-white">
-                          {formatCurrency(statsData.total_prepayments || 0)}
+                          {formatCurrency(reportData.income?.prepayments || 0)}
                         </span>
                       </div>
                       <div className="flex justify-between items-center p-3 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg border-t-2 border-emerald-500">
                         <span className="font-bold text-gray-900 dark:text-white">Gesamt</span>
                         <span className="font-bold text-emerald-600 dark:text-emerald-400 text-lg">
-                          {formatCurrency(
-                            (statsData.total_rent || 0) + (statsData.total_prepayments || 0)
-                          )}
+                          {formatCurrency(reportData.income?.total || 0)}
                         </span>
                       </div>
                     </div>
@@ -193,19 +210,19 @@ export default function Berichte() {
                       <div className="flex justify-between items-center p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
                         <span className="text-gray-700 dark:text-gray-300">Betriebskosten</span>
                         <span className="font-bold text-red-600 dark:text-red-400">
-                          {formatCurrency(0)}
+                          {formatCurrency(reportData.expenses?.operating_costs || 0)}
                         </span>
                       </div>
                       <div className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                         <span className="text-gray-700 dark:text-gray-300">Instandhaltung</span>
                         <span className="font-medium text-gray-900 dark:text-white">
-                          {formatCurrency(0)}
+                          {formatCurrency(reportData.expenses?.maintenance || 0)}
                         </span>
                       </div>
                       <div className="flex justify-between items-center p-3 bg-red-100 dark:bg-red-900/30 rounded-lg border-t-2 border-red-500">
                         <span className="font-bold text-gray-900 dark:text-white">Gesamt</span>
                         <span className="font-bold text-red-600 dark:text-red-400 text-lg">
-                          {formatCurrency(0)}
+                          {formatCurrency(reportData.expenses?.total || 0)}
                         </span>
                       </div>
                     </div>
@@ -220,11 +237,7 @@ export default function Berichte() {
                         Überschuss
                       </div>
                       <div className="text-3xl font-bold text-primary-600 dark:text-primary-400">
-                        {formatCurrency(
-                          (statsData.total_rent || 0) +
-                            (statsData.total_prepayments || 0) -
-                            0
-                        )}
+                        {formatCurrency(reportData.surplus || 0)}
                       </div>
                     </div>
                     <DollarSign className="w-12 h-12 text-primary-500" />

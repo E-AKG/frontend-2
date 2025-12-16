@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useApp } from "../contexts/AppContext";
 import { clientApi } from "../api/clientApi";
 import { Building2, Calendar, Plus, ArrowRight, Loader2, Edit, X, AlertCircle } from "lucide-react";
@@ -11,6 +11,7 @@ import Benachrichtigung, { useBenachrichtigung } from "../components/Benachricht
 
 export default function ClientSelection() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { clients, fiscalYears, loading, loadClients, loadFiscalYears, updateClient, updateFiscalYear } = useApp();
   const { benachrichtigung, zeigeBenachrichtigung } = useBenachrichtigung();
   const [selectedClientId, setSelectedClientId] = useState(null);
@@ -51,6 +52,25 @@ export default function ClientSelection() {
       setShowClientModal(true);
     }
   }, [loading, clients.length, showClientModal]);
+
+  // Wenn über /clients/new aufgerufen, öffne automatisch das Erstellungs-Modal
+  useEffect(() => {
+    if (location.pathname === "/clients/new" && !showClientModal && !loading) {
+      setEditingClient(null);
+      setClientFormData({
+        name: "",
+        client_type: "private_landlord",
+        contact_name: "",
+        email: "",
+        phone: "",
+        address: "",
+        notes: "",
+      });
+      setShowClientModal(true);
+      // Entferne /clients/new aus der URL
+      navigate("/client-selection", { replace: true });
+    }
+  }, [location.pathname, showClientModal, loading, navigate]);
 
   const handleClientSelect = (clientId) => {
     setSelectedClientId(clientId);
