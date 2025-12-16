@@ -110,6 +110,14 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/clients/:clientId/fiscal-years/new"
+            element={
+              <ProtectedRoute>
+                <ClientSelection />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Protected Routes with ProLayout - New Layout */}
           <Route
