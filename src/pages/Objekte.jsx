@@ -102,12 +102,22 @@ export default function Objekte() {
       };
 
       if (bearbeitung) {
-        await propertyApi.update(bearbeitung.id, daten);
+        const response = await propertyApi.update(bearbeitung.id, daten);
         zeigeBenachrichtigung("Objekt erfolgreich aktualisiert");
+        
+        // Aktualisiere die Liste mit den neuesten Daten
+        await ladeObjekte();
+        
+        // Aktualisiere das bearbeitete Objekt in der Liste mit den Server-Daten
+        if (response.data) {
+          setObjekte(prev => prev.map(obj => 
+            obj.id === bearbeitung.id ? { ...obj, ...response.data } : obj
+          ));
+        }
+        
         setShowModal(false);
         setBearbeitung(null);
         formZuruecksetzen();
-        ladeObjekte();
       } else {
         if (!selectedClient) {
           zeigeBenachrichtigung("Bitte wählen Sie zuerst einen Mandanten aus", "fehler");
@@ -128,16 +138,33 @@ export default function Objekte() {
     }
   };
 
-  const handleBearbeiten = (objekt) => {
-    setBearbeitung(objekt);
-    setFormDaten({
-      name: objekt.name,
-      address: objekt.address,
-      year_built: objekt.year_built || "",
-      size_sqm: objekt.size_sqm || "",
-      notes: objekt.notes || "",
-    });
-    setShowModal(true);
+  const handleBearbeiten = async (objekt) => {
+    // Lade die neuesten Daten vom Server, um sicherzustellen, dass wir die aktuellsten Daten haben
+    try {
+      const response = await propertyApi.get(objekt.id);
+      const aktuellesObjekt = response.data;
+      setBearbeitung(aktuellesObjekt);
+      setFormDaten({
+        name: aktuellesObjekt.name || "",
+        address: aktuellesObjekt.address || "",
+        year_built: aktuellesObjekt.year_built || "",
+        size_sqm: aktuellesObjekt.size_sqm || "",
+        notes: aktuellesObjekt.notes || "",
+      });
+      setShowModal(true);
+    } catch (error) {
+      console.error("Fehler beim Laden der Objektdaten:", error);
+      // Fallback: Verwende die Daten aus der Liste
+      setBearbeitung(objekt);
+      setFormDaten({
+        name: objekt.name || "",
+        address: objekt.address || "",
+        year_built: objekt.year_built || "",
+        size_sqm: objekt.size_sqm || "",
+        notes: objekt.notes || "",
+      });
+      setShowModal(true);
+    }
   };
 
   const handleLoeschen = async (objekt) => {
