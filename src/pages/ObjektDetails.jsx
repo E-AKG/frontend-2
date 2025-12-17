@@ -7,6 +7,7 @@ import { meterApi } from "../api/meterApi";
 import { keyApi } from "../api/keyApi";
 import { tenantApi } from "../api/tenantApi";
 import { insuranceApi, propertyBankAccountApi, allocationKeyApi } from "../api/propertyExtendedApi";
+import { documentApi } from "../api/documentApi";
 import { useApp } from "../contexts/AppContext";
 import Tabelle from "../components/Tabelle";
 import Modal from "../components/Modal";
@@ -16,7 +17,8 @@ import Button from "../components/Button";
 import Benachrichtigung, { useBenachrichtigung } from "../components/Benachrichtigung";
 import { 
   Gauge, Key as KeyIcon, Plus, Edit, Trash2, Calendar, User, History, TrendingUp,
-  FileText, Shield, CreditCard, Calculator, Building2, Thermometer, FileCheck, X, Save
+  FileText, Shield, CreditCard, Calculator, Building2, Thermometer, FileCheck, X, Save,
+  Image as ImageIcon, ChevronLeft, ChevronRight
 } from "lucide-react";
 
 export default function ObjektDetails() {
@@ -36,6 +38,10 @@ export default function ObjektDetails() {
   const [showInsuranceModal, setShowInsuranceModal] = useState(false);
   const [showBankAccountModal, setShowBankAccountModal] = useState(false);
   const [showAllocationKeyModal, setShowAllocationKeyModal] = useState(false);
+  const [showImageModal, setShowImageModal] = useState(false);
+  const [selectedImages, setSelectedImages] = useState([]);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [pendingImages, setPendingImages] = useState([]);
   const [bearbeitung, setBearbeitung] = useState(null);
   const [bearbeiteterZaehler, setBearbeiteterZaehler] = useState(null);
   const [bearbeiteterSchluessel, setBearbeiteterSchluessel] = useState(null);
@@ -252,12 +258,29 @@ export default function ObjektDetails() {
         floor_covering: formDaten.floor_covering || null,
       };
 
+      let unitId;
       if (bearbeitung) {
         await unitApi.update(bearbeitung.id, daten);
+        unitId = bearbeitung.id;
         zeigeBenachrichtigung("Einheit erfolgreich aktualisiert");
       } else {
-        await unitApi.create(daten);
+        const response = await unitApi.create(daten);
+        unitId = response.data.id;
         zeigeBenachrichtigung("Einheit erfolgreich erstellt");
+      }
+
+      // Lade ausstehende Bilder hoch (wenn neue Einheit erstellt wurde)
+      if (pendingImages.length > 0 && unitId) {
+        const uploadPromises = pendingImages.map(file => 
+          uploadImageMutation.mutateAsync({ file, unitId })
+        );
+        try {
+          await Promise.all(uploadPromises);
+          zeigeBenachrichtigung(`${pendingImages.length} Bild(er) erfolgreich hochgeladen`);
+        } catch (error) {
+          zeigeBenachrichtigung("Einige Bilder konnten nicht hochgeladen werden", "fehler");
+        }
+        setPendingImages([]);
       }
 
       setShowModal(false);
@@ -462,6 +485,180 @@ export default function ObjektDetails() {
     enabled: !!ausgewaehlterSchluessel?.id,
   });
 
+  // Lade Bilder für eine Einheit
+  const { data: unitImages = [] } = useQuery({
+    queryKey: ["unit-images", bearbeitung?.id],
+    queryFn: async () => {
+      if (!bearbeitung?.id || !selectedClient?.id) return [];
+      try {
+        const response = await documentApi.list({
+          client_id: selectedClient.id,
+          unit_id: bearbeitung.id,
+          document_type: "other",
+        });
+        // Filtere nur Bild-Dateien
+        const images = (response.data?.items || response.data || []).filter(doc => {
+          const mimeType = doc.mime_type?.toLowerCase() || "";
+          const filename = doc.filename?.toLowerCase() || "";
+          return mimeType.startsWith("image/") || 
+                 filename.endsWith(".jpg") || 
+                 filename.endsWith(".jpeg") || 
+                 filename.endsWith(".png") || 
+                 filename.endsWith(".gif") || 
+                 filename.endsWith(".webp");
+        });
+        return images;
+      } catch (error) {
+        console.error("Fehler beim Laden der Bilder:", error);
+        return [];
+      }
+    },
+    enabled: !!bearbeitung?.id && !!selectedClient?.id,
+  });
+
+  // Lade Bilder als Blob-URLs für die Anzeige
+  const [imageBlobUrls, setImageBlobUrls] = useState({});
+  const [galleryBlobUrls, setGalleryBlobUrls] = useState({});
+
+  useEffect(() => {
+    if (!unitImages.length) {
+      setImageBlobUrls({});
+      return;
+    }
+
+    const loadImageBlobs = async () => {
+      const urls = {};
+      const promises = unitImages.map(async (image) => {
+        try {
+          const response = await documentApi.download(image.id);
+          const blob = new Blob([response.data]);
+          const blobUrl = URL.createObjectURL(blob);
+          urls[image.id] = blobUrl;
+        } catch (error) {
+          console.error(`Fehler beim Laden des Bildes ${image.id}:`, error);
+        }
+      });
+      
+      await Promise.all(promises);
+      setImageBlobUrls(urls);
+    };
+
+    loadImageBlobs();
+
+    // Cleanup: Revoke blob URLs when component unmounts or images change
+    return () => {
+      Object.values(imageBlobUrls).forEach(url => URL.revokeObjectURL(url));
+    };
+  }, [unitImages.map(img => img.id).join(',')]);
+
+  // Lade Blob-URLs für die Galerie
+  useEffect(() => {
+    if (!selectedImages.length || !showImageModal) {
+      // Cleanup alte Blob-URLs
+      Object.values(galleryBlobUrls).forEach(url => URL.revokeObjectURL(url));
+      setGalleryBlobUrls({});
+      return;
+    }
+
+    const loadGalleryBlobs = async () => {
+      const urls = {};
+      const promises = selectedImages.map(async (image) => {
+        try {
+          const response = await documentApi.download(image.id);
+          const blob = new Blob([response.data]);
+          const blobUrl = URL.createObjectURL(blob);
+          urls[image.id] = blobUrl;
+        } catch (error) {
+          console.error(`Fehler beim Laden des Galerie-Bildes ${image.id}:`, error);
+        }
+      });
+      
+      await Promise.all(promises);
+      setGalleryBlobUrls(urls);
+    };
+
+    loadGalleryBlobs();
+
+    // Cleanup: Revoke blob URLs when modal closes
+    return () => {
+      Object.values(galleryBlobUrls).forEach(url => URL.revokeObjectURL(url));
+    };
+  }, [selectedImages.map(img => img.id).join(','), showImageModal]);
+
+  // Bild-Upload Mutation
+  const uploadImageMutation = useMutation({
+    mutationFn: async ({ file, unitId }) => {
+      if (!selectedClient?.id) throw new Error("Kein Mandant ausgewählt");
+      
+      return await documentApi.upload(file, {
+        client_id: selectedClient.id,
+        document_type: "other",
+        unit_id: unitId,
+        title: file.name,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["unit-images", bearbeitung?.id] });
+      // Benachrichtigung wird in handleImageUpload behandelt
+    },
+    onError: (error) => {
+      console.error("Upload-Fehler:", error);
+      // Fehler wird in handleImageUpload behandelt
+      throw error;
+    },
+  });
+
+  // Bild-Löschen Mutation
+  const deleteImageMutation = useMutation({
+    mutationFn: async (imageId) => {
+      return await documentApi.delete(imageId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["unit-images", bearbeitung?.id] });
+      zeigeBenachrichtigung("Bild erfolgreich gelöscht");
+    },
+    onError: (error) => {
+      zeigeBenachrichtigung("Fehler beim Löschen des Bildes", "fehler");
+      console.error("Delete-Fehler:", error);
+    },
+  });
+
+  const handleImageUpload = async (e) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    // Prüfe ob Einheit bereits existiert
+    const unitId = bearbeitung?.id;
+    if (!unitId) {
+      // Wenn noch keine Einheit existiert, speichere die Bilder für später
+      setPendingImages([...pendingImages, ...files]);
+      zeigeBenachrichtigung(`${files.length} Bild(er) werden nach dem Speichern der Einheit hochgeladen`);
+      // Reset input
+      e.target.value = '';
+      return;
+    }
+
+    // Lade alle Bilder parallel hoch
+    const uploadPromises = files.map(file => 
+      uploadImageMutation.mutateAsync({ file, unitId })
+    );
+    
+    try {
+      await Promise.all(uploadPromises);
+      zeigeBenachrichtigung(`${files.length} Bild(er) erfolgreich hochgeladen`);
+    } catch (error) {
+      zeigeBenachrichtigung("Einige Bilder konnten nicht hochgeladen werden", "fehler");
+    }
+    
+    // Reset input
+    e.target.value = '';
+  };
+
+  const handleImageDelete = async (imageId) => {
+    if (!confirm("Möchten Sie dieses Bild wirklich löschen?")) return;
+    deleteImageMutation.mutate(imageId);
+  };
+
   const spalten = [
     { key: "unit_label", label: "Bezeichnung" },
     { key: "floor", label: "Etage", render: (zeile) => zeile.floor || "—" },
@@ -514,12 +711,52 @@ export default function ObjektDetails() {
                 has_balcony: zeile.has_balcony || false,
                 floor_covering: zeile.floor_covering || "",
               });
+              setPendingImages([]);
               setShowModal(true);
             }}
             className="text-green-600 hover:text-green-700 font-medium text-sm"
           >
             Bearbeiten
           </button>
+          {/* Bilder-Button */}
+          {zeile.id && (
+            <button
+              onClick={async (e) => {
+                e.stopPropagation();
+                try {
+                  const response = await documentApi.list({
+                    client_id: selectedClient?.id,
+                    unit_id: zeile.id,
+                    document_type: "other",
+                  });
+                  const images = (response.data?.items || response.data || []).filter(doc => {
+                    const mimeType = doc.mime_type?.toLowerCase() || "";
+                    const filename = doc.filename?.toLowerCase() || "";
+                    return mimeType.startsWith("image/") || 
+                           filename.endsWith(".jpg") || 
+                           filename.endsWith(".jpeg") || 
+                           filename.endsWith(".png") || 
+                           filename.endsWith(".gif") || 
+                           filename.endsWith(".webp");
+                  });
+                  if (images.length > 0) {
+                    setSelectedImages(images);
+                    setSelectedImageIndex(0);
+                    setShowImageModal(true);
+                  } else {
+                    zeigeBenachrichtigung("Keine Bilder für diese Einheit vorhanden", "info");
+                  }
+                } catch (error) {
+                  console.error("Fehler beim Laden der Bilder:", error);
+                  zeigeBenachrichtigung("Fehler beim Laden der Bilder", "fehler");
+                }
+              }}
+              className="text-blue-600 hover:text-blue-700 font-medium text-sm"
+              title="Bilder ansehen"
+            >
+              Bilder
+            </button>
+          )}
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -1607,6 +1844,114 @@ export default function ObjektDetails() {
             placeholder="z.B. Wohnung 1A"
             required
           />
+
+          {/* Bilder - IMMER SICHTBAR */}
+          <div className="border-2 border-blue-300 bg-blue-50 rounded-lg p-4 mt-4">
+            <h3 className="text-base font-bold text-blue-900 mb-3 flex items-center gap-2">
+              <ImageIcon className="w-5 h-5 text-blue-600" />
+              Bilder der Einheit
+            </h3>
+            
+            {/* Bild-Upload */}
+            <div className="mb-4">
+              <label className="block text-sm font-semibold text-blue-900 mb-2">
+                Bilder hochladen
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleImageUpload}
+                className="w-full px-4 py-3 border-2 border-blue-400 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm font-medium"
+              />
+              <p className="text-xs text-blue-700 mt-2 font-medium">
+                Sie können mehrere Bilder gleichzeitig auswählen (JPG, PNG, GIF, WebP)
+              </p>
+            </div>
+
+            {/* Ausstehende Bilder (wenn Einheit noch nicht gespeichert) */}
+            {pendingImages.length > 0 && (
+              <div className="mb-4">
+                <p className="text-sm font-medium text-gray-700 mb-2">
+                  Ausstehende Bilder ({pendingImages.length})
+                </p>
+                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                  {pendingImages.map((file, index) => (
+                    <div key={index} className="relative group">
+                      <img
+                        src={URL.createObjectURL(file)}
+                        alt={file.name}
+                        className="w-full h-24 object-cover rounded-lg border border-gray-200"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setPendingImages(pendingImages.filter((_, i) => i !== index));
+                        }}
+                        className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Hochgeladene Bilder */}
+            {bearbeitung && unitImages.length > 0 && (
+              <div>
+                <p className="text-sm font-medium text-gray-700 mb-2">
+                  Hochgeladene Bilder ({unitImages.length})
+                </p>
+                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                  {unitImages.map((image) => {
+                    const imageUrl = imageBlobUrls[image.id] || null;
+                    return (
+                      <div key={image.id} className="relative group">
+                        {imageUrl ? (
+                          <img
+                            src={imageUrl}
+                            alt={image.title || image.filename}
+                            className="w-full h-24 object-cover rounded-lg border border-gray-200 cursor-pointer"
+                            onClick={() => {
+                              setSelectedImages(unitImages);
+                              setSelectedImageIndex(unitImages.findIndex(img => img.id === image.id));
+                              setShowImageModal(true);
+                            }}
+                            onError={(e) => {
+                              console.error('Fehler beim Laden des Bildes:', image.id);
+                              e.target.style.display = 'none';
+                              e.target.nextSibling.style.display = 'flex';
+                            }}
+                          />
+                        ) : (
+                          <div className="w-full h-24 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center text-gray-400 text-xs">
+                            Lädt...
+                          </div>
+                        )}
+                        <div className="w-full h-24 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center text-gray-400 text-xs hidden">
+                          Bild konnte nicht geladen werden
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleImageDelete(image.id)}
+                          className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {bearbeitung && unitImages.length === 0 && pendingImages.length === 0 && (
+              <p className="text-sm text-gray-500 italic">Noch keine Bilder hochgeladen</p>
+            )}
+          </div>
+
           {/* Basisdaten */}
           <div className="border-t border-gray-200 pt-4 mt-4">
             <h3 className="text-sm font-semibold text-gray-700 mb-3">Basisdaten</h3>
@@ -2442,6 +2787,104 @@ export default function ObjektDetails() {
             </Button>
           </div>
         </form>
+      </Modal>
+
+      {/* Bild-Galerie Modal */}
+      <Modal
+        isOpen={showImageModal}
+        onClose={() => {
+          // Cleanup blob URLs
+          Object.values(galleryBlobUrls).forEach(url => URL.revokeObjectURL(url));
+          setGalleryBlobUrls({});
+          setShowImageModal(false);
+          setSelectedImages([]);
+          setSelectedImageIndex(0);
+        }}
+        titel="Bildergalerie"
+        groesse="lg"
+      >
+        {selectedImages.length > 0 && (
+          <div className="space-y-4">
+            {/* Hauptbild */}
+            <div className="relative bg-gray-100 rounded-lg overflow-hidden" style={{ minHeight: "400px" }}>
+              {galleryBlobUrls[selectedImages[selectedImageIndex]?.id] ? (
+                <img
+                  src={galleryBlobUrls[selectedImages[selectedImageIndex]?.id]}
+                  alt={selectedImages[selectedImageIndex]?.title || selectedImages[selectedImageIndex]?.filename}
+                  className="w-full h-auto object-contain"
+                  onError={(e) => {
+                    console.error('Fehler beim Laden des Bildes in der Galerie');
+                    e.target.src = '';
+                  }}
+                />
+              ) : (
+                <div className="w-full h-96 flex items-center justify-center text-gray-400">
+                  Lädt...
+                </div>
+              )}
+              {/* Navigation */}
+              {selectedImages.length > 1 && (
+                <>
+                  <button
+                    onClick={() => setSelectedImageIndex((prev) => (prev > 0 ? prev - 1 : selectedImages.length - 1))}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 p-2 bg-black/50 text-white rounded-full hover:bg-black/70 transition-colors"
+                  >
+                    <ChevronLeft className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => setSelectedImageIndex((prev) => (prev < selectedImages.length - 1 ? prev + 1 : 0))}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 p-2 bg-black/50 text-white rounded-full hover:bg-black/70 transition-colors"
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                  </button>
+                </>
+              )}
+            </div>
+            
+            {/* Thumbnails */}
+            {selectedImages.length > 1 && (
+              <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+                {selectedImages.map((image, index) => (
+                  <button
+                    key={image.id}
+                    onClick={() => setSelectedImageIndex(index)}
+                    className={`relative overflow-hidden rounded-lg border-2 transition-all ${
+                      index === selectedImageIndex
+                        ? "border-primary-500 ring-2 ring-primary-200"
+                        : "border-gray-200 hover:border-gray-300"
+                    }`}
+                  >
+                    {galleryBlobUrls[image.id] ? (
+                      <img
+                        src={galleryBlobUrls[image.id]}
+                        alt={image.title || image.filename}
+                        className="w-full h-20 object-cover"
+                        onError={(e) => {
+                          console.error('Fehler beim Laden des Thumbnails');
+                          e.target.style.display = 'none';
+                        }}
+                      />
+                    ) : (
+                      <div className="w-full h-20 bg-gray-100 flex items-center justify-center text-gray-400 text-xs">
+                        Lädt...
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
+            
+            {/* Bild-Info */}
+            <div className="text-sm text-gray-600">
+              <p className="font-medium">{selectedImages[selectedImageIndex]?.title || selectedImages[selectedImageIndex]?.filename}</p>
+              {selectedImages.length > 1 && (
+                <p className="text-xs text-gray-500 mt-1">
+                  Bild {selectedImageIndex + 1} von {selectedImages.length}
+                </p>
+              )}
+            </div>
+          </div>
+        )}
       </Modal>
     </div>
   );
