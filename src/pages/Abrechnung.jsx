@@ -833,35 +833,63 @@ export default function Abrechnung() {
                   )}
                   {settlements.length > 0 && (
                     <div className="space-y-2 max-h-64 overflow-y-auto">
-                      {settlements.map((settlement) => (
-                        <div
-                          key={settlement.id}
-                          className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg"
-                        >
-                          <div>
-                            <div className="font-medium text-gray-900 dark:text-white">
-                              {settlement.tenant_name || "Unbekannt"}
+                      {settlements.map((settlement) => {
+                        // Berechne anteiligen Zeitraum für Anzeige
+                        const isPartial = settlement.days_occupied && settlement.days_in_period && 
+                                          settlement.days_occupied < settlement.days_in_period;
+                        const percentage = settlement.days_in_period > 0 
+                          ? Math.round((settlement.days_occupied / settlement.days_in_period) * 100)
+                          : 100;
+                        
+                        return (
+                          <div
+                            key={settlement.id}
+                            className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600"
+                          >
+                            <div className="flex-1">
+                              <div className="font-medium text-gray-900 dark:text-white">
+                                {settlement.tenant_name || "Leerstand"}
+                              </div>
+                              <div className="text-sm text-gray-600 dark:text-gray-400">
+                                {settlement.unit_label}
+                              </div>
+                              {/* Zeige Zeitraum-Informationen wenn vorhanden */}
+                              {isPartial && settlement.lease_period_start && settlement.lease_period_end && (
+                                <div className="mt-1 text-xs text-blue-600 dark:text-blue-400 font-medium">
+                                  📅 {formatDate(settlement.lease_period_start)} - {formatDate(settlement.lease_period_end)}
+                                  <span className="ml-2 text-gray-500">
+                                    ({settlement.days_occupied} von {settlement.days_in_period} Tagen, {percentage}%)
+                                  </span>
+                                </div>
+                              )}
+                              {!settlement.lease_id && (
+                                <div className="mt-1 text-xs text-amber-600 dark:text-amber-400 font-medium">
+                                  ⚠️ Leerstand im Abrechnungszeitraum
+                                </div>
+                              )}
                             </div>
-                            <div className="text-sm text-gray-600 dark:text-gray-400">
-                              {settlement.unit_label}
+                            <div className="text-right ml-4">
+                              <div
+                                className={`font-bold ${
+                                  settlement.settlement_amount >= 0
+                                    ? "text-red-600 dark:text-red-400"
+                                    : "text-emerald-600 dark:text-emerald-400"
+                                }`}
+                              >
+                                {formatCurrency(settlement.settlement_amount)}
+                              </div>
+                              <div className="text-xs text-gray-500 dark:text-gray-500">
+                                von {formatCurrency(settlement.allocated_costs)}
+                              </div>
+                              {settlement.advance_payments > 0 && (
+                                <div className="text-xs text-gray-500 dark:text-gray-500">
+                                  Vorauszahlung: {formatCurrency(settlement.advance_payments)}
+                                </div>
+                              )}
                             </div>
                           </div>
-                          <div className="text-right">
-                            <div
-                              className={`font-bold ${
-                                settlement.settlement_amount >= 0
-                                  ? "text-red-600 dark:text-red-400"
-                                  : "text-emerald-600 dark:text-emerald-400"
-                              }`}
-                            >
-                              {formatCurrency(settlement.settlement_amount)}
-                            </div>
-                            <div className="text-xs text-gray-500 dark:text-gray-500">
-                              von {formatCurrency(settlement.allocated_costs)}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </div>
