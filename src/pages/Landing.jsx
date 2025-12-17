@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, Shield, Zap, Users, BarChart3, FileText, CheckCircle2, Sparkles, Building2, TrendingUp, Clock, Globe, Upload, Star, Award, Rocket, ExternalLink, Mail, HelpCircle, Brain, Sparkles as SparklesIcon, CheckCircle, AlertTriangle, Infinity } from "lucide-react";
+import { ArrowRight, Shield, Zap, Users, BarChart3, FileText, CheckCircle2, Sparkles, Building2, TrendingUp, Clock, Globe, Upload, Star, Award, Rocket, ExternalLink, Mail, HelpCircle, Brain, Sparkles as SparklesIcon, CheckCircle, AlertTriangle, Infinity, Receipt, Ticket, Key, Gauge, Image as ImageIcon, Bell, CreditCard, FileCheck, Send } from "lucide-react";
 import Button from "../components/Button";
 
 export default function Landing() {
@@ -163,8 +163,8 @@ export default function Landing() {
           </div>
 
           <div className="max-w-6xl mx-auto space-y-8 sm:space-y-12 md:space-y-16 w-full px-0">
-            {/* USP 1: Radikal einfach */}
-            <div className="bg-white rounded-3xl p-8 sm:p-10 md:p-12 border-2 border-slate-200 shadow-xl hover:shadow-2xl transition-all">
+            {/* USP 1: Intuitiv einfach */}
+            <div className="bg-gradient-to-br from-primary-50 to-white rounded-3xl p-8 sm:p-10 md:p-12 border-2 border-primary-200 shadow-xl hover:shadow-2xl transition-all">
               <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
                 <div className="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center shadow-lg">
                   <Zap className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
@@ -180,13 +180,164 @@ export default function Landing() {
                     Einloggen, starten, loslegen.
                   </p>
                   <p className="text-base sm:text-lg text-slate-600 leading-relaxed">
-                    Kein Schulungsaufwand, kein Chaos – nur ein cleanes, modernes Interface.
+                    Kein Schulungsaufwand, kein Chaos. Nur ein cleanes, modernes Interface.
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* USP 2: KI Risikoanalyse */}
+            {/* USP 2: Professionelle Abrechnungen */}
+            <div className="bg-gradient-to-br from-primary-50 to-white rounded-3xl p-6 sm:p-8 md:p-10 lg:p-12 border-2 border-primary-200 shadow-xl hover:shadow-2xl transition-all w-full max-w-full">
+              <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
+                <div className="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center shadow-lg">
+                  <Receipt className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+                </div>
+                <div className="flex-1">
+                  <div className="inline-block px-3 py-1 bg-primary-200 rounded-full mb-4">
+                    <span className="text-xs font-bold text-primary-800">2. BK-Abrechnung in Minuten</span>
+                  </div>
+                  <h3 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 mb-4">
+                    Betriebskostenabrechnung automatisch erstellen und versenden
+                  </h3>
+                  <p className="text-lg sm:text-xl text-slate-700 mb-4 leading-relaxed">
+                    Erstelle professionelle BK-Abrechnungen mit wenigen Klicks:
+                  </p>
+                  <ul className="space-y-2 text-base sm:text-lg text-slate-600">
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                      <span><strong>Automatische Berechnung</strong> nach Verteilerschlüssel (m², Einheiten, Personen, Verbrauch)</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                      <span><strong>PDF-Generierung</strong> mit professionellen Abrechnungen und allen Belegen</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                      <span><strong>Automatischer E-Mail-Versand</strong> direkt an alle Mieter</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                      <span><strong>Mieter-Portal</strong> für Online-Einsicht und Download</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                      <span>Belege automatisch verknüpfen und zuordnen</span>
+                    </li>
+                  </ul>
+                  <p className="text-base sm:text-lg text-primary-700 font-bold mt-4">
+                    Was früher Stunden dauerte, geht jetzt in Minuten.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* USP 3: Ticket-System */}
+            <div className="bg-white rounded-3xl p-6 sm:p-8 md:p-10 lg:p-12 border-2 border-slate-200 shadow-xl hover:shadow-2xl transition-all w-full max-w-full">
+              <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
+                <div className="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center shadow-lg">
+                  <Ticket className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+                </div>
+                <div className="flex-1">
+                  <div className="inline-block px-3 py-1 bg-primary-100 rounded-full mb-4">
+                    <span className="text-xs font-bold text-primary-700">3. Ticket-System</span>
+                  </div>
+                  <h3 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 mb-4">
+                    Reparaturen und Anfragen professionell verwalten
+                  </h3>
+                  <p className="text-lg sm:text-xl text-slate-700 mb-4 leading-relaxed">
+                    Verwalte alle Vorgänge zentral und professionell:
+                  </p>
+                  <ul className="space-y-2 text-base sm:text-lg text-slate-600">
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                      <span><strong>Tickets erstellen</strong> für Reparaturen, Schäden, Wartungen und Anfragen</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                      <span><strong>Prioritäten setzen</strong> von niedrig bis dringend</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                      <span><strong>Handwerker zuweisen</strong> direkt an Dienstleister weiterleiten</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                      <span><strong>Status-Tracking</strong> immer wissen, wo was steht</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                      <span>Kosten erfassen für spätere Zuordnung zu Betriebskosten</span>
+                    </li>
+                  </ul>
+                  <p className="text-base sm:text-lg text-slate-700 font-semibold mt-4">
+                    Nie wieder vergessene Reparaturen oder offene Anfragen.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* USP 4: Komplette Verwaltung */}
+            <div className="bg-white rounded-3xl p-6 sm:p-8 md:p-10 lg:p-12 border-2 border-slate-200 shadow-xl hover:shadow-2xl transition-all w-full max-w-full">
+              <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
+                <div className="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center shadow-lg">
+                  <Building2 className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+                </div>
+                <div className="flex-1">
+                  <div className="inline-block px-3 py-1 bg-primary-100 rounded-full mb-4">
+                    <span className="text-xs font-bold text-primary-700">4. Alles an einem Ort</span>
+                  </div>
+                  <h3 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 mb-4">
+                    Komplette Verwaltung von A bis Z
+                  </h3>
+                  <p className="text-lg sm:text-xl text-slate-700 mb-4 leading-relaxed">
+                    Eine Plattform für alle Verwaltungsaufgaben:
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                    <div className="space-y-2">
+                      <div className="flex items-start gap-2">
+                        <Key className="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                        <span className="text-base sm:text-lg text-slate-600"><strong>Schlüsselverwaltung</strong> mit Historie</span>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <Gauge className="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                        <span className="text-base sm:text-lg text-slate-600"><strong>Zählerverwaltung</strong> mit Eichfristen</span>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <ImageIcon className="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                        <span className="text-base sm:text-lg text-slate-600"><strong>Bilder zu Einheiten</strong> hochladen</span>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <FileText className="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                        <span className="text-base sm:text-lg text-slate-600"><strong>Dokumentenverwaltung</strong> zentral</span>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-start gap-2">
+                        <CreditCard className="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                        <span className="text-base sm:text-lg text-slate-600"><strong>Versicherungen</strong> verwalten</span>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <FileCheck className="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                        <span className="text-base sm:text-lg text-slate-600"><strong>Bankkonten</strong> pro Objekt</span>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <Bell className="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                        <span className="text-base sm:text-lg text-slate-600"><strong>Erinnerungen</strong> für wichtige Termine</span>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <Users className="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                        <span className="text-base sm:text-lg text-slate-600"><strong>Mieter-Portal</strong> für Selbstbedienung</span>
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-base sm:text-lg text-slate-700 font-semibold mt-4">
+                    Alles, was du für professionelle Hausverwaltung brauchst in einer Lösung.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* USP 5: KI Risikoanalyse */}
             <div className="bg-white rounded-3xl p-6 sm:p-8 md:p-10 lg:p-12 border-2 border-slate-200 shadow-xl hover:shadow-2xl transition-all w-full max-w-full">
               <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
                 <div className="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center shadow-lg">
@@ -194,7 +345,7 @@ export default function Landing() {
                 </div>
                 <div className="flex-1">
                   <div className="inline-block px-3 py-1 bg-primary-100 rounded-full mb-4">
-                    <span className="text-xs font-bold text-primary-700">2. KI, die mehr kann</span>
+                    <span className="text-xs font-bold text-primary-700">5. KI, die mehr kann</span>
                   </div>
                   <h3 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 mb-4">
                     Intelligente Risikoerkennung deiner Mieter
@@ -219,7 +370,7 @@ export default function Landing() {
               </div>
             </div>
 
-            {/* USP 3: Vollautomatisierung */}
+            {/* USP 6: Vollautomatisierung */}
             <div className="bg-white rounded-3xl p-6 sm:p-8 md:p-10 lg:p-12 border-2 border-slate-200 shadow-xl hover:shadow-2xl transition-all w-full max-w-full">
               <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
                 <div className="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center shadow-lg">
@@ -227,7 +378,7 @@ export default function Landing() {
                 </div>
                 <div className="flex-1">
                   <div className="inline-block px-3 py-1 bg-primary-100 rounded-full mb-4">
-                    <span className="text-xs font-bold text-primary-700">3. Vollautomatisiert</span>
+                    <span className="text-xs font-bold text-primary-700">6. Vollautomatisiert</span>
                   </div>
                   <h3 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 mb-4">
                     Zeit sparen ohne Aufwand
@@ -238,11 +389,23 @@ export default function Landing() {
                   <ul className="space-y-2 text-base sm:text-lg text-slate-600">
                     <li className="flex items-start gap-2">
                       <CheckCircle className="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
-                      <span>CSV hochladen – automatischer Zahlungsabgleich ohne manuelles Suchen</span>
+                      <span>CSV hochladen für automatischen Zahlungsabgleich ohne manuelles Suchen</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <CheckCircle className="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
                       <span>Erkennt automatisch welcher Mieter gezahlt hat und welcher nicht</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                      <span><strong>Betriebskostenabrechnung erstellen</strong> mit automatischer Berechnung nach Verteilerschlüssel</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                      <span><strong>Automatischer E-Mail-Versand</strong> direkt an Mieter</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                      <span>Monatliche Sollstellungen automatisch für alle aktiven Verträge</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <CheckCircle className="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
@@ -256,7 +419,7 @@ export default function Landing() {
               </div>
             </div>
 
-            {/* USP 4: Alles im Blick */}
+            {/* USP 7: Alles im Blick */}
             <div className="bg-white rounded-3xl p-6 sm:p-8 md:p-10 lg:p-12 border-2 border-slate-200 shadow-xl hover:shadow-2xl transition-all w-full max-w-full">
               <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
                 <div className="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center shadow-lg">
@@ -264,19 +427,19 @@ export default function Landing() {
                 </div>
                 <div className="flex-1">
                   <div className="inline-block px-3 py-1 bg-primary-100 rounded-full mb-4">
-                    <span className="text-xs font-bold text-primary-700">4. Alles im Blick</span>
+                    <span className="text-xs font-bold text-primary-700">7. Alles im Blick</span>
                   </div>
                   <h3 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 mb-4">
                     Dein gesamtes Immobilien-Reich auf einem Dashboard
                   </h3>
                   <p className="text-lg sm:text-xl text-slate-700 leading-relaxed">
-                    Offene Mieten, auslaufende Verträge, potenzielle Risiken, Dokumente – alles in Echtzeit sichtbar.
+                    Offene Mieten, auslaufende Verträge, potenzielle Risiken, Dokumente. Alles in Echtzeit sichtbar.
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* USP 5: Perfekt skaliert */}
+            {/* USP 8: Perfekt skaliert */}
             <div className="bg-white rounded-3xl p-6 sm:p-8 md:p-10 lg:p-12 border-2 border-slate-200 shadow-xl hover:shadow-2xl transition-all w-full max-w-full">
               <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
                 <div className="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center shadow-lg">
@@ -284,10 +447,10 @@ export default function Landing() {
                 </div>
                 <div className="flex-1">
                   <div className="inline-block px-3 py-1 bg-primary-100 rounded-full mb-4">
-                    <span className="text-xs font-bold text-primary-700">5. Perfekt skaliert</span>
+                    <span className="text-xs font-bold text-primary-700">8. Perfekt skaliert</span>
                   </div>
                   <h3 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 mb-4">
-                    Für Kleinvermieter – stark für große Bestände
+                    Für Kleinvermieter stark für große Bestände
                   </h3>
                   <p className="text-lg sm:text-xl text-slate-700 leading-relaxed">
                     Ob 1 Einheit oder 100: Das Tool skaliert mit dir, ohne komplizierte Einrichtung.
@@ -296,7 +459,7 @@ export default function Landing() {
               </div>
             </div>
 
-            {/* USP 6: Moderne Technologie */}
+            {/* USP 9: Moderne Technologie */}
             <div className="bg-white rounded-3xl p-6 sm:p-8 md:p-10 lg:p-12 border-2 border-slate-200 shadow-xl hover:shadow-2xl transition-all w-full max-w-full">
               <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
                 <div className="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center shadow-lg">
@@ -304,7 +467,7 @@ export default function Landing() {
                 </div>
                 <div className="flex-1">
                   <div className="inline-block px-3 py-1 bg-primary-100 rounded-full mb-4">
-                    <span className="text-xs font-bold text-primary-700">6. Moderne Technologie</span>
+                    <span className="text-xs font-bold text-primary-700">9. Moderne Technologie</span>
                   </div>
                   <h3 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 mb-4">
                     Statt veralteter Software
@@ -380,7 +543,7 @@ export default function Landing() {
                       <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
                     ))}
                   </div>
-                  <div className="text-xs text-slate-600 font-semibold">500+ zufriedene Kunden</div>
+                  <div className="text-xs text-slate-600 font-semibold">100+ zufriedene Kunden</div>
                 </div>
               </div>
             </div>
