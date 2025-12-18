@@ -10,6 +10,7 @@ export default function Formularfeld({
   className = "",
   disabled = false,
   icon,
+  helperText,
 }) {
   const inputClasses = `w-full px-4 sm:px-5 py-3.5 sm:py-4 border-2 rounded-xl text-base sm:text-lg transition-all duration-200 min-h-[52px] sm:min-h-[56px]
     ${error
@@ -64,6 +65,11 @@ export default function Formularfeld({
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           {error}
+        </p>
+      )}
+      {helperText && !error && (
+        <p className="mt-1.5 sm:mt-2 text-xs sm:text-sm text-gray-500">
+          {helperText}
         </p>
       )}
     </div>
