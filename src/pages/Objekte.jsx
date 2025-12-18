@@ -17,7 +17,8 @@ import {
   FileText,
   Eye,
   Edit,
-  Trash2
+  Trash2,
+  DoorOpen
 } from "lucide-react";
 
 export default function Objekte() {
@@ -36,6 +37,7 @@ export default function Objekte() {
     address: "",
     year_built: "",
     size_sqm: "",
+    units_count: "",
     notes: "",
   });
 
@@ -97,6 +99,9 @@ export default function Objekte() {
         size_sqm: formDaten.size_sqm && formDaten.size_sqm.trim() !== "" 
           ? parseInt(formDaten.size_sqm) 
           : null,
+        units_count: formDaten.units_count && formDaten.units_count.trim() !== "" 
+          ? parseInt(formDaten.units_count) 
+          : null,
         notes: formDaten.notes?.trim() || null,
         features: {},
       };
@@ -124,7 +129,8 @@ export default function Objekte() {
           return;
         }
         const response = await propertyApi.create(daten, selectedClient.id);
-        zeigeBenachrichtigung("Objekt erfolgreich erstellt");
+        const unitsCreated = daten.units_count ? `${daten.units_count} Einheiten automatisch erstellt. ` : "";
+        zeigeBenachrichtigung(`Objekt erfolgreich erstellt. ${unitsCreated}Sie können nun die Einheiten-Stammdaten bearbeiten.`);
         setShowModal(false);
         formZuruecksetzen();
         // Navigiere direkt zur Detailansicht, damit Einheiten/Zähler/Schlüssel hinzugefügt werden können
@@ -149,6 +155,7 @@ export default function Objekte() {
         address: aktuellesObjekt.address || "",
         year_built: aktuellesObjekt.year_built || "",
         size_sqm: aktuellesObjekt.size_sqm || "",
+        units_count: "",  // Beim Bearbeiten nicht anzeigen (nur beim Erstellen)
         notes: aktuellesObjekt.notes || "",
       });
       setShowModal(true);
@@ -161,6 +168,7 @@ export default function Objekte() {
         address: objekt.address || "",
         year_built: objekt.year_built || "",
         size_sqm: objekt.size_sqm || "",
+        units_count: "",  // Beim Bearbeiten nicht anzeigen
         notes: objekt.notes || "",
       });
       setShowModal(true);
@@ -187,6 +195,7 @@ export default function Objekte() {
       address: "",
       year_built: "",
       size_sqm: "",
+      units_count: "",
       notes: "",
     });
   };
@@ -340,7 +349,7 @@ export default function Objekte() {
               icon={<Calendar className="w-5 h-5" />}
             />
             <Formularfeld
-              label="Fläche (m²)"
+              label="Gesamtfläche (m²)"
               name="size_sqm"
               type="number"
               value={formDaten.size_sqm}
@@ -349,6 +358,18 @@ export default function Objekte() {
               icon={<Ruler className="w-5 h-5" />}
             />
           </div>
+          {!bearbeitung && (
+            <Formularfeld
+              label="Anzahl Einheiten"
+              name="units_count"
+              type="number"
+              value={formDaten.units_count}
+              onChange={(e) => setFormDaten({ ...formDaten, units_count: e.target.value })}
+              placeholder="z.B. 6 (Einheiten werden automatisch erstellt)"
+              icon={<DoorOpen className="w-5 h-5" />}
+              helperText="Wenn angegeben, werden die Einheiten automatisch erstellt (z.B. 'Wohnung 1', 'Wohnung 2', ...). Die m² können Sie später bei den Einheiten-Stammdaten hinterlegen."
+            />
+          )}
           <Formularfeld
             label="Notizen"
             name="notes"
