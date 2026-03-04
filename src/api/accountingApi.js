@@ -28,10 +28,13 @@ export const accountingApi = {
     return response;
   },
 
-  calculate: async (accountingId, allocationMethod = "area") => {
-    const response = await axiosInstance.post(`/api/accounting/${accountingId}/calculate`, null, {
-      params: { allocation_method: allocationMethod },
-    });
+  calculate: async (accountingId, allocationMethod = "area", itemAllocation = {}) => {
+    const body = Object.keys(itemAllocation).length > 0 ? { item_allocation: itemAllocation } : null;
+    const response = await axiosInstance.post(
+      `/api/accounting/${accountingId}/calculate`,
+      body,
+      { params: { allocation_method: allocationMethod } }
+    );
     return response;
   },
 
