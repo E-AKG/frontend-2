@@ -51,6 +51,7 @@ export default function Vertraege() {
       cold_rent: { amount: "", description: "Kaltmiete" },
       operating_costs: { amount: "", description: "Nebenkosten" },
       heating_costs: { amount: "", description: "Heizkosten" },
+      security_deposit: { amount: "", description: "Kaution" },
       other: [], // Array für mehrere "Sonstiges"-Einträge
     },
   });
@@ -175,6 +176,7 @@ export default function Vertraege() {
       // Standard-Komponenten (cold_rent, operating_costs, heating_costs)
       for (const [type, component] of Object.entries(components)) {
         if (type === 'other') continue; // Wird separat behandelt
+        if (type === 'security_deposit') continue; // Wird separat als "other" gespeichert
         
         if (component.amount && parseFloat(component.amount) > 0) {
           componentPromises.push(
@@ -185,6 +187,17 @@ export default function Vertraege() {
             })
           );
         }
+      }
+      
+      // Kaution (als "other" mit Beschreibung "Kaution")
+      if (components.security_deposit?.amount && parseFloat(components.security_deposit.amount) > 0) {
+        componentPromises.push(
+          leaseApi.createComponent(leaseId, {
+            type: "other",
+            amount: parseFloat(components.security_deposit.amount),
+            description: "Kaution",
+          })
+        );
       }
       
       // "Sonstiges"-Komponenten (Array)
@@ -274,6 +287,15 @@ export default function Vertraege() {
             type: "heating_costs",
             amount: parseFloat(daten.components.heating_costs.amount),
             description: daten.components.heating_costs.description || "Heizkosten",
+          })
+        );
+      }
+      if (daten.components.security_deposit?.amount && parseFloat(daten.components.security_deposit.amount) > 0) {
+        componentPromises.push(
+          leaseApi.createComponent(leaseId, {
+            type: "other",
+            amount: parseFloat(daten.components.security_deposit.amount),
+            description: "Kaution",
           })
         );
       }
@@ -401,6 +423,7 @@ export default function Vertraege() {
         cold_rent: { amount: "", description: "Kaltmiete" },
         operating_costs: { amount: "", description: "Nebenkosten" },
         heating_costs: { amount: "", description: "Heizkosten" },
+        security_deposit: { amount: "", description: "Kaution" },
         other: [],
       },
     });
@@ -414,6 +437,7 @@ export default function Vertraege() {
         cold_rent: { amount: "", description: "Kaltmiete" },
         operating_costs: { amount: "", description: "Nebenkosten" },
         heating_costs: { amount: "", description: "Heizkosten" },
+        security_deposit: { amount: "", description: "Kaution" },
         other: [],
       };
       
@@ -425,7 +449,11 @@ export default function Vertraege() {
         } else if (comp.type === "heating_costs") {
           components.heating_costs = { amount: comp.amount.toString(), description: comp.description || "Heizkosten" };
         } else if (comp.type === "other") {
-          components.other.push({ amount: comp.amount.toString(), description: comp.description || "" });
+          if (comp.description === "Kaution") {
+            components.security_deposit = { amount: comp.amount.toString(), description: "Kaution" };
+          } else {
+            components.other.push({ amount: comp.amount.toString(), description: comp.description || "" });
+          }
         }
       });
       
@@ -470,6 +498,7 @@ export default function Vertraege() {
         cold_rent: { amount: "", description: "Kaltmiete" },
         operating_costs: { amount: "", description: "Nebenkosten" },
         heating_costs: { amount: "", description: "Heizkosten" },
+        security_deposit: { amount: "", description: "Kaution" },
         other: [],
       },
     });
@@ -805,6 +834,30 @@ export default function Vertraege() {
                 </div>
               </div>
               
+              {/* Kaution */}
+              <div className="bg-gray-50 rounded-lg p-3 sm:p-4 border border-gray-200">
+                <label className="block text-sm font-semibold text-gray-900 mb-2">
+                  Kaution
+                </label>
+                <Formularfeld
+                  label="Betrag"
+                  name="security_deposit_amount"
+                  type="number"
+                  step="0.01"
+                  placeholder="0.00"
+                  value={(formDaten.components.security_deposit || {}).amount || ""}
+                  onChange={(e) => setFormDaten({
+                    ...formDaten,
+                    components: {
+                      ...formDaten.components,
+                      security_deposit: { ...(formDaten.components.security_deposit || { amount: "", description: "Kaution" }), amount: e.target.value }
+                    }
+                  })}
+                  icon={<Euro className="w-4 h-4" />}
+                />
+                <p className="text-xs text-gray-500 mt-1">Einmalige Mietkaution (z.B. 3× Kaltmiete)</p>
+              </div>
+              
               {/* Sonstiges - Mehrfach */}
               <div className="bg-gray-50 rounded-lg p-3 sm:p-4 border border-gray-200">
                 <div className="flex items-center justify-between mb-3">
@@ -905,21 +958,33 @@ export default function Vertraege() {
             </div>
             
             {/* Gesamtsumme */}
-            <div className="mt-4 p-4 bg-gradient-to-r from-emerald-50 to-emerald-100 border-2 border-emerald-300 rounded-xl shadow-sm">
-              <div className="flex items-center justify-between">
-                <span className="text-base font-bold text-emerald-900 flex items-center gap-2">
-                  <Calculator className="w-5 h-5" />
-                  Gesamtmiete:
-                </span>
-                <span className="text-2xl font-bold text-emerald-700">
-                  {(
-                    parseFloat(formDaten.components.cold_rent.amount || 0) +
-                    parseFloat(formDaten.components.operating_costs.amount || 0) +
-                    parseFloat(formDaten.components.heating_costs.amount || 0) +
-                    (formDaten.components.other || []).reduce((sum, item) => sum + parseFloat(item.amount || 0), 0)
-                  ).toFixed(2)} €
-                </span>
+            <div className="mt-4 space-y-3">
+              <div className="p-4 bg-gradient-to-r from-emerald-50 to-emerald-100 border-2 border-emerald-300 rounded-xl shadow-sm">
+                <div className="flex items-center justify-between">
+                  <span className="text-base font-bold text-emerald-900 flex items-center gap-2">
+                    <Calculator className="w-5 h-5" />
+                    Gesamtmiete:
+                  </span>
+                  <span className="text-2xl font-bold text-emerald-700">
+                    {(
+                      parseFloat(formDaten.components.cold_rent.amount || 0) +
+                      parseFloat(formDaten.components.operating_costs.amount || 0) +
+                      parseFloat(formDaten.components.heating_costs.amount || 0) +
+                      (formDaten.components.other || []).reduce((sum, item) => sum + parseFloat(item.amount || 0), 0)
+                    ).toFixed(2)} €
+                  </span>
+                </div>
               </div>
+              {formDaten.components.security_deposit?.amount && parseFloat(formDaten.components.security_deposit.amount) > 0 && (
+                <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-semibold text-amber-900">Kaution:</span>
+                    <span className="text-lg font-bold text-amber-700">
+                      {parseFloat(formDaten.components.security_deposit.amount).toFixed(2)} €
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
           
