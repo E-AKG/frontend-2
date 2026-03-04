@@ -84,9 +84,9 @@ export default function Dienstleister() {
     const list = [...gefilterteDienstleister];
     if (sortConfig.key === "name") {
       list.sort((a, b) => {
-        const nameA = (a.company_name || `${a.last_name} ${a.first_name}`).toLowerCase();
-        const nameB = (b.company_name || `${b.last_name} ${b.first_name}`).toLowerCase();
-        const cmp = nameA.localeCompare(nameB);
+        const nameA = (a.company_name || `${a.first_name || ""} ${a.last_name || ""}`.trim()).toLowerCase();
+        const nameB = (b.company_name || `${b.first_name || ""} ${b.last_name || ""}`.trim()).toLowerCase();
+        const cmp = nameA.localeCompare(nameB, "de");
         return sortConfig.direction === "asc" ? cmp : -cmp;
       });
     } else if (sortConfig.key === "service_type") {

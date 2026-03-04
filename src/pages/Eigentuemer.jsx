@@ -82,9 +82,9 @@ export default function Eigentuemer() {
     const list = [...gefilterteEigentuemer];
     if (sortConfig.key === "name") {
       list.sort((a, b) => {
-        const nameA = `${a.last_name} ${a.first_name}`.toLowerCase();
-        const nameB = `${b.last_name} ${b.first_name}`.toLowerCase();
-        const cmp = nameA.localeCompare(nameB);
+        const nameA = `${a.first_name || ""} ${a.last_name || ""}`.trim().toLowerCase();
+        const nameB = `${b.first_name || ""} ${b.last_name || ""}`.trim().toLowerCase();
+        const cmp = nameA.localeCompare(nameB, "de");
         return sortConfig.direction === "asc" ? cmp : -cmp;
       });
     }
