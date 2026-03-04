@@ -73,6 +73,7 @@ export default function Vertraege() {
   });
   const [showStaggeredForm, setShowStaggeredForm] = useState(false);
   const [staggeredEntry, setStaggeredEntry] = useState({ date: "", amount: "" });
+  const [editierendeKomponente, setEditierendeKomponente] = useState(null);
 
   // React Query: Fetch Leases
   const { data: vertraege = [], isLoading: loading } = useQuery({
@@ -378,11 +379,64 @@ export default function Vertraege() {
       queryClient.invalidateQueries({ queryKey: ['leases'] });
       invalidateSollstellungen();
       zeigeBenachrichtigung("Komponente erfolgreich hinzugefügt");
-      setKomponentenForm({ type: "cold_rent", amount: "", description: "" });
+      setKomponentenForm({
+        type: "cold_rent",
+        amount: "",
+        description: "",
+        adjustment_type: "fixed",
+        staggered_schedule: [],
+        index_type: "",
+        index_base_value: "",
+        index_base_date: "",
+        index_adjustment_date: "",
+        index_adjustment_percentage: "",
+        allocation_key: "",
+        allocation_factor: "",
+        allocation_notes: "",
+      });
     },
     onError: () => {
       zeigeBenachrichtigung("Fehler beim Hinzufügen der Komponente", "fehler");
     }
+  });
+
+  const updateComponentMutation = useMutation({
+    mutationFn: async ({ componentId, componentData }) => {
+      const payload = {
+        amount: parseFloat(componentData.amount),
+        description: componentData.description || undefined,
+        adjustment_type: componentData.adjustment_type || "fixed",
+      };
+      if (componentData.staggered_schedule?.length) {
+        payload.staggered_schedule = componentData.staggered_schedule;
+      }
+      return await leaseApi.updateComponent(componentId, payload);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['leaseComponents'] });
+      queryClient.invalidateQueries({ queryKey: ['leases'] });
+      invalidateSollstellungen();
+      zeigeBenachrichtigung("Komponente aktualisiert");
+      setEditierendeKomponente(null);
+      setKomponentenForm({
+        type: "cold_rent",
+        amount: "",
+        description: "",
+        adjustment_type: "fixed",
+        staggered_schedule: [],
+        index_type: "",
+        index_base_value: "",
+        index_base_date: "",
+        index_adjustment_date: "",
+        index_adjustment_percentage: "",
+        allocation_key: "",
+        allocation_factor: "",
+        allocation_notes: "",
+      });
+    },
+    onError: () => {
+      zeigeBenachrichtigung("Fehler beim Aktualisieren", "fehler");
+    },
   });
 
   const deleteComponentMutation = useMutation({
@@ -463,9 +517,35 @@ export default function Vertraege() {
 
   const handleKomponenteHinzufuegen = (e) => {
     e.preventDefault();
-    addComponentMutation.mutate({
-      leaseId: ausgewaehlterVertrag.id,
-      componentData: komponentenForm
+    if (editierendeKomponente) {
+      updateComponentMutation.mutate({
+        componentId: editierendeKomponente.id,
+        componentData: komponentenForm,
+      });
+    } else {
+      addComponentMutation.mutate({
+        leaseId: ausgewaehlterVertrag.id,
+        componentData: komponentenForm
+      });
+    }
+  };
+
+  const handleKomponenteBearbeiten = (komp) => {
+    setEditierendeKomponente(komp);
+    setKomponentenForm({
+      type: komp.type,
+      amount: komp.amount?.toString() ?? "",
+      description: komp.description ?? "",
+      adjustment_type: komp.adjustment_type || "fixed",
+      staggered_schedule: komp.staggered_schedule || [],
+      index_type: komp.index_type ?? "",
+      index_base_value: komp.index_base_value ?? "",
+      index_base_date: komp.index_base_date ?? "",
+      index_adjustment_date: komp.index_adjustment_date ?? "",
+      index_adjustment_percentage: komp.index_adjustment_percentage ?? "",
+      allocation_key: komp.allocation_key ?? "",
+      allocation_factor: komp.allocation_factor ?? "",
+      allocation_notes: komp.allocation_notes ?? "",
     });
   };
 
@@ -1020,12 +1100,15 @@ export default function Vertraege() {
           setShowKomponentenModal(false);
           setAusgewaehlterVertrag(null);
           setKomponenten([]);
+          setEditierendeKomponente(null);
         }}
         titel={`Mietkomponenten`}
         groesse="lg"
       >
         <div className="mb-4 sm:mb-6">
-          <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Neue Komponente</h3>
+          <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">
+            {editierendeKomponente ? "Komponente bearbeiten" : "Neue Komponente"}
+          </h3>
           <form onSubmit={handleKomponenteHinzufuegen} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
               <Auswahl
@@ -1060,7 +1143,40 @@ export default function Vertraege() {
                   setKomponentenForm({ ...komponentenForm, description: e.target.value })
                 }
               />
-              <Button type="submit" className="w-full sm:w-auto">Hinzufügen</Button>
+              <div className="flex gap-2">
+                {editierendeKomponente && (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => {
+                      setEditierendeKomponente(null);
+                      setKomponentenForm({
+                        type: "cold_rent",
+                        amount: "",
+                        description: "",
+                        adjustment_type: "fixed",
+                        staggered_schedule: [],
+                        index_type: "",
+                        index_base_value: "",
+                        index_base_date: "",
+                        index_adjustment_date: "",
+                        index_adjustment_percentage: "",
+                        allocation_key: "",
+                        allocation_factor: "",
+                        allocation_notes: "",
+                      });
+                    }}
+                  >
+                    Abbrechen
+                  </Button>
+                )}
+                <Button
+                  type="submit"
+                  disabled={editierendeKomponente ? updateComponentMutation.isPending : addComponentMutation.isPending}
+                >
+                  {editierendeKomponente ? "Speichern" : "Hinzufügen"}
+                </Button>
+              </div>
             </div>
 
             {/* Mietanpassung */}
@@ -1353,12 +1469,20 @@ export default function Vertraege() {
                       )}
                     </td>
                     <td className="px-4 py-2 text-sm">
-                      <button
-                        onClick={() => handleKomponenteLoeschen(komp.id)}
-                        className="text-red-600 hover:text-red-700 font-medium"
-                      >
-                        Löschen
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleKomponenteBearbeiten(komp)}
+                          className="text-blue-600 hover:text-blue-700 font-medium"
+                        >
+                          Bearbeiten
+                        </button>
+                        <button
+                          onClick={() => handleKomponenteLoeschen(komp.id)}
+                          className="text-red-600 hover:text-red-700 font-medium"
+                        >
+                          Löschen
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
