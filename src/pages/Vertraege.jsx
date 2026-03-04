@@ -601,7 +601,8 @@ export default function Vertraege() {
 
   const getMieterName = (tenantId) => {
     const mieterObj = mieter.find((m) => m.id === tenantId);
-    return mieterObj ? `${mieterObj.first_name} ${mieterObj.last_name}` : tenantId;
+    if (!mieterObj) return tenantId;
+    return mieterObj.company_name || `${mieterObj.first_name || ""} ${mieterObj.last_name || ""}`.trim();
   };
 
   const getGesamtmiete = (vertrag) => {
@@ -754,7 +755,7 @@ export default function Vertraege() {
             onChange={(e) => setFormDaten({ ...formDaten, tenant_id: e.target.value })}
             optionen={mieter.map((m) => ({
               value: m.id,
-              label: `${m.first_name} ${m.last_name}`,
+              label: m.company_name || `${m.first_name || ""} ${m.last_name || ""}`.trim(),
             }))}
             required
           />

@@ -44,8 +44,10 @@ export default function Mieter() {
   const { benachrichtigung, zeigeBenachrichtigung } = useBenachrichtigung();
 
   const [formDaten, setFormDaten] = useState({
+    tenant_type: "private",  // "private" | "business"
     first_name: "",
     last_name: "",
+    company_name: "",
     email: "",
     phone: "",
     address: "",
@@ -153,8 +155,8 @@ export default function Mieter() {
     if (sortConfig.key === "name") {
       list.sort((a, b) => {
         // Sortierung nach angezeigter Reihenfolge (Vorname Nachname)
-        const nameA = `${a.first_name || ""} ${a.last_name || ""}`.trim().toLowerCase();
-        const nameB = `${b.first_name || ""} ${b.last_name || ""}`.trim().toLowerCase();
+        const nameA = (a.company_name || `${a.first_name || ""} ${a.last_name || ""}`.trim()).toLowerCase();
+        const nameB = (b.company_name || `${b.first_name || ""} ${b.last_name || ""}`.trim()).toLowerCase();
         const cmp = nameA.localeCompare(nameB, "de");
         return sortConfig.direction === "asc" ? cmp : -cmp;
       });
@@ -184,6 +186,9 @@ export default function Mieter() {
       }
       const cleanedData = {
         ...data,
+        first_name: data.tenant_type === "business" ? null : (data.first_name?.trim() || null),
+        last_name: data.tenant_type === "business" ? null : (data.last_name?.trim() || null),
+        company_name: data.tenant_type === "business" ? (data.company_name?.trim() || null) : null,
         email: data.email?.trim() || null,
         phone: data.phone?.trim() || null,
         address: data.address?.trim() || null,
@@ -228,6 +233,9 @@ export default function Mieter() {
     mutationFn: async ({ id, data }) => {
       const cleanedData = {
         ...data,
+        first_name: data.tenant_type === "business" ? null : (data.first_name?.trim() || null),
+        last_name: data.tenant_type === "business" ? null : (data.last_name?.trim() || null),
+        company_name: data.tenant_type === "business" ? (data.company_name?.trim() || null) : null,
         email: data.email?.trim() || null,
         phone: data.phone?.trim() || null,
         address: data.address?.trim() || null,
@@ -297,15 +305,18 @@ export default function Mieter() {
   };
 
   const handleLoeschen = (mieter) => {
-    if (!confirm(`Mieter "${mieter.first_name} ${mieter.last_name}" wirklich löschen?`))
+    const displayName = mieter.company_name || `${mieter.first_name || ""} ${mieter.last_name || ""}`.trim();
+    if (!confirm(`Mieter "${displayName}" wirklich löschen?`))
       return;
     deleteMutation.mutate(mieter.id);
   };
 
   const formZuruecksetzen = () => {
     setFormDaten({
+      tenant_type: "private",
       first_name: "",
       last_name: "",
+      company_name: "",
       email: "",
       phone: "",
       address: "",
@@ -324,8 +335,10 @@ export default function Mieter() {
     if (searchParams.get('create') === 'true') {
       setBearbeitung(null);
       setFormDaten({
-        first_name: "",
-        last_name: "",
+        tenant_type: zeile.company_name ? "business" : "private",
+        first_name: zeile.first_name || "",
+        last_name: zeile.last_name || "",
+        company_name: zeile.company_name || "",
         email: "",
         phone: "",
         iban: "",
@@ -350,7 +363,7 @@ export default function Mieter() {
           className="text-left hover:text-primary-600 transition-colors"
         >
           <div className="font-semibold text-gray-900">
-            {zeile.first_name} {zeile.last_name}
+            {zeile.company_name || `${zeile.first_name || ""} ${zeile.last_name || ""}`.trim()}
           </div>
           {zeile.email && (
             <div className="text-xs text-gray-500 mt-0.5">{zeile.email}</div>
@@ -396,8 +409,10 @@ export default function Mieter() {
               e.stopPropagation();
               setBearbeitung(zeile);
               setFormDaten({
-                first_name: zeile.first_name,
-                last_name: zeile.last_name,
+                tenant_type: zeile.company_name ? "business" : "private",
+                first_name: zeile.first_name || "",
+                last_name: zeile.last_name || "",
+                company_name: zeile.company_name || "",
                 email: zeile.email || "",
                 phone: zeile.phone || "",
                 address: zeile.address || "",
@@ -511,23 +526,60 @@ export default function Mieter() {
         kompakt={true}
       >
         <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4 pb-2">
-          <div className="grid grid-cols-2 gap-2 sm:gap-3">
+          {/* Privatperson oder Gewerbe */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Typ</label>
+            <div className="flex gap-4">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="tenant_type"
+                  checked={formDaten.tenant_type === "private"}
+                  onChange={() => setFormDaten({ ...formDaten, tenant_type: "private", company_name: "" })}
+                />
+                Privatperson
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="tenant_type"
+                  checked={formDaten.tenant_type === "business"}
+                  onChange={() => setFormDaten({ ...formDaten, tenant_type: "business", first_name: "", last_name: "" })}
+                />
+                Gewerbe / Firma
+              </label>
+            </div>
+          </div>
+
+          {formDaten.tenant_type === "business" ? (
             <Formularfeld
-              label="Vorname"
-              name="first_name"
-              value={formDaten.first_name}
-              onChange={(e) => setFormDaten({ ...formDaten, first_name: e.target.value })}
+              label="Firmenname"
+              name="company_name"
+              value={formDaten.company_name}
+              onChange={(e) => setFormDaten({ ...formDaten, company_name: e.target.value })}
               required
+              placeholder="z.B. IVOUM GmbH & Co. KG"
               icon={<Users className="w-5 h-5" />}
             />
-            <Formularfeld
-              label="Nachname"
-              name="last_name"
-              value={formDaten.last_name}
-              onChange={(e) => setFormDaten({ ...formDaten, last_name: e.target.value })}
-              required
-            />
-          </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-2 sm:gap-3">
+              <Formularfeld
+                label="Vorname"
+                name="first_name"
+                value={formDaten.first_name}
+                onChange={(e) => setFormDaten({ ...formDaten, first_name: e.target.value })}
+                required
+                icon={<Users className="w-5 h-5" />}
+              />
+              <Formularfeld
+                label="Nachname"
+                name="last_name"
+                value={formDaten.last_name}
+                onChange={(e) => setFormDaten({ ...formDaten, last_name: e.target.value })}
+                required
+              />
+            </div>
+          )}
           <Formularfeld
             label="E-Mail (für Mieterportal-Zugang)"
             name="email"

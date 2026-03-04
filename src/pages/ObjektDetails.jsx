@@ -2364,7 +2364,7 @@ export default function ObjektDetails() {
                 { value: "", label: "Bitte wählen" },
                 ...tenants.map((t) => ({
                   value: t.id,
-                  label: `${t.first_name} ${t.last_name}`,
+                  label: t.company_name || `${t.first_name || ""} ${t.last_name || ""}`.trim(),
                 })),
               ]}
               required

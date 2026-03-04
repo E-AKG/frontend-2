@@ -444,7 +444,7 @@ export default function Einheiten() {
     
     // Finde Mieter
     const mieterObj = mieter.find((m) => m.id === vertrag.tenant_id);
-    return mieterObj ? `${mieterObj.first_name} ${mieterObj.last_name}` : "—";
+    return mieterObj ? (mieterObj.company_name || `${mieterObj.first_name || ""} ${mieterObj.last_name || ""}`.trim()) : "—";
   };
 
   // Filtere Einheiten nach Suche
