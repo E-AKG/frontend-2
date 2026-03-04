@@ -31,7 +31,9 @@ export default function ClientSelection() {
     contact_name: "",
     email: "",
     phone: "",
-    address: "",
+    address_street: "",
+    postal_code: "",
+    city: "",
     notes: "",
   });
   const [creatingYear, setCreatingYear] = useState(false);
@@ -64,7 +66,9 @@ export default function ClientSelection() {
         contact_name: "",
         email: "",
         phone: "",
-        address: "",
+        address_street: "",
+    postal_code: "",
+    city: "",
         notes: "",
       });
       setShowClientModal(true);
@@ -131,7 +135,9 @@ export default function ClientSelection() {
         contact_name: "",
         email: "",
         phone: "",
-        address: "",
+        address_street: "",
+    postal_code: "",
+    city: "",
         notes: "",
       });
       zeigeBenachrichtigung("Mandant erfolgreich erstellt");
@@ -179,7 +185,9 @@ export default function ClientSelection() {
         contact_name: "",
         email: "",
         phone: "",
-        address: "",
+        address_street: "",
+    postal_code: "",
+    city: "",
         notes: "",
       });
       zeigeBenachrichtigung("Mandant erfolgreich aktualisiert");
@@ -238,7 +246,9 @@ export default function ClientSelection() {
       contact_name: client.contact_name || "",
       email: client.email || "",
       phone: client.phone || "",
-      address: client.address || "",
+      address_street: client.address_street || client.address || "",
+      postal_code: client.postal_code || "",
+      city: client.city || "",
       notes: client.notes || "",
     });
     setShowClientModal(true);
@@ -286,7 +296,9 @@ export default function ClientSelection() {
                     contact_name: "",
                     email: "",
                     phone: "",
-                    address: "",
+                    address_street: "",
+    postal_code: "",
+    city: "",
                     notes: "",
                   });
                   setShowClientModal(true);
@@ -311,7 +323,9 @@ export default function ClientSelection() {
                       contact_name: "",
                       email: "",
                       phone: "",
-                      address: "",
+                      address_street: "",
+    postal_code: "",
+    city: "",
                       notes: "",
                     });
                     setShowClientModal(true);
@@ -515,7 +529,9 @@ export default function ClientSelection() {
             contact_name: "",
             email: "",
             phone: "",
-            address: "",
+            address_street: "",
+    postal_code: "",
+    city: "",
             notes: "",
           });
         }}
@@ -572,10 +588,25 @@ export default function ClientSelection() {
             />
           </div>
           <Formularfeld
-            label="Adresse (optional)"
-            value={clientFormData.address}
-            onChange={(e) => setClientFormData({ ...clientFormData, address: e.target.value })}
+            label="Adresse (Straße)"
+            value={clientFormData.address_street}
+            onChange={(e) => setClientFormData({ ...clientFormData, address_street: e.target.value })}
+            placeholder="z.B. Musterstraße 1"
           />
+          <div className="grid grid-cols-2 gap-2">
+            <Formularfeld
+              label="PLZ"
+              value={clientFormData.postal_code}
+              onChange={(e) => setClientFormData({ ...clientFormData, postal_code: e.target.value })}
+              placeholder="12345"
+            />
+            <Formularfeld
+              label="Ort"
+              value={clientFormData.city}
+              onChange={(e) => setClientFormData({ ...clientFormData, city: e.target.value })}
+              placeholder="Berlin"
+            />
+          </div>
           <Formularfeld
             label="Notizen (optional)"
             type="textarea"
@@ -595,7 +626,9 @@ export default function ClientSelection() {
                   contact_name: "",
                   email: "",
                   phone: "",
-                  address: "",
+                  address_street: "",
+    postal_code: "",
+    city: "",
                   notes: "",
                 });
               }}

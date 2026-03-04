@@ -40,7 +40,9 @@ export default function Eigentuemer() {
     last_name: "",
     email: "",
     phone: "",
-    address: "",
+    address_street: "",
+    postal_code: "",
+    city: "",
     // Steuerliche Daten
     tax_id: "",
     // Eigentumsanteile
@@ -176,7 +178,9 @@ export default function Eigentuemer() {
       last_name: "",
       email: "",
       phone: "",
-      address: "",
+      address_street: "",
+      postal_code: "",
+      city: "",
       tax_id: "",
       ownership_percentage: "",
       iban: "",
@@ -231,7 +235,9 @@ export default function Eigentuemer() {
                 last_name: zeile.last_name,
                 email: zeile.email || "",
                 phone: zeile.phone || "",
-                address: zeile.address || "",
+                address_street: zeile.address_street || zeile.address || "",
+                postal_code: zeile.postal_code || "",
+                city: zeile.city || "",
                 tax_id: zeile.tax_id || "",
                 ownership_percentage: zeile.ownership_percentage || "",
                 iban: zeile.iban || "",
@@ -355,12 +361,29 @@ export default function Eigentuemer() {
             />
           </div>
           <Formularfeld
-            label="Adresse"
-            name="address"
-            value={formDaten.address}
-            onChange={(e) => setFormDaten({ ...formDaten, address: e.target.value })}
+            label="Adresse (Straße)"
+            name="address_street"
+            value={formDaten.address_street}
+            onChange={(e) => setFormDaten({ ...formDaten, address_street: e.target.value })}
+            placeholder="z.B. Musterstraße 1"
             icon={<MapPin className="w-5 h-5" />}
           />
+          <div className="grid grid-cols-2 gap-2">
+            <Formularfeld
+              label="PLZ"
+              name="postal_code"
+              value={formDaten.postal_code}
+              onChange={(e) => setFormDaten({ ...formDaten, postal_code: e.target.value })}
+              placeholder="12345"
+            />
+            <Formularfeld
+              label="Ort"
+              name="city"
+              value={formDaten.city}
+              onChange={(e) => setFormDaten({ ...formDaten, city: e.target.value })}
+              placeholder="Berlin"
+            />
+          </div>
           <div className="grid grid-cols-2 gap-2 sm:gap-3">
             <Formularfeld
               label="Eigentumsanteil (%)"

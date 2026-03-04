@@ -34,7 +34,9 @@ export default function Objekte() {
 
   const [formDaten, setFormDaten] = useState({
     name: "",
-    address: "",
+    address_street: "",
+    postal_code: "",
+    city: "",
     year_built: "",
     size_sqm: "",
     units_count: "",
@@ -56,7 +58,9 @@ export default function Objekte() {
       setBearbeitung(null);
       setFormDaten({
         name: "",
-        address: "",
+        address_street: "",
+        postal_code: "",
+        city: "",
         year_built: "",
         size_sqm: "",
         notes: "",
@@ -92,7 +96,9 @@ export default function Objekte() {
     try {
       const daten = {
         name: formDaten.name.trim(),
-        address: formDaten.address.trim(),
+        address_street: formDaten.address_street?.trim() || null,
+        postal_code: formDaten.postal_code?.trim() || null,
+        city: formDaten.city?.trim() || null,
         year_built: formDaten.year_built && formDaten.year_built.trim() !== "" 
           ? parseInt(formDaten.year_built) 
           : null,
@@ -152,7 +158,9 @@ export default function Objekte() {
       setBearbeitung(aktuellesObjekt);
       setFormDaten({
         name: aktuellesObjekt.name || "",
-        address: aktuellesObjekt.address || "",
+        address_street: aktuellesObjekt.address_street || aktuellesObjekt.address || "",
+        postal_code: aktuellesObjekt.postal_code || "",
+        city: aktuellesObjekt.city || "",
         year_built: aktuellesObjekt.year_built || "",
         size_sqm: aktuellesObjekt.size_sqm || "",
         units_count: "",  // Beim Bearbeiten nicht anzeigen (nur beim Erstellen)
@@ -165,7 +173,9 @@ export default function Objekte() {
       setBearbeitung(objekt);
       setFormDaten({
         name: objekt.name || "",
-        address: objekt.address || "",
+        address_street: objekt.address_street || objekt.address || "",
+        postal_code: objekt.postal_code || "",
+        city: objekt.city || "",
         year_built: objekt.year_built || "",
         size_sqm: objekt.size_sqm || "",
         units_count: "",  // Beim Bearbeiten nicht anzeigen
@@ -192,7 +202,9 @@ export default function Objekte() {
   const formZuruecksetzen = () => {
     setFormDaten({
       name: "",
-      address: "",
+      address_street: "",
+      postal_code: "",
+      city: "",
       year_built: "",
       size_sqm: "",
       units_count: "",
@@ -330,14 +342,30 @@ export default function Objekte() {
             icon={<Building2 className="w-5 h-5" />}
           />
           <Formularfeld
-            label="Adresse"
-            name="address"
-            value={formDaten.address}
-            onChange={(e) => setFormDaten({ ...formDaten, address: e.target.value })}
-            placeholder="Musterstraße 123, 12345 Musterstadt"
+            label="Adresse (Straße)"
+            name="address_street"
+            value={formDaten.address_street}
+            onChange={(e) => setFormDaten({ ...formDaten, address_street: e.target.value })}
+            placeholder="z.B. Musterstraße 1"
             required
             icon={<MapPin className="w-5 h-5" />}
           />
+          <div className="grid grid-cols-2 gap-2">
+            <Formularfeld
+              label="PLZ"
+              name="postal_code"
+              value={formDaten.postal_code}
+              onChange={(e) => setFormDaten({ ...formDaten, postal_code: e.target.value })}
+              placeholder="12345"
+            />
+            <Formularfeld
+              label="Ort"
+              name="city"
+              value={formDaten.city}
+              onChange={(e) => setFormDaten({ ...formDaten, city: e.target.value })}
+              placeholder="Berlin"
+            />
+          </div>
           <div className="grid grid-cols-2 gap-2 sm:gap-3">
             <Formularfeld
               label="Baujahr"

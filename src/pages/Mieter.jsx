@@ -50,7 +50,9 @@ export default function Mieter() {
     company_name: "",
     email: "",
     phone: "",
-    address: "",
+    address_street: "",
+    postal_code: "",
+    city: "",
     notes: "",
     // Alle Vertragspartner
     contract_partners: [],
@@ -189,9 +191,11 @@ export default function Mieter() {
         first_name: data.tenant_type === "business" ? null : (data.first_name?.trim() || null),
         last_name: data.tenant_type === "business" ? null : (data.last_name?.trim() || null),
         company_name: data.tenant_type === "business" ? (data.company_name?.trim() || null) : null,
+        address_street: data.address_street?.trim() || null,
+        postal_code: data.postal_code?.trim() || null,
+        city: data.city?.trim() || null,
         email: data.email?.trim() || null,
         phone: data.phone?.trim() || null,
-        address: data.address?.trim() || null,
         notes: data.notes?.trim() || null,
         // Vertragspartner
         contract_partners: data.contract_partners && data.contract_partners.length > 0 ? data.contract_partners : null,
@@ -236,9 +240,11 @@ export default function Mieter() {
         first_name: data.tenant_type === "business" ? null : (data.first_name?.trim() || null),
         last_name: data.tenant_type === "business" ? null : (data.last_name?.trim() || null),
         company_name: data.tenant_type === "business" ? (data.company_name?.trim() || null) : null,
+        address_street: data.address_street?.trim() || null,
+        postal_code: data.postal_code?.trim() || null,
+        city: data.city?.trim() || null,
         email: data.email?.trim() || null,
         phone: data.phone?.trim() || null,
-        address: data.address?.trim() || null,
         notes: data.notes?.trim() || null,
         // Vertragspartner
         contract_partners: data.contract_partners && data.contract_partners.length > 0 ? data.contract_partners : null,
@@ -319,7 +325,9 @@ export default function Mieter() {
       company_name: "",
       email: "",
       phone: "",
-      address: "",
+      address_street: "",
+      postal_code: "",
+      city: "",
       notes: "",
       contract_partners: [],
       schufa_score: "",
@@ -342,7 +350,9 @@ export default function Mieter() {
         email: "",
         phone: "",
         iban: "",
-        address: "",
+        address_street: "",
+        postal_code: "",
+        city: "",
         notes: "",
       });
       setShowModal(true);
@@ -415,7 +425,9 @@ export default function Mieter() {
                 company_name: zeile.company_name || "",
                 email: zeile.email || "",
                 phone: zeile.phone || "",
-                address: zeile.address || "",
+                address_street: zeile.address_street || zeile.address || "",
+                postal_code: zeile.postal_code || "",
+                city: zeile.city || "",
                 notes: zeile.notes || "",
                 contract_partners: zeile.contract_partners || [],
                 schufa_score: zeile.schufa_score || "",
@@ -595,13 +607,32 @@ export default function Mieter() {
             onChange={(e) => setFormDaten({ ...formDaten, phone: e.target.value })}
             icon={<Phone className="w-5 h-5" />}
           />
-          <Formularfeld
-            label="Adresse"
-            name="address"
-            value={formDaten.address}
-            onChange={(e) => setFormDaten({ ...formDaten, address: e.target.value })}
-            icon={<MapPin className="w-5 h-5" />}
-          />
+          <div className="space-y-2">
+            <Formularfeld
+              label="Adresse (Straße)"
+              name="address_street"
+              value={formDaten.address_street}
+              onChange={(e) => setFormDaten({ ...formDaten, address_street: e.target.value })}
+              placeholder="z.B. Musterstraße 1"
+              icon={<MapPin className="w-5 h-5" />}
+            />
+            <div className="grid grid-cols-2 gap-2">
+              <Formularfeld
+                label="PLZ"
+                name="postal_code"
+                value={formDaten.postal_code}
+                onChange={(e) => setFormDaten({ ...formDaten, postal_code: e.target.value })}
+                placeholder="12345"
+              />
+              <Formularfeld
+                label="Ort"
+                name="city"
+                value={formDaten.city}
+                onChange={(e) => setFormDaten({ ...formDaten, city: e.target.value })}
+                placeholder="Berlin"
+              />
+            </div>
+          </div>
           
           {/* Alle Vertragspartner */}
           <div className="border-t border-gray-200 pt-4 mt-4">
