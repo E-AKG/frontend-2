@@ -29,5 +29,17 @@ export const tenantApi = {
   getCrm: (id) => {
     return axiosInstance.get(`/api/tenants/${id}/crm`);
   },
+
+  getComments: (tenantId) => {
+    return axiosInstance.get(`/api/tenants/${tenantId}/comments`);
+  },
+
+  addComment: (tenantId, comment) => {
+    return axiosInstance.post(`/api/tenants/${tenantId}/comments`, { comment });
+  },
+
+  deleteComment: (tenantId, commentId) => {
+    return axiosInstance.delete(`/api/tenants/${tenantId}/comments/${commentId}`);
+  },
 };
 
