@@ -1,3 +1,5 @@
+import DatumFeld from "./DatumFeld";
+
 export default function Formularfeld({
   label,
   type = "text",
@@ -20,6 +22,23 @@ export default function Formularfeld({
     ${disabled ? "bg-gray-50 text-gray-500 cursor-not-allowed border-gray-200" : "text-gray-900"}
     ${icon ? "pl-12 sm:pl-14" : ""}
     focus:outline-none focus:ring-2 focus:ring-offset-0 placeholder:text-gray-400`;
+
+  if (type === "date") {
+    return (
+      <DatumFeld
+        label={label}
+        name={name}
+        value={value}
+        onChange={onChange}
+        placeholder="TT.MM.JJJJ"
+        required={required}
+        error={error}
+        className={className}
+        disabled={disabled}
+        icon={icon}
+      />
+    );
+  }
 
   return (
     <div className={`${className}`}>
