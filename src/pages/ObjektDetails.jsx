@@ -662,8 +662,13 @@ export default function ObjektDetails() {
   const spalten = [
     {
       key: "unit_number",
+      label: "Einheitsnummer",
+      render: (zeile) => zeile.unit_number || "—",
+    },
+    {
+      key: "unit_label",
       label: "Bezeichnung",
-      render: (zeile) => zeile.unit_number || zeile.unit_label || "—",
+      render: (zeile) => zeile.unit_label || zeile.location || "—",
     },
     { key: "floor", label: "Etage", render: (zeile) => zeile.floor || "—" },
     {
