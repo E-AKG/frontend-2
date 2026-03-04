@@ -619,10 +619,13 @@ export default function Vertraege() {
             name="unit_id"
             value={formDaten.unit_id}
             onChange={(e) => setFormDaten({ ...formDaten, unit_id: e.target.value })}
-            optionen={einheiten.map((e) => ({
-              value: e.id,
-              label: `${e.unit_label} (${e.status === "vacant" ? "Leer" : "Vermietet"})`,
-            }))}
+            optionen={einheiten.map((e) => {
+              const beschreibung = [e.unit_number, e.location, e.unit_label].filter(Boolean).join(" - ") || "Einheit";
+              return {
+                value: e.id,
+                label: `${beschreibung} (${e.status === "vacant" ? "Leer" : "Vermietet"})`,
+              };
+            })}
             required
           />
           <Auswahl
