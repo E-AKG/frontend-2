@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApp } from "../contexts/AppContext";
 import { ticketApi } from "../api/ticketApi";
+import { propertyApi } from "../api/propertyApi";
 import { Plus, AlertCircle, Wrench, FileText, Clock, CheckCircle, XCircle, Trash2, Edit, MessageSquare, Save, X } from "lucide-react";
 import Button from "../components/Button";
 import Modal from "../components/Modal";
@@ -30,11 +31,13 @@ export default function Tickets() {
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [newComment, setNewComment] = useState("");
+  const [filterPropertyId, setFilterPropertyId] = useState("");
   const [formData, setFormData] = useState({
     title: "",
     description: "",
     category: "other",
     priority: "medium",
+    property_id: "",
     due_date: "",
   });
   const [editFormData, setEditFormData] = useState({
@@ -43,16 +46,30 @@ export default function Tickets() {
     category: "other",
     priority: "medium",
     status: "new",
+    property_id: "",
     due_date: "",
+  });
+
+  // Lade Objekte (Liegenschaften)
+  const { data: properties = [] } = useQuery({
+    queryKey: ["properties", selectedClient?.id],
+    queryFn: async () => {
+      const response = await propertyApi.list({
+        client_id: selectedClient?.id,
+        page_size: 500,
+      });
+      return response.data?.items || response.data || [];
+    },
+    enabled: !!selectedClient,
   });
 
   // Lade Tickets
   const { data: tickets = [], isLoading } = useQuery({
-    queryKey: ["tickets", selectedClient?.id],
+    queryKey: ["tickets", selectedClient?.id, filterPropertyId],
     queryFn: async () => {
-      const response = await ticketApi.list({
-        client_id: selectedClient?.id,
-      });
+      const params = { client_id: selectedClient?.id };
+      if (filterPropertyId) params.property_id = filterPropertyId;
+      const response = await ticketApi.list(params);
       return response.data || [];
     },
     enabled: !!selectedClient,
@@ -84,6 +101,7 @@ export default function Tickets() {
         description: "",
         category: "other",
         priority: "medium",
+        property_id: "",
         due_date: "",
       });
     },
@@ -147,6 +165,7 @@ export default function Tickets() {
     e.preventDefault();
     const data = {
       ...formData,
+      property_id: formData.property_id || null,
       due_date: formData.due_date || null,
     };
     createMutation.mutate(data);
@@ -157,6 +176,7 @@ export default function Tickets() {
     if (!selectedTicket) return;
     const data = {
       ...editFormData,
+      property_id: editFormData.property_id || null,
       due_date: editFormData.due_date || null,
     };
     updateMutation.mutate({
@@ -189,6 +209,7 @@ export default function Tickets() {
       category: ticket.category,
       priority: ticket.priority,
       status: ticket.status,
+      property_id: ticket.property_id || "",
       due_date: ticket.due_date || "",
     });
   };
@@ -206,9 +227,16 @@ export default function Tickets() {
         category: selectedTicket.category,
         priority: selectedTicket.priority,
         status: selectedTicket.status,
+        property_id: selectedTicket.property_id || "",
         due_date: selectedTicket.due_date || "",
       });
     }
+  };
+
+  const getPropertyName = (propertyId) => {
+    if (!propertyId) return null;
+    const p = properties.find((pr) => pr.id === propertyId);
+    return p ? p.name : propertyId;
   };
 
   const getTicketsByStatus = (status) => {
@@ -238,19 +266,33 @@ export default function Tickets() {
 
   return (
     <div className="p-6">
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Tickets & Vorgänge</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
             Verwaltung von Schäden, Reparaturen und Aufgaben
           </p>
         </div>
-        <Button
-          onClick={() => setShowAddModal(true)}
-          icon={<Plus className="w-5 h-5" />}
-        >
-          Neues Ticket
-        </Button>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <select
+            value={filterPropertyId}
+            onChange={(e) => setFilterPropertyId(e.target.value)}
+            className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white text-sm"
+          >
+            <option value="">Alle Liegenschaften</option>
+            {properties.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}
+              </option>
+            ))}
+          </select>
+          <Button
+            onClick={() => setShowAddModal(true)}
+            icon={<Plus className="w-5 h-5" />}
+          >
+            Neues Ticket
+          </Button>
+        </div>
       </div>
 
       {/* Kanban-Board */}
@@ -292,11 +334,18 @@ export default function Tickets() {
                         {ticket.description}
                       </p>
                     )}
-                    <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-                      <span className="capitalize">{ticket.category}</span>
-                      {ticket.due_date && (
-                        <span>{formatDate(ticket.due_date)}</span>
+                    <div className="space-y-1 text-xs text-gray-500 dark:text-gray-400">
+                      {getPropertyName(ticket.property_id) && (
+                        <div className="font-medium text-gray-700 dark:text-gray-300">
+                          {getPropertyName(ticket.property_id)}
+                        </div>
                       )}
+                      <div className="flex items-center justify-between">
+                        <span className="capitalize">{ticket.category}</span>
+                        {ticket.due_date && (
+                          <span>{formatDate(ticket.due_date)}</span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))
@@ -371,6 +420,21 @@ export default function Tickets() {
                   <option value="urgent">Dringend</option>
                 </select>
               </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Liegenschaft
+              </label>
+              <select
+                value={formData.property_id}
+                onChange={(e) => setFormData({ ...formData, property_id: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
+              >
+                <option value="">— Keine Zuordnung —</option>
+                {properties.map((p) => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -499,6 +563,21 @@ export default function Tickets() {
                   />
                 </div>
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Liegenschaft
+                </label>
+                <select
+                  value={editFormData.property_id}
+                  onChange={(e) => setEditFormData({ ...editFormData, property_id: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
+                >
+                  <option value="">— Keine Zuordnung —</option>
+                  {properties.map((p) => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                  ))}
+                </select>
+              </div>
               <div className="flex gap-3 pt-4">
                 <Button
                   type="button"
@@ -583,6 +662,16 @@ export default function Tickets() {
                       </label>
                       <span className="text-sm text-gray-900 dark:text-white">
                         {formatDate(selectedTicket.due_date)}
+                      </span>
+                    </div>
+                  )}
+                  {getPropertyName(selectedTicket.property_id) && (
+                    <div>
+                      <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+                        Liegenschaft
+                      </label>
+                      <span className="text-sm text-gray-900 dark:text-white font-medium">
+                        {getPropertyName(selectedTicket.property_id)}
                       </span>
                     </div>
                   )}
