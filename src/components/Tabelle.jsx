@@ -1,4 +1,6 @@
-export default function Tabelle({ spalten, daten, onZeileKlick, loading = false }) {
+import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+
+export default function Tabelle({ spalten, daten, onZeileKlick, loading = false, sortConfig, onSort }) {
   if (loading) {
     return (
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-16">
@@ -23,9 +25,23 @@ export default function Tabelle({ spalten, daten, onZeileKlick, loading = false 
               {spalten.map((spalte, idx) => (
                 <th
                   key={idx}
-                  className="px-4 lg:px-6 py-3 lg:py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider"
+                  className={`px-4 lg:px-6 py-3 lg:py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider ${
+                    spalte.sortable && onSort ? "cursor-pointer select-none hover:bg-gray-100 transition-colors" : ""
+                  }`}
+                  onClick={() => spalte.sortable && onSort && onSort(spalte.key)}
                 >
-                  {spalte.label}
+                  <span className="flex items-center gap-1">
+                    {spalte.label}
+                    {spalte.sortable && onSort && (
+                      <span className="inline-flex text-gray-400">
+                        {sortConfig?.key === spalte.key ? (
+                          sortConfig.direction === "asc" ? <ArrowUp className="w-3.5 h-3.5" /> : <ArrowDown className="w-3.5 h-3.5" />
+                        ) : (
+                          <ArrowUpDown className="w-3.5 h-3.5 opacity-50" />
+                        )}
+                      </span>
+                    )}
+                  </span>
                 </th>
               ))}
             </tr>
