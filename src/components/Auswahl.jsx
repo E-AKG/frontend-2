@@ -33,7 +33,7 @@ export default function Auswahl({
       >
         <option value="">-- Auswählen --</option>
         {optionen.map((opt, idx) => (
-          <option key={idx} value={opt.value}>
+          <option key={idx} value={opt.value} disabled={opt.disabled}>
             {opt.label}
           </option>
         ))}
