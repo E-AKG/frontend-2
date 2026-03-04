@@ -1,39 +1,67 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { tenantApi } from "../api/tenantApi";
 import { useApp } from "../contexts/AppContext";
 import {
-  User,
   Mail,
   Phone,
   MapPin,
   CreditCard,
   FileText,
   Calendar,
-  Euro,
   AlertCircle,
   CheckCircle,
-  Clock,
   ArrowLeft,
   Building2,
   DoorOpen,
   TrendingUp,
   History,
+  MessageSquare,
+  Trash2,
 } from "lucide-react";
 import RiskBadge from "../components/RiskBadge";
+import Button from "../components/Button";
+import { formatDateTime } from "../utils/formatting";
 
 export default function PersonenCRM() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { selectedClient } = useApp();
   const [activeTab, setActiveTab] = useState("overview");
+  const [newComment, setNewComment] = useState("");
 
   const { data: crmData, isLoading, error } = useQuery({
     queryKey: ["tenantCrm", id],
     queryFn: () => tenantApi.getCrm(id),
     enabled: !!id,
   });
+
+  const { data: comments = [], refetch: refetchComments } = useQuery({
+    queryKey: ["tenantComments", id],
+    queryFn: async () => {
+      const res = await tenantApi.getComments(id);
+      return res.data || [];
+    },
+    enabled: !!id && activeTab === "notes",
+  });
+
+  const addCommentMutation = useMutation({
+    mutationFn: ({ tenantId, comment }) => tenantApi.addComment(tenantId, comment),
+    onSuccess: () => {
+      refetchComments();
+      setNewComment("");
+    },
+  });
+
+  const deleteCommentMutation = useMutation({
+    mutationFn: ({ tenantId, commentId }) => tenantApi.deleteComment(tenantId, commentId),
+    onSuccess: () => refetchComments(),
+  });
+
+  const handleAddComment = () => {
+    if (!newComment.trim() || !id) return;
+    addCommentMutation.mutate({ tenantId: id, comment: newComment.trim() });
+  };
 
   if (isLoading) {
     return (
@@ -107,6 +135,7 @@ export default function PersonenCRM() {
             { id: "leases", label: "Verträge" },
             { id: "charges", label: "Offene Posten" },
             { id: "payments", label: "Zahlungen" },
+            { id: "notes", label: "Gesprächsnotizen" },
             { id: "timeline", label: "Timeline" },
           ].map((tab) => (
             <button
@@ -332,6 +361,72 @@ export default function PersonenCRM() {
                 <p>Keine offenen Posten</p>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Gesprächsnotizen Tab */}
+        {activeTab === "notes" && (
+          <div className="space-y-6">
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                <MessageSquare className="w-5 h-5" />
+                Gesprächsnotizen ({comments.length})
+              </h2>
+
+              <div className="space-y-4 mb-6 max-h-96 overflow-y-auto">
+                {comments.length === 0 ? (
+                  <p className="text-gray-500 dark:text-gray-400 text-sm">Noch keine Gesprächsnotizen</p>
+                ) : (
+                  comments.map((comment) => (
+                    <div
+                      key={comment.id}
+                      className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                            {formatDateTime(comment.created_at)}
+                          </p>
+                          <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+                            {comment.comment}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() =>
+                            deleteCommentMutation.mutate({ tenantId: id, commentId: comment.id })
+                          }
+                          disabled={deleteCommentMutation.isLoading}
+                          className="p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded transition-colors"
+                          title="Notiz löschen"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Neue Gesprächsnotiz
+                </label>
+                <textarea
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white mb-3"
+                  rows="3"
+                  placeholder="Notiz hinzufügen..."
+                />
+                <Button
+                  onClick={handleAddComment}
+                  disabled={!newComment.trim() || addCommentMutation.isLoading}
+                  icon={<MessageSquare className="w-4 h-4" />}
+                >
+                  {addCommentMutation.isLoading ? "Speichern..." : "Notiz hinzufügen"}
+                </Button>
+              </div>
+            </div>
           </div>
         )}
 
