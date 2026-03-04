@@ -661,6 +661,16 @@ export default function Vertraege() {
             <button
               onClick={(e) => {
                 e.stopPropagation();
+                handleKomponentenAnzeigen(zeile);
+              }}
+              className="p-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-all duration-200"
+              title="Mietkomponenten (Staffelmiete, etc.)"
+            >
+              <Layers className="w-4 h-4" />
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
                 handleBearbeiten(zeile);
               }}
               className="p-2 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-all duration-200"
