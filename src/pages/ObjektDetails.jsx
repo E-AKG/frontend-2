@@ -660,7 +660,11 @@ export default function ObjektDetails() {
   };
 
   const spalten = [
-    { key: "unit_label", label: "Bezeichnung" },
+    {
+      key: "unit_number",
+      label: "Bezeichnung",
+      render: (zeile) => zeile.unit_number || zeile.unit_label || "—",
+    },
     { key: "floor", label: "Etage", render: (zeile) => zeile.floor || "—" },
     {
       key: "size_sqm",
