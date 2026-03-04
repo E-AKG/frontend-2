@@ -18,7 +18,7 @@ import Benachrichtigung, { useBenachrichtigung } from "../components/Benachricht
 import { 
   Gauge, Key as KeyIcon, Plus, Edit, Trash2, Calendar, User, History, TrendingUp,
   FileText, Shield, CreditCard, Calculator, Building2, Thermometer, FileCheck, X, Save,
-  Image as ImageIcon, ChevronLeft, ChevronRight
+  Image as ImageIcon, ChevronLeft, ChevronRight, Download
 } from "lucide-react";
 
 export default function ObjektDetails() {
@@ -805,8 +805,30 @@ export default function ObjektDetails() {
 
       {/* Objekt-Info */}
       <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 p-4 sm:p-6 mb-4 sm:mb-6">
-        <h1 className="text-xl sm:text-2xl font-bold text-slate-900 mb-1">{objekt.name}</h1>
-        <p className="text-slate-600 text-sm sm:text-[15px] mb-4 sm:mb-6">{objekt.address}</p>
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 mb-1">{objekt.name}</h1>
+            <p className="text-slate-600 text-sm sm:text-[15px]">{objekt.address}</p>
+          </div>
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={<Download className="w-4 h-4" />}
+            onClick={async () => {
+              try {
+                await propertyApi.downloadPdf(id, objekt.name);
+                zeigeBenachrichtigung("PDF wird heruntergeladen");
+              } catch (err) {
+                zeigeBenachrichtigung(
+                  err.response?.data?.detail || "Fehler beim PDF-Export",
+                  "fehler"
+                );
+              }
+            }}
+          >
+            PDF exportieren
+          </Button>
+        </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
           <div>
