@@ -32,6 +32,7 @@ export default function Abrechnung() {
     notes: "",
   });
   const [allocationMethod, setAllocationMethod] = useState("area");
+  const [itemAllocation, setItemAllocation] = useState({});
   const [currentAccountingId, setCurrentAccountingId] = useState(null);
   const [showItemForm, setShowItemForm] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
@@ -168,7 +169,7 @@ export default function Abrechnung() {
   // Calculate Mutation
   const calculateMutation = useMutation({
     mutationFn: async () => {
-      return await accountingApi.calculate(currentAccountingId, allocationMethod);
+      return await accountingApi.calculate(currentAccountingId, allocationMethod, itemAllocation);
     },
     onSuccess: () => {
       setWizardStep(3);
@@ -763,20 +764,72 @@ export default function Abrechnung() {
                   <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
                     Schritt 3: Berechnung
                   </h3>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Umlageschlüssel
-                    </label>
-                    <select
-                      value={allocationMethod}
-                      onChange={(e) => setAllocationMethod(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                    >
-                      <option value="area">Nach Fläche (m²)</option>
-                      <option value="units">Nach Einheiten</option>
-                      <option value="persons">Nach Personen</option>
-                    </select>
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-4">
+                    <p className="text-sm text-gray-600 dark:text-gray-400 flex-1">
+                      Wählen Sie pro Kostenposten den Umlageschlüssel. Die Kosten werden entsprechend verteilt.
+                    </p>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                        Standard:
+                      </label>
+                      <select
+                        value={allocationMethod}
+                        onChange={(e) => setAllocationMethod(e.target.value)}
+                        className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                      >
+                        <option value="area">Fläche (m²)</option>
+                        <option value="units">Einheiten</option>
+                        <option value="persons">Personen</option>
+                        <option value="consumption">Verbrauch</option>
+                      </select>
+                    </div>
                   </div>
+                  {items.length === 0 ? (
+                    <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-8 text-center">
+                      <p className="text-gray-600 dark:text-gray-400">
+                        Keine Kostenposten. Bitte fügen Sie zuerst Kosten in Schritt 2 hinzu.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3 mb-4">
+                      {items.filter((i) => i.is_allocable).map((item) => (
+                        <div
+                          key={item.id}
+                          className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600"
+                        >
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium text-gray-900 dark:text-white">{item.cost_type}</div>
+                            <div className="text-sm text-gray-600 dark:text-gray-400 truncate">{item.description}</div>
+                            <div className="text-sm font-semibold text-gray-900 dark:text-white mt-1">
+                              {formatCurrency(item.amount)}
+                            </div>
+                          </div>
+                          <div className="flex-shrink-0 w-full sm:w-56">
+                            <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+                              Umlage
+                            </label>
+                            <select
+                              value={itemAllocation[item.id] ?? allocationMethod}
+                              onChange={(e) =>
+                                setItemAllocation((prev) => ({ ...prev, [item.id]: e.target.value }))
+                              }
+                              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                            >
+                              <option value="area">Nach Fläche (m²)</option>
+                              <option value="units">Nach Einheiten</option>
+                              <option value="persons">Nach Personen</option>
+                              <option value="consumption">Nach Verbrauch</option>
+                            </select>
+                          </div>
+                        </div>
+                      ))}
+                      {items.some((i) => !i.is_allocable) && (
+                        <div className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                          Nicht umlagefähige Kostenposten werden bei der Berechnung nicht berücksichtigt.
+                        </div>
+                      )}
+                    </div>
+                  )}
                   <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
                     <div className="flex items-center gap-2 mb-2">
                       <Calculator className="w-5 h-5 text-blue-600 dark:text-blue-400" />
