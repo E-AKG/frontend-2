@@ -49,6 +49,7 @@ export default function Vertraege() {
     // Mietkomponenten - alle auf einmal
     components: {
       cold_rent: { amount: "", description: "Kaltmiete" },
+      advance_payment_pauschale: { amount: "", description: "Pauschale für Vorauszahlung" },
       operating_costs: { amount: "", description: "Nebenkosten" },
       heating_costs: { amount: "", description: "Heizkosten" },
       security_deposit: { amount: "", description: "Kaution" },
@@ -178,6 +179,7 @@ export default function Vertraege() {
       for (const [type, component] of Object.entries(components)) {
         if (type === 'other') continue; // Wird separat behandelt
         if (type === 'security_deposit') continue; // Wird separat als "other" gespeichert
+        if (type === 'advance_payment_pauschale') continue; // Wird separat als "other" gespeichert
         
         if (component.amount && parseFloat(component.amount) > 0) {
           componentPromises.push(
@@ -188,6 +190,17 @@ export default function Vertraege() {
             })
           );
         }
+      }
+      
+      // Pauschale für Vorauszahlung (als "other" mit festem Label)
+      if (components.advance_payment_pauschale?.amount && parseFloat(components.advance_payment_pauschale.amount) > 0) {
+        componentPromises.push(
+          leaseApi.createComponent(leaseId, {
+            type: "other",
+            amount: parseFloat(components.advance_payment_pauschale.amount),
+            description: components.advance_payment_pauschale.description || "Pauschale für Vorauszahlung",
+          })
+        );
       }
       
       // Kaution (als "other" mit Beschreibung "Kaution")
@@ -288,6 +301,15 @@ export default function Vertraege() {
             type: "heating_costs",
             amount: parseFloat(daten.components.heating_costs.amount),
             description: daten.components.heating_costs.description || "Heizkosten",
+          })
+        );
+      }
+      if (daten.components.advance_payment_pauschale?.amount && parseFloat(daten.components.advance_payment_pauschale.amount) > 0) {
+        componentPromises.push(
+          leaseApi.createComponent(leaseId, {
+            type: "other",
+            amount: parseFloat(daten.components.advance_payment_pauschale.amount),
+            description: daten.components.advance_payment_pauschale.description || "Pauschale für Vorauszahlung",
           })
         );
       }
@@ -475,6 +497,7 @@ export default function Vertraege() {
       due_day: vertrag.due_day?.toString() || "1",
       components: {
         cold_rent: { amount: "", description: "Kaltmiete" },
+        advance_payment_pauschale: { amount: "", description: "Pauschale für Vorauszahlung" },
         operating_costs: { amount: "", description: "Nebenkosten" },
         heating_costs: { amount: "", description: "Heizkosten" },
         security_deposit: { amount: "", description: "Kaution" },
@@ -489,6 +512,7 @@ export default function Vertraege() {
     if (bearbeitung && bearbeitungsKomponenten.length > 0) {
       const components = {
         cold_rent: { amount: "", description: "Kaltmiete" },
+        advance_payment_pauschale: { amount: "", description: "Pauschale für Vorauszahlung" },
         operating_costs: { amount: "", description: "Nebenkosten" },
         heating_costs: { amount: "", description: "Heizkosten" },
         security_deposit: { amount: "", description: "Kaution" },
@@ -505,6 +529,8 @@ export default function Vertraege() {
         } else if (comp.type === "other") {
           if (comp.description === "Kaution") {
             components.security_deposit = { amount: comp.amount.toString(), description: "Kaution" };
+          } else if ((comp.description || "").toLowerCase().includes("pauschale") && (comp.description || "").toLowerCase().includes("vorauszahlung")) {
+            components.advance_payment_pauschale = { amount: comp.amount.toString(), description: comp.description || "Pauschale für Vorauszahlung" };
           } else {
             components.other.push({ amount: comp.amount.toString(), description: comp.description || "" });
           }
@@ -576,6 +602,7 @@ export default function Vertraege() {
       due_day: "1",
       components: {
         cold_rent: { amount: "", description: "Kaltmiete" },
+        advance_payment_pauschale: { amount: "", description: "Pauschale für Vorauszahlung" },
         operating_costs: { amount: "", description: "Nebenkosten" },
         heating_costs: { amount: "", description: "Heizkosten" },
         security_deposit: { amount: "", description: "Kaution" },
@@ -852,6 +879,45 @@ export default function Vertraege() {
                 </div>
               </div>
               
+              {/* Pauschale für Vorauszahlung */}
+              <div className="bg-gray-50 rounded-lg p-3 sm:p-4 border border-gray-200">
+                <label className="block text-sm font-semibold text-gray-900 mb-2">
+                  Pauschale für Vorauszahlung
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <Formularfeld
+                    label="Betrag"
+                    name="advance_payment_pauschale_amount"
+                    type="number"
+                    step="0.01"
+                    placeholder="0.00"
+                    value={formDaten.components.advance_payment_pauschale?.amount || ""}
+                    onChange={(e) => setFormDaten({
+                      ...formDaten,
+                      components: {
+                        ...formDaten.components,
+                        advance_payment_pauschale: { ...(formDaten.components.advance_payment_pauschale || { amount: "", description: "Pauschale für Vorauszahlung" }), amount: e.target.value }
+                      }
+                    })}
+                    icon={<Euro className="w-4 h-4" />}
+                  />
+                  <Formularfeld
+                    label="Beschreibung (optional)"
+                    name="advance_payment_pauschale_description"
+                    placeholder="z.B. Vorauszahlung NK/Heizung"
+                    value={formDaten.components.advance_payment_pauschale?.description || "Pauschale für Vorauszahlung"}
+                    onChange={(e) => setFormDaten({
+                      ...formDaten,
+                      components: {
+                        ...formDaten.components,
+                        advance_payment_pauschale: { ...(formDaten.components.advance_payment_pauschale || { amount: "", description: "Pauschale für Vorauszahlung" }), description: e.target.value }
+                      }
+                    })}
+                  />
+                </div>
+                <p className="text-xs text-gray-500 mt-1">Monatliche Pauschale für Nebenkosten-/Heizungsvorauszahlung</p>
+              </div>
+              
               {/* Nebenkosten */}
               <div className="bg-gray-50 rounded-lg p-3 sm:p-4 border border-gray-200">
                 <label className="block text-sm font-semibold text-gray-900 mb-2">
@@ -1062,6 +1128,7 @@ export default function Vertraege() {
                   <span className="text-2xl font-bold text-emerald-700">
                     {(
                       parseFloat(formDaten.components.cold_rent.amount || 0) +
+                      parseFloat(formDaten.components.advance_payment_pauschale?.amount || 0) +
                       parseFloat(formDaten.components.operating_costs.amount || 0) +
                       parseFloat(formDaten.components.heating_costs.amount || 0) +
                       (formDaten.components.other || []).reduce((sum, item) => sum + parseFloat(item.amount || 0), 0)
