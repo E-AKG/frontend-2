@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from "react";
-import { Outlet, useNavigate, useLocation, NavLink } from "react-router-dom";
+import { Outlet, useNavigate, useLocation, NavLink, useParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { useApp } from "../contexts/AppContext";
+import { propertyApi } from "../api/propertyApi";
 import { searchApi } from "../api/searchApi";
 import {
   LayoutDashboard,
@@ -39,6 +41,16 @@ export default function ProLayout() {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const searchInputRef = useRef(null);
   const searchTimeoutRef = useRef(null);
+
+  const params = useParams();
+  const isPropertyDetail = (location.pathname.startsWith("/verwaltung/") && params.id && params.id !== "einheiten")
+    || (location.pathname.startsWith("/objekte/") && params.id);
+  const propertyId = isPropertyDetail ? params.id : null;
+  const { data: currentProperty } = useQuery({
+    queryKey: ["property", propertyId],
+    queryFn: () => propertyApi.get(propertyId),
+    enabled: !!propertyId,
+  });
 
   // Dark Mode Toggle
   useEffect(() => {
@@ -301,6 +313,15 @@ export default function ProLayout() {
                   </>
                 )}
               </div>
+
+              {/* Aktuell bearbeitete Liegenschaft (nur bei Objekt-Detailansicht) */}
+              {selectedClient && currentProperty?.data && (
+                <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-800 text-sm">
+                  <span className="text-primary-700 dark:text-primary-300 font-medium truncate max-w-[200px]">
+                    {currentProperty.data.name || currentProperty.data.address || "Liegenschaft"}
+                  </span>
+                </div>
+              )}
 
               {/* Fiscal Year Dropdown */}
               {selectedClient && (
