@@ -38,6 +38,7 @@ export default function Mieter() {
   const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
   const [suche, setSuche] = useState("");
+  const [sortConfig, setSortConfig] = useState({ key: "name", direction: "asc" });
   const [showModal, setShowModal] = useState(false);
   const [bearbeitung, setBearbeitung] = useState(null);
   const { benachrichtigung, zeigeBenachrichtigung } = useBenachrichtigung();
@@ -146,6 +147,33 @@ export default function Mieter() {
     
     return rentMap;
   }, [activeLeases, leaseComponentsMap]);
+
+  const sortierteMieter = useMemo(() => {
+    const list = [...(mieter || [])];
+    if (sortConfig.key === "name") {
+      list.sort((a, b) => {
+        const nameA = `${a.last_name} ${a.first_name}`.toLowerCase();
+        const nameB = `${b.last_name} ${b.first_name}`.toLowerCase();
+        const cmp = nameA.localeCompare(nameB);
+        return sortConfig.direction === "asc" ? cmp : -cmp;
+      });
+    } else if (sortConfig.key === "rent") {
+      list.sort((a, b) => {
+        const rentA = tenantRentMap[a.id] || 0;
+        const rentB = tenantRentMap[b.id] || 0;
+        const cmp = rentA - rentB;
+        return sortConfig.direction === "asc" ? cmp : -cmp;
+      });
+    }
+    return list;
+  }, [mieter, sortConfig, tenantRentMap]);
+
+  const handleSort = (key) => {
+    setSortConfig((prev) => ({
+      key,
+      direction: prev.key === key && prev.direction === "asc" ? "desc" : "asc",
+    }));
+  };
 
   // Mutations
   const createMutation = useMutation({
@@ -314,6 +342,7 @@ export default function Mieter() {
     {
       key: "name",
       label: "Name",
+      sortable: true,
       render: (zeile) => (
         <button
           onClick={() => navigate(`/personen/${zeile.id}`)}
@@ -331,6 +360,7 @@ export default function Mieter() {
     {
       key: "rent",
       label: "Monatliche Miete",
+      sortable: true,
       render: (zeile) => {
         const totalRent = tenantRentMap[zeile.id] || 0;
         return (
@@ -467,7 +497,7 @@ export default function Mieter() {
         </div>
       </div>
 
-      <Tabelle spalten={spalten} daten={mieter} loading={loading} />
+      <Tabelle spalten={spalten} daten={sortierteMieter} loading={loading} sortConfig={sortConfig} onSort={handleSort} />
 
       <Modal
         isOpen={showModal}

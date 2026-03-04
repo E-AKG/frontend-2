@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { serviceProviderApi } from "../api/serviceProviderApi";
@@ -31,6 +31,7 @@ export default function Dienstleister() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [suche, setSuche] = useState("");
   const [filterType, setFilterType] = useState("");
+  const [sortConfig, setSortConfig] = useState({ key: "name", direction: "asc" });
   const [showModal, setShowModal] = useState(false);
   const [bearbeitung, setBearbeitung] = useState(null);
   const { benachrichtigung, zeigeBenachrichtigung } = useBenachrichtigung();
@@ -78,6 +79,33 @@ export default function Dienstleister() {
       (d.email && d.email.toLowerCase().includes(sucheLower))
     );
   });
+
+  const sortierteDienstleister = useMemo(() => {
+    const list = [...gefilterteDienstleister];
+    if (sortConfig.key === "name") {
+      list.sort((a, b) => {
+        const nameA = (a.company_name || `${a.last_name} ${a.first_name}`).toLowerCase();
+        const nameB = (b.company_name || `${b.last_name} ${b.first_name}`).toLowerCase();
+        const cmp = nameA.localeCompare(nameB);
+        return sortConfig.direction === "asc" ? cmp : -cmp;
+      });
+    } else if (sortConfig.key === "service_type") {
+      list.sort((a, b) => {
+        const typeA = (a.service_type || "").toLowerCase();
+        const typeB = (b.service_type || "").toLowerCase();
+        const cmp = typeA.localeCompare(typeB);
+        return sortConfig.direction === "asc" ? cmp : -cmp;
+      });
+    }
+    return list;
+  }, [gefilterteDienstleister, sortConfig]);
+
+  const handleSort = (key) => {
+    setSortConfig((prev) => ({
+      key,
+      direction: prev.key === key && prev.direction === "asc" ? "desc" : "asc",
+    }));
+  };
 
   // Mutations
   const createMutation = useMutation({
@@ -190,6 +218,7 @@ export default function Dienstleister() {
     {
       key: "name",
       label: "Name",
+      sortable: true,
       render: (zeile) => (
         <div>
           <div className="font-medium">{zeile.company_name || `${zeile.first_name} ${zeile.last_name}`}</div>
@@ -202,6 +231,7 @@ export default function Dienstleister() {
     {
       key: "service_type",
       label: "Typ",
+      sortable: true,
       render: (zeile) => (
         <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
           {getServiceTypeLabel(zeile.service_type)}
@@ -348,7 +378,7 @@ export default function Dienstleister() {
       </div>
 
       {/* Tabelle */}
-      <Tabelle spalten={spalten} daten={gefilterteDienstleister} loading={loading} />
+      <Tabelle spalten={spalten} daten={sortierteDienstleister} loading={loading} sortConfig={sortConfig} onSort={handleSort} />
 
       {/* Modal */}
       <Modal

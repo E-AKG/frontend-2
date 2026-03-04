@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ownerApi } from "../api/ownerApi";
@@ -30,6 +30,7 @@ export default function Eigentuemer() {
   const { selectedClient } = useApp();
   const [searchParams, setSearchParams] = useSearchParams();
   const [suche, setSuche] = useState("");
+  const [sortConfig, setSortConfig] = useState({ key: "name", direction: "asc" });
   const [showModal, setShowModal] = useState(false);
   const [bearbeitung, setBearbeitung] = useState(null);
   const { benachrichtigung, zeigeBenachrichtigung } = useBenachrichtigung();
@@ -76,6 +77,26 @@ export default function Eigentuemer() {
       (e.email && e.email.toLowerCase().includes(sucheLower))
     );
   });
+
+  const sortierteEigentuemer = useMemo(() => {
+    const list = [...gefilterteEigentuemer];
+    if (sortConfig.key === "name") {
+      list.sort((a, b) => {
+        const nameA = `${a.last_name} ${a.first_name}`.toLowerCase();
+        const nameB = `${b.last_name} ${b.first_name}`.toLowerCase();
+        const cmp = nameA.localeCompare(nameB);
+        return sortConfig.direction === "asc" ? cmp : -cmp;
+      });
+    }
+    return list;
+  }, [gefilterteEigentuemer, sortConfig]);
+
+  const handleSort = (key) => {
+    setSortConfig((prev) => ({
+      key,
+      direction: prev.key === key && prev.direction === "asc" ? "desc" : "asc",
+    }));
+  };
 
   // Mutations
   const createMutation = useMutation({
@@ -178,6 +199,7 @@ export default function Eigentuemer() {
     {
       key: "name",
       label: "Name",
+      sortable: true,
       render: (zeile) => `${zeile.first_name} ${zeile.last_name}`,
     },
     {
@@ -286,7 +308,7 @@ export default function Eigentuemer() {
       </div>
 
       {/* Tabelle */}
-      <Tabelle spalten={spalten} daten={gefilterteEigentuemer} loading={loading} />
+      <Tabelle spalten={spalten} daten={sortierteEigentuemer} loading={loading} sortConfig={sortConfig} onSort={handleSort} />
 
       {/* Modal */}
       <Modal
